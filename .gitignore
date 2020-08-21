@@ -1,7 +1,6 @@
 .DS_Store
 terraform-provider-hashicups
 bin
-
 # Local .terraform directories
 **/.terraform/*
 
@@ -36,3 +35,8 @@ override.tf.json
 .terraformrc
 terraform.rc
 terraform
+
+vendor
+pandoc.out
+env
+TODO.md
