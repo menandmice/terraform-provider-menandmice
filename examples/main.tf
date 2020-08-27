@@ -20,7 +20,7 @@ resource menandmice_dnsrecord rec1 {
   name    = "test"
   data    = "127.0.0.7"
   type    = "A"
-  dnszone = "rens.nl3"
+  dnszone = "rens.nl"
 }
 
 output test1{

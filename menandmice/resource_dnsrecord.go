@@ -16,7 +16,6 @@ func resourceDNSrec() *schema.Resource {
 		ReadContext:   resourceDNSrecRead,
 		UpdateContext: resourceDNSrecUpdate,
 		DeleteContext: resourceDNSrecDelete,
-		//TODO for now 1 records at a time
 		Schema: map[string]*schema.Schema{
 
 			"last_updated": &schema.Schema{
@@ -46,6 +45,7 @@ func resourceDNSrec() *schema.Resource {
 			"aging": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  0, // if set to 0 its ignored
 				//TODO valiate
 			},
 			"ttl": &schema.Schema{
@@ -53,19 +53,48 @@ func resourceDNSrec() *schema.Resource {
 				Optional: true,
 				//TODO validate
 			},
+			"enabled": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 			"ref": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			// TODO should this be dnszoneref
+
+			// TODO it is not dnszone but dnszoneref
 			"dnszone": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
 }
-func schema2dnsrecord(d *schema.ResourceData) DNSRecord {
+func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
+
+	d.Set("ref", dnsrec.Ref)
+	d.Set("name", dnsrec.Name)
+	d.Set("type", dnsrec.Rectype)
+
+	if dnsrec.Ttl != nil {
+		ttl, err := strconv.Atoi(*dnsrec.Ttl)
+		if err == nil {
+
+			d.Set("ttl", ttl)
+		}
+	}
+	d.Set("enabled", dnsrec.Enabled)
+	d.Set("dnszone", dnsrec.DNSZoneRef)
+
+	d.Set("aging", dnsrec.Aging)
+	d.Set("comment", dnsrec.Comment) // comment is always given, but sometimes ""
+	return
+
+}
+
+func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 
 	var ref string = d.Get("ref").(string)
 	var optionalRef *string
@@ -88,8 +117,8 @@ func schema2dnsrecord(d *schema.ResourceData) DNSRecord {
 			Ttl:     optionalTTL,
 			Data:    d.Get("data").(string),
 			Comment: d.Get("comment").(string),
-			Aging:   d.Get("aging").(int),
-			// Enabled:    d.Get("enabled").(bool), //TODO
+			Aging:   d.Get("aging").(int), // TODO when not specified it's 0
+			Enabled: d.Get("enabled").(bool),
 		},
 	}
 	return dnsrec
@@ -98,7 +127,7 @@ func schema2dnsrecord(d *schema.ResourceData) DNSRecord {
 func resourceDNSrecCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*resty.Client)
 
-	dnsrec := schema2dnsrecord(d)
+	dnsrec := readDNSRecSchema(d)
 
 	err, objRef := CreateDNSRec(c, dnsrec)
 
@@ -123,23 +152,7 @@ func resourceDNSrecRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	// TODO  remove duplcation dataSourceDNSrectRead
-
-	d.Set("ref", dnsrec.Ref)
-	d.Set("name", dnsrec.Name)
-	d.Set("type", dnsrec.Rectype)
-
-	if dnsrec.Ttl != nil {
-		ttl, err := strconv.Atoi(*dnsrec.Ttl)
-		if err == nil {
-
-			d.Set("ttl", ttl)
-		}
-	}
-	d.Set("enabled", dnsrec.Enabled)
-	d.Set("dnszoneref", dnsrec.DNSZoneRef)
-
-	d.Set("aging", dnsrec.Aging)     //TODO default
-	d.Set("comment", dnsrec.Comment) // comment is always given, but sometimes ""
+	writeDNSRecSchema(d, dnsrec)
 
 	return diags
 }
@@ -148,11 +161,13 @@ func resourceDNSrecUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	//can't change read only property zone
 	if d.HasChange("dnszone") {
-		return diag.Errorf("cant update dnszone of %s.%s. you could try to delete dnsrecord first", d.Get("name"), d.Get("dnszone")) // TODO find work around
+		// this can't never error can never happen because of "ForceNew: true," for dnszone
+		// TODO this messages use dnszone but it is a dnszone ref
+		return diag.Errorf("cant update dnszone of %s.%s. you could try to delete dnsrecord first", d.Get("name"), d.Get("dnszone"))
 	}
 	c := m.(*resty.Client)
 	ref := d.Id()
-	dnsrec := schema2dnsrecord(d)
+	dnsrec := readDNSRecSchema(d)
 	err := UpdateDNSRec(c, dnsrec.DNSProperties, ref)
 
 	if err != nil {

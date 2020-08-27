@@ -12,7 +12,7 @@ type DNSRecord struct { // TODO do we neet point if omit empty
 	DNSProperties
 }
 
-type DNSProperties struct { // TODO do we neet point if omit empty
+type DNSProperties struct {
 	Name    string  `json:"name"`
 	Rectype string  `json:"type"`
 	Ttl     *string `json:"ttl,omitempty"`
@@ -42,24 +42,24 @@ type CreateDNSRecResponse struct {
 }
 
 type CreateDNSRecRequest struct {
-	DNSRecords         []DNSRecord `json:"dnsRecords"`
-	SaveComment        string      `json:"saveComment"`
-	autoAssignRangeRef string      // TODO
-	// dnsZoneRef string //TODO
-	// forceOverrideOfNamingConflictCheck bool // TODO
-
+	DNSRecords  []DNSRecord `json:"dnsRecords"`
+	SaveComment string      `json:"saveComment"`
+	// TODO autoAssignRangeRef string
+	// TODO dnsZoneRef string
+	ForceOverrideOfNamingConflictCheck bool `json:"forceOverrideOfNamingConflictCheck"`
 }
 
 func CreateDNSRec(c *resty.Client, dnsrec DNSRecord) (error, string) {
 	var objRef string
 	postcreate := CreateDNSRecRequest{
-		DNSRecords: []DNSRecord{dnsrec},
-
-		SaveComment: "created by terraform",
-		// autoAssignRangeRef: ...// TODO
+		DNSRecords:                         []DNSRecord{dnsrec},
+		SaveComment:                        "created by terraform",
+		ForceOverrideOfNamingConflictCheck: false,
 	}
 	var re CreateDNSRecResponse
 	err := MmPost(c, postcreate, &re, "DNSRecords")
+
+	// TODO if dnsZoneRef does not exit you can confusing error "Missing object reference." give better messages
 
 	if err != nil {
 		return err, objRef
@@ -79,7 +79,7 @@ func CreateDNSRec(c *resty.Client, dnsrec DNSRecord) (error, string) {
 type DeleteDNSRecRequest struct {
 	SaveComment  string `json:"saveComment"`
 	ForceRemoval bool   `json:"forceRemoval"`
-	// objType string	//TODO
+	// objType string
 
 }
 
