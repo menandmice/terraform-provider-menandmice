@@ -11,11 +11,11 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"web": &schema.Schema{
+			"endpoint": &schema.Schema{
 				Type: schema.TypeString,
 				// Required:    true,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_WEB", nil),
+				DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_ENDPOINT", nil),
 				Description: "Men&Mice Web API endpoint",
 			},
 			"username": &schema.Schema{
@@ -62,14 +62,25 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var diags diag.Diagnostics
 
 	params := Cfg{
-		MMWeb:      d.Get("web").(string),
+		MMEndpoint: d.Get("endpoint").(string),
 		MMUsername: d.Get("username").(string),
 		MMPassword: d.Get("password").(string),
 		TLSVerify:  d.Get("tls_verify").(bool),
 		Timeout:    d.Get("timeout").(int),
 	}
 
-	//TODO better error messages
+	if params.MMEndpoint == "" {
+		diags = append(diags, diag.Errorf("REST API endpoint set for provider menandmice.")...)
+	}
+	if params.MMUsername == "" {
+		diags = append(diags, diag.Errorf("No username set for provider menandmice.")...)
+	}
+	if params.MMPassword == "" {
+		diags = append(diags, diag.Errorf("No password set for provider menandmice.")...)
+	}
+	if diags != nil {
+		return nil, diags
+	}
 	client, err := ClientInit(&params)
 	if err != nil {
 		return nil, diag.FromErr(err)

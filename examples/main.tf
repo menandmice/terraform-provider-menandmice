@@ -8,7 +8,7 @@ terraform {
 }
 
 provider menandmice {
-  web      = "mandm.example.net"
+  endpoint = "mandm.example.net"
   username = "rens"
 }
 

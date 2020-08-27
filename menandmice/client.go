@@ -15,7 +15,7 @@ import (
 
 // Cfg config to construct client
 type Cfg struct {
-	MMWeb      string
+	MMEndpoint string
 	MMUsername string
 	MMPassword string
 	TLSVerify  bool
@@ -31,8 +31,8 @@ func init() {
 func ClientInit(c *Cfg) (*resty.Client, error) {
 	client := resty.New()
 
-	if c.MMWeb == "" {
-		return nil, errors.New("REST API endpoint must be configured as mmWeb")
+	if c.MMEndpoint == "" {
+		return nil, errors.New("REST API endpoint must be configured")
 		//TODO check if it resolaves
 	}
 	if c.MMUsername == "" {
@@ -51,7 +51,7 @@ func ClientInit(c *Cfg) (*resty.Client, error) {
 	client.SetBasicAuth(c.MMUsername, c.MMPassword)
 	client.SetHeader("Content-Type", "application/json")
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
-	client.SetHostURL("http://" + c.MMWeb + "/mmws/api") // FIXME https
+	client.SetHostURL("http://" + c.MMEndpoint + "/mmws/api") // FIXME https
 
 	return client, nil
 }
