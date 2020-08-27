@@ -3,14 +3,14 @@ package menandmice
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/go-resty/resty/v2"
 
 	"encoding/json"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	// "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 // Cfg config to construct client
@@ -56,46 +56,104 @@ func ClientInit(c *Cfg) (*resty.Client, error) {
 	return client, nil
 }
 
-// TODO make this a method call for new object mmClient that is wrapper
-func MmGet(c *resty.Client, result interface{}, path string) diag.Diagnostics {
-
-	var diags diag.Diagnostics
-
-	//TODO better error Message
-	r, err := c.R().Get(path)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if !r.IsSuccess() {
-		return diag.Errorf("HTTP error code: %v", r.StatusCode())
-	}
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	err = json.Unmarshal(r.Body(), &result)
-
-	return diags
+type ErrorResponse struct {
+	Error struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	} `json:"error"`
 }
 
 // TODO make this a method call for new object mmClient that is wrapper
-func MmPost(c *resty.Client, data interface{}, result interface{}, path string) diag.Diagnostics {
+func MmGet(c *resty.Client, result interface{}, path string) error {
 
-	var diags diag.Diagnostics
 	//TODO better error Message
-	r, err := c.R().SetBody(data).Post(path)
-
+	var errorResponse ErrorResponse
+	r, err := c.R().
+		SetError(&errorResponse).
+		Get(path)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	if !r.IsSuccess() {
-		return diag.Errorf("HTTP error code:%v", r.StatusCode())
+		jsonError := r.Error().(*ErrorResponse)
+		return errors.New(fmt.Sprintf("HTTP error code:%v\n%v",
+			r.StatusCode(),
+			jsonError.Error.Message))
 	}
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 	err = json.Unmarshal(r.Body(), &result)
 
-	return diags
+	return err
+}
+
+// TODO make this a method call for new object mmClient that is wrapper
+func MmPost(c *resty.Client, data interface{}, result interface{}, path string) error {
+
+	//TODO better error Message
+	var errorResponse ErrorResponse
+	r, err := c.R().
+		SetBody(data).
+		SetError(&errorResponse).
+		Post(path)
+
+	if err != nil {
+		return err
+	}
+
+	if !r.IsSuccess() {
+		return fmt.Errorf("HTTP error code:%v\n%v",
+			r.StatusCode(),
+			errorResponse.Error.Message)
+	}
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(r.Body(), &result)
+
+	return err
+}
+
+func MmDelete(c *resty.Client, data interface{}, path string) error {
+
+	var err error
+	var errorResponse ErrorResponse
+	r, err := c.R().
+		SetBody(data).
+		SetError(&errorResponse).
+		Delete(path)
+
+	if err != nil {
+		return err
+	}
+
+	if !r.IsSuccess() {
+		return fmt.Errorf("HTTP error code:%v\n%v",
+			r.StatusCode(),
+			errorResponse.Error.Message)
+	}
+
+	return err
+}
+
+func MmPut(c *resty.Client, data interface{}, path string) error {
+	var errorResponse ErrorResponse
+	r, err := c.R().
+		SetBody(data).
+		SetError(&errorResponse).
+		Put(path)
+
+	if err != nil {
+		return err
+	}
+
+	if !r.IsSuccess() {
+		return fmt.Errorf("HTTP error code:%v\n%v",
+			r.StatusCode(),
+			errorResponse.Error.Message)
+	}
+
+	return err
 }

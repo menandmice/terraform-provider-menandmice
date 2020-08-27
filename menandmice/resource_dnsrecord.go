@@ -3,6 +3,7 @@ package menandmice
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -36,10 +37,7 @@ func resourceDNSrec() *schema.Resource {
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			"savecomment": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				//TODO validate
 			},
 			"comment": &schema.Schema{
 				Type:     schema.TypeString,
@@ -48,10 +46,12 @@ func resourceDNSrec() *schema.Resource {
 			"aging": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				//TODO valiate
 			},
 			"ttl": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				//TODO validate
 			},
 			"ref": &schema.Schema{
 				Type:     schema.TypeString,
@@ -65,26 +65,7 @@ func resourceDNSrec() *schema.Resource {
 		},
 	}
 }
-
-type postCreate struct {
-	DNSRecords []DNSRecord `json:"dnsRecords"`
-	// saveComment string //TODO
-	autoAssignRangeRef string // TODO
-	// dnsZoneRef string //TODO
-	// forceOverrideOfNamingConflictCheck bool // TODO
-
-}
-
-type postCreateResponse struct {
-	Result struct {
-		ObjRef []string `json:"objRefs"`
-		Error  []string `json:"errors"`
-	} `json:"result"`
-}
-
-func resourceDNSrecCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
+func schema2dnsrecord(d *schema.ResourceData) DNSRecord {
 
 	var ref string = d.Get("ref").(string)
 	var optionalRef *string
@@ -98,36 +79,36 @@ func resourceDNSrecCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		optionalTTL = &ttlString
 	}
 
-	postcreate := postCreate{
-		DNSRecords: []DNSRecord{DNSRecord{
-			Ref:     optionalRef, //TODO
+	dnsrec := DNSRecord{
+		Ref:        optionalRef,
+		DNSZoneRef: d.Get("dnszone").(string),
+		DNSProperties: DNSProperties{
 			Name:    d.Get("name").(string),
 			Rectype: d.Get("type").(string),
 			Ttl:     optionalTTL,
 			Data:    d.Get("data").(string),
 			Comment: d.Get("comment").(string),
 			Aging:   d.Get("aging").(int),
-			// Enabled:    d.Get("enabled").(bool),
-			DNSZoneRef: d.Get("dnszone").(string),
-		}},
-		// autoAssignRangeRef: ...// TODO
+			// Enabled:    d.Get("enabled").(bool), //TODO
+		},
 	}
+	return dnsrec
+}
 
+func resourceDNSrecCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*resty.Client)
 
-	var re postCreateResponse
-	diags = MmPost(c, postcreate, &re, "DNSRecords")
+	dnsrec := schema2dnsrecord(d)
 
-	if len(re.Result.ObjRef) == 1 {
-		d.SetId(re.Result.ObjRef[0])
-	} else {
-		diags = diag.Errorf("faild to create dnsrecord")
+	err, objRef := CreateDNSRec(c, dnsrec)
+
+	if err != nil {
+		return diag.FromErr(err)
 	}
-	var diags2 = resourceDNSrecRead(ctx, d, m)
+	d.SetId(objRef)
 
-	diags = append(diags, diags2...)
+	return resourceDNSrecRead(ctx, d, m)
 
-	return diags
 }
 
 func resourceDNSrecRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -137,39 +118,60 @@ func resourceDNSrecRead(ctx context.Context, d *schema.ResourceData, m interface
 
 	c := m.(*resty.Client)
 
-	var re Response
-	diags = MmGet(c, &re, "dnsrecords/"+d.Id())
+	err, dnsrec := ReadDNSRec(c, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	// TODO  remove duplcation dataSourceDNSrectRead
 
-	d.Set("ref", re.Result.DNSRecord.Ref)
-	d.Set("name", re.Result.DNSRecord.Name)
-	d.Set("type", re.Result.DNSRecord.Rectype)
+	d.Set("ref", dnsrec.Ref)
+	d.Set("name", dnsrec.Name)
+	d.Set("type", dnsrec.Rectype)
 
-	if re.Result.DNSRecord.Ttl != nil {
-		ttl, err := strconv.Atoi(*re.Result.DNSRecord.Ttl)
+	if dnsrec.Ttl != nil {
+		ttl, err := strconv.Atoi(*dnsrec.Ttl)
 		if err == nil {
 
 			d.Set("ttl", ttl)
 		}
 	}
-	d.Set("enabled", re.Result.DNSRecord.Enabled)
-	d.Set("dnszoneref", re.Result.DNSRecord.DNSZoneRef)
+	d.Set("enabled", dnsrec.Enabled)
+	d.Set("dnszoneref", dnsrec.DNSZoneRef)
 
-	d.Set("aging", re.Result.DNSRecord.Aging)     //TODO default is no 0
-	d.Set("comment", re.Result.DNSRecord.Comment) // comment is always given, but sometimes ""
+	d.Set("aging", dnsrec.Aging)     //TODO default
+	d.Set("comment", dnsrec.Comment) // comment is always given, but sometimes ""
 
 	return diags
 }
 
 func resourceDNSrecUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
+	//can't change read only property zone
+	if d.HasChange("dnszone") {
+		return diag.Errorf("cant update dnszone of %s.%s. you could try to delete dnsrecord first", d.Get("name"), d.Get("dnszone")) // TODO find work around
+	}
+	c := m.(*resty.Client)
+	ref := d.Id()
+	dnsrec := schema2dnsrecord(d)
+	err := UpdateDNSRec(c, dnsrec.DNSProperties, ref)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("last_updated", time.Now().Format(time.RFC850))
 	return resourceDNSrecRead(ctx, d, m)
 }
 
 func resourceDNSrecDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-	// orderID := d.Id()
 
+	c := m.(*resty.Client)
+	var diags diag.Diagnostics
+	ref := d.Id()
+	err := DeleteDNSRec(c, ref)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	d.SetId("")
 	return diags
 }

@@ -60,46 +60,31 @@ func DataSourceDNSrec() *schema.Resource {
 	}
 }
 
-type DNSRecord struct { // TODO do we neet point if omit empty
-	Ref        *string `json:"ref,omitempty"`
-	Name       string  `json:"name"`
-	Rectype    string  `json:"type"`
-	Ttl        *string `json:"ttl,omitempty"`
-	Data       string  `json:"data"`
-	Comment    string  `json:"comment,omitempty"`
-	Aging      int     `json:"aging,omitempty"`
-	Enabled    bool    `json:"enabled,omitempty"`
-	DNSZoneRef string  `json:"dnsZoneRef"`
-}
-
-type Response struct {
-	Result struct {
-		DNSRecord `json:"dnsRecord"`
-	} `json:"result"`
-}
-
 func dataSourceDNSrectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 	c := m.(*resty.Client)
 
-	var re Response
-	diags = MmGet(c, &re, "dnsrecords/"+(d.Get("domain").(string)))
+	err, re := ReadDNSRec(c, d.Get("domain").(string))
 
-	d.Set("ref", re.Result.DNSRecord.Ref)
-	d.Set("name", re.Result.DNSRecord.Name)
-	d.Set("type", re.Result.DNSRecord.Rectype)
-	if re.Result.DNSRecord.Ttl != nil {
-		ttl, err := strconv.Atoi(*re.Result.DNSRecord.Ttl)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.Set("ref", re.Ref)
+	d.Set("name", re.Name)
+	d.Set("type", re.Rectype)
+	if re.Ttl != nil {
+		ttl, err := strconv.Atoi(*re.Ttl)
 		if err == nil {
 			d.Set("ttl", ttl)
 		}
 	}
-	d.Set("enabled", re.Result.DNSRecord.Enabled)
-	d.Set("dnszoneref", re.Result.DNSRecord.DNSZoneRef)
+	d.Set("enabled", re.Enabled)
+	d.Set("dnszoneref", re.DNSZoneRef)
 
-	d.Set("aging", re.Result.DNSRecord.Aging)     //TODO default is no 0
-	d.Set("comment", re.Result.DNSRecord.Comment) // comment is always given, but sometimes ""
+	d.Set("aging", re.Aging)     //TODO default is no 0
+	d.Set("comment", re.Comment) // comment is always given, but sometimes ""
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags

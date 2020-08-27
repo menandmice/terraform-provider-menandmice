@@ -8,24 +8,25 @@ terraform {
 }
 
 provider menandmice {
-      web      = "mandm.example.nett"
-      username = "rens"
+  web      = "mandm.example.net"
+  username = "rens"
 }
 
-data "menandmice_dnsrecord" "tonk" {
-  domain = "tonk.example.net"
+data "menandmice_dnsrecord" "test2" {
+  domain = "test2.rens.nl."
 }
 
 resource menandmice_dnsrecord rec1 {
-    name    = "test1"
-    data    = "127.0.0.1"
-    type    = "A"
-    dnszone = "rens.nl"
+  name    = "test"
+  data    = "127.0.0.7"
+  type    = "A"
+  dnszone = "rens.nl3"
 }
 
-output data_tonk {
+output test1{
 
-  value = data.menandmice_dnsrecord.tonk
+  value = data.menandmice_dnsrecord.test2
+
 }
 
 output rec1 {
