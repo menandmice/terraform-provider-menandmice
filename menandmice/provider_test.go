@@ -35,7 +35,7 @@ func testAccPreCheck(t *testing.T) {
 		t.Fatal("MENANDMICE_PASSWORD must be set for acceptance tests")
 	}
 
-	if err := os.Getenv("MENANDMICE_WEB"); err == "" {
-		t.Fatal("MENANDMICE_WEB must be set for acceptance tests")
+	if err := os.Getenv("MENANDMICE_ENDPOINT"); err == "" {
+		t.Fatal("MENANDMICE_ENDPOINT must be set for acceptance tests")
 	}
 }

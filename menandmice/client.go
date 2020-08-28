@@ -10,10 +10,10 @@ import (
 	"github.com/go-resty/resty/v2"
 
 	"encoding/json"
-	// "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 // Cfg config to construct client
+type Mmclient struct{ resty.Client }
 type Cfg struct {
 	MMEndpoint string
 	MMUsername string
@@ -28,8 +28,8 @@ func init() {
 }
 
 // ClientInit establishes default settings on the REST client
-func ClientInit(c *Cfg) (*resty.Client, error) {
-	client := resty.New()
+func ClientInit(c *Cfg) (*Mmclient, error) {
+	client := Mmclient{Client: *resty.New()}
 
 	if c.MMEndpoint == "" {
 		return nil, errors.New("REST API endpoint must be configured")
@@ -51,9 +51,9 @@ func ClientInit(c *Cfg) (*resty.Client, error) {
 	client.SetBasicAuth(c.MMUsername, c.MMPassword)
 	client.SetHeader("Content-Type", "application/json")
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
-	client.SetHostURL("http://" + c.MMEndpoint + "/mmws/api") // FIXME https
+	client.SetHostURL("https://" + c.MMEndpoint + "/mmws/api")
 
-	return client, nil
+	return &client, nil
 }
 
 type ErrorResponse struct {
@@ -63,8 +63,7 @@ type ErrorResponse struct {
 	} `json:"error"`
 }
 
-// TODO make this a method call for new object mmClient that is wrapper
-func MmGet(c *resty.Client, result interface{}, path string) error {
+func (c *Mmclient) Get(result interface{}, path string) error {
 
 	//TODO better error Message
 	var errorResponse ErrorResponse
@@ -89,8 +88,7 @@ func MmGet(c *resty.Client, result interface{}, path string) error {
 	return err
 }
 
-// TODO make this a method call for new object mmClient that is wrapper
-func MmPost(c *resty.Client, data interface{}, result interface{}, path string) error {
+func (c *Mmclient) Post(data interface{}, result interface{}, path string) error {
 
 	//TODO better error Message
 	var errorResponse ErrorResponse
@@ -116,7 +114,7 @@ func MmPost(c *resty.Client, data interface{}, result interface{}, path string) 
 	return err
 }
 
-func MmDelete(c *resty.Client, data interface{}, path string) error {
+func (c *Mmclient) Delete(data interface{}, path string) error {
 
 	var err error
 	var errorResponse ErrorResponse
@@ -138,7 +136,7 @@ func MmDelete(c *resty.Client, data interface{}, path string) error {
 	return err
 }
 
-func MmPut(c *resty.Client, data interface{}, path string) error {
+func (c *Mmclient) Put(data interface{}, path string) error {
 	var errorResponse ErrorResponse
 	r, err := c.R().
 		SetBody(data).

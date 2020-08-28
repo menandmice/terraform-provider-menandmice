@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -31,7 +30,7 @@ func TestAccMenandmiceDNSrecBasic(t *testing.T) {
 }
 
 func testAccCheckMenandmiceDNSRecDestroy(s *terraform.State) error {
-	c := testAccProvider.Meta().(*resty.Client)
+	c := testAccProvider.Meta().(*Mmclient)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "menandmice_dnsrecord" {
@@ -40,7 +39,7 @@ func testAccCheckMenandmiceDNSRecDestroy(s *terraform.State) error {
 
 		ref := rs.Primary.ID
 
-		err := DeleteDNSRec(c, ref)
+		err := c.DeleteDNSRec(ref)
 		if err != nil {
 			return err
 		}

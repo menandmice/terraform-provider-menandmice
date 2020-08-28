@@ -53,6 +53,7 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"menandmice_dnsrecord": DataSourceDNSrec(),
+			"menandmice_dnszone":   DataSourceDNSzone(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

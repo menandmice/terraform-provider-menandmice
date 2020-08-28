@@ -2,8 +2,6 @@ package menandmice
 
 import (
 	"errors"
-
-	"github.com/go-resty/resty/v2"
 )
 
 type DNSRecord struct { // TODO do we neet point if omit empty
@@ -28,9 +26,9 @@ type ReadDNSRecResponse struct {
 	} `json:"result"`
 }
 
-func ReadDNSRec(c *resty.Client, ref string) (error, DNSRecord) {
+func (c *Mmclient) ReadDNSRec(ref string) (error, DNSRecord) {
 	var re ReadDNSRecResponse
-	err := MmGet(c, &re, "dnsrecords/"+ref)
+	err := c.Get(&re, "dnsrecords/"+ref)
 	return err, re.Result.DNSRecord
 }
 
@@ -49,7 +47,7 @@ type CreateDNSRecRequest struct {
 	ForceOverrideOfNamingConflictCheck bool `json:"forceOverrideOfNamingConflictCheck"`
 }
 
-func CreateDNSRec(c *resty.Client, dnsrec DNSRecord) (error, string) {
+func (c *Mmclient) CreateDNSRec(dnsrec DNSRecord) (error, string) {
 	var objRef string
 	postcreate := CreateDNSRecRequest{
 		DNSRecords:                         []DNSRecord{dnsrec},
@@ -57,7 +55,7 @@ func CreateDNSRec(c *resty.Client, dnsrec DNSRecord) (error, string) {
 		ForceOverrideOfNamingConflictCheck: false,
 	}
 	var re CreateDNSRecResponse
-	err := MmPost(c, postcreate, &re, "DNSRecords")
+	err := c.Post(postcreate, &re, "DNSRecords")
 
 	// TODO if dnsZoneRef does not exit you can confusing error "Missing object reference." give better messages
 
@@ -83,13 +81,13 @@ type DeleteDNSRecRequest struct {
 
 }
 
-func DeleteDNSRec(c *resty.Client, ref string) error {
+func (c *Mmclient) DeleteDNSRec(ref string) error {
 
 	del := DeleteDNSRecRequest{
 		ForceRemoval: true,
 		SaveComment:  "deleted by terraform",
 	}
-	return MmDelete(c, del, "DNSRecords/"+ref)
+	return c.Delete(del, "DNSRecords/"+ref)
 }
 
 type UpdateDNSRecRequest struct {
@@ -100,7 +98,7 @@ type UpdateDNSRecRequest struct {
 	Properties        DNSProperties `json:"properties"`
 }
 
-func UpdateDNSRec(c *resty.Client, dnsProperties DNSProperties, ref string) error {
+func (c *Mmclient) UpdateDNSRec(dnsProperties DNSProperties, ref string) error {
 
 	update := UpdateDNSRecRequest{
 		Ref:               ref,
@@ -108,5 +106,5 @@ func UpdateDNSRec(c *resty.Client, dnsProperties DNSProperties, ref string) erro
 		DeleteUnspecified: true,
 		Properties:        dnsProperties,
 	}
-	return MmPut(c, update, "DNSRecords/"+ref)
+	return c.Put(update, "DNSRecords/"+ref)
 }

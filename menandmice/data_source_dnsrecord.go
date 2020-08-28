@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-resty/resty/v2"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -16,7 +14,7 @@ func DataSourceDNSrec() *schema.Resource {
 		ReadContext: dataSourceDNSrectRead,
 		Schema: map[string]*schema.Schema{
 
-			"domain": &schema.Schema{
+			"fqdn": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -63,9 +61,9 @@ func DataSourceDNSrec() *schema.Resource {
 func dataSourceDNSrectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
-	c := m.(*resty.Client)
+	c := m.(*Mmclient)
 
-	err, dnsrec := ReadDNSRec(c, d.Get("domain").(string))
+	err, dnsrec := c.ReadDNSRec(d.Get("fqdn").(string))
 
 	if err != nil {
 		return diag.FromErr(err)
