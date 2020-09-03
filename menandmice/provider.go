@@ -50,6 +50,7 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"menandmice_dnsrecord": resourceDNSrec(),
+			"menandmice_dnszone":   resourceDNSzone(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"menandmice_dnsrecord": DataSourceDNSrec(),

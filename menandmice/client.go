@@ -14,6 +14,7 @@ import (
 
 // Cfg config to construct client
 type Mmclient struct{ resty.Client }
+
 type Cfg struct {
 	MMEndpoint string
 	MMUsername string
@@ -63,6 +64,7 @@ type ErrorResponse struct {
 	} `json:"error"`
 }
 
+// TODO maybe use filter here?
 func (c *Mmclient) Get(result interface{}, path string) error {
 
 	//TODO better error Message

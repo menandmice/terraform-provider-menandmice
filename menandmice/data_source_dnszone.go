@@ -34,8 +34,17 @@ func DataSourceDNSzone() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+
+			// TODO maybe choose between ref or refs automatic
 			"dnsviewref": &schema.Schema{
 				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"dnsviewrefs": &schema.Schema{
+				Type: schema.TypeList, //TODO TypeSet
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 				Computed: true,
 			},
 			"type": &schema.Schema{
