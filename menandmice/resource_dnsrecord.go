@@ -87,7 +87,7 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 	d.Set("ref", dnsrec.Ref)
 	d.Set("name", dnsrec.Name)
 	d.Set("type", dnsrec.Rectype)
-
+	d.Set("data", dnsrec.Data)
 	if dnsrec.Ttl != nil {
 		ttl, err := strconv.Atoi(*dnsrec.Ttl)
 		if err == nil {

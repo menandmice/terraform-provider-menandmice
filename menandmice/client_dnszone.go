@@ -1,21 +1,21 @@
 package menandmice
 
 type DNSzone struct {
-	Ref string `json:"ref,omitempty"`
-	DNSZoneProperties
-}
-
-type DNSZoneProperties struct {
-	Name         string   `json:"name"`
-	Dynamic      bool     `json:"dynamic,omitempty"`
+	Ref          string   `json:"ref,omitempty"`
 	AdIntegrated bool     `json:"adIntegrated"`
 	DnsViewRef   string   `json:"dnsViewRef,omitempty"`
 	DnsViewRefs  []string `json:"dnsViewRefs,omitempty"`
 	Authority    string   `json:"authority,omitempty"`
-	ZoneType     string   `json:"type,omitempty"`
-	DnssecSigned bool     `json:"dnssecSigned,omitempty"`
-	KskIDs       string   `json:"kskIDs,omitempty"`
-	ZskIDs       string   `json:"zskIDs,omitempty"`
+	DNSZoneProperties
+}
+
+type DNSZoneProperties struct {
+	Name         string `json:"name"`
+	Dynamic      bool   `json:"dynamic,omitempty"`
+	ZoneType     string `json:"type,omitempty"`
+	DnssecSigned bool   `json:"dnssecSigned,omitempty"`
+	KskIDs       string `json:"kskIDs,omitempty"`
+	ZskIDs       string `json:"zskIDs,omitempty"`
 	// TODO CustomProperties map[string]string `json:"customProperties,omitempty"`
 	AdReplicationType string `json:"adReplicationType,omitempty"`
 	AdPartition       string `json:"adPartition,omitempty"`
@@ -41,7 +41,7 @@ func (c Mmclient) ReadDNSzone(ref string) (error, DNSzone) {
 type CreateDNSzoneRequest struct {
 	DNSzone     DNSzone  `json:"dnsZone"`
 	SaveComment string   `json:"saveComment"`
-	Master      []string `json:"master,omitempty"`
+	Masters     []string `json:"masters,omitempty"`
 }
 
 type CreateDNSzoneResponse struct {
@@ -50,12 +50,12 @@ type CreateDNSzoneResponse struct {
 	} `json:"result"`
 }
 
-func (c *Mmclient) CreateDNSzone(dnszone DNSzone) (error, string) {
+func (c *Mmclient) CreateDNSzone(dnszone DNSzone, masters []string) (error, string) {
 	var objRef string
 	postcreate := CreateDNSzoneRequest{
 		DNSzone:     dnszone,
 		SaveComment: "created by terraform",
-		// TODO Master : ,
+		Masters:     masters,
 	}
 	var re CreateDNSzoneResponse
 	err := c.Post(postcreate, &re, "DNSzones")

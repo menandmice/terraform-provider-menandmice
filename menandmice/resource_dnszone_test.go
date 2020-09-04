@@ -25,6 +25,13 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 					testAccCheckResourceExists("menandmice_dnszone.testzone"),
 				),
 			},
+			{
+				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, viewref, "mandm.example.com."),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_dnszone.testzone"),
+				),
+			},
+
 			// TODO test minimal parameters,
 			// TODO test with all parameters set to non default
 			// TODO test update, and recreate

@@ -39,20 +39,22 @@ func resourceDNSzone() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+				ForceNew: true,
 			},
 
 			// TODO maybe choose between ref or refs automatic
 			"dnsviewref": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				// Default:  "DNSView/1", //TODO
+				ForceNew: true,
+				//TODO Default:  "DNSView/1", ?
 			},
 			"dnsviewrefs": &schema.Schema{
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
-					// TODO Default:
 				},
+				ForceNew: true,
 				Optional: true,
 			},
 
@@ -64,9 +66,21 @@ func resourceDNSzone() *schema.Resource {
 					"Master", "Slave", "Hint", "Stub", "Forward",
 				}, false),
 			},
+			"masters": &schema.Schema{
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: validation.Any(
+						validation.IsIPv4Address,
+						validation.IsIPv4Address),
+				},
+				ForceNew: true,
+				Optional: true,
+			},
 
 			"authority": &schema.Schema{
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 
@@ -146,21 +160,21 @@ func writeDNSzoneSchema(d *schema.ResourceData, dnszone DNSzone) {
 func readDNSzoneSchema(d *schema.ResourceData) DNSzone {
 	// TODO  check dnsViewRef and dnsViewRefs are not both set
 
-	dnsViewRefsRead := d.Get("dnsviewrefs").(*schema.Set).List()
+	dnsViewRefsRead := d.Get("dnsviewrefs").(*schema.Set).List() //TODO check succes
 	var dnsViewRefs = make([]string, len(dnsViewRefsRead))
 	for i, view := range dnsViewRefsRead {
 		dnsViewRefs[i] = view.(string)
 	}
 	dnszone := DNSzone{
-		Ref: tryGetString(d, "ref"),
-		DNSZoneProperties: DNSZoneProperties{
-			Name:         d.Get("name").(string),
-			Dynamic:      d.Get("dynamic").(bool),
-			AdIntegrated: d.Get("adintegrated").(bool),
+		Ref:          tryGetString(d, "ref"),
+		AdIntegrated: d.Get("adintegrated").(bool),
+		DnsViewRef:   tryGetString(d, "dnsviewref"),
+		DnsViewRefs:  dnsViewRefs,
+		Authority:    tryGetString(d, "authority"),
 
-			DnsViewRef:        tryGetString(d, "dnsviewref"),
-			DnsViewRefs:       dnsViewRefs,
-			Authority:         tryGetString(d, "Authority"),
+		DNSZoneProperties: DNSZoneProperties{
+			Name:              d.Get("name").(string),
+			Dynamic:           d.Get("dynamic").(bool),
 			ZoneType:          tryGetString(d, "type"),
 			DnssecSigned:      d.Get("dnssecsigned").(bool),
 			KskIDs:            tryGetString(d, "kskids"),
@@ -178,9 +192,17 @@ func readDNSzoneSchema(d *schema.ResourceData) DNSzone {
 func resourceDNSzoneCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*Mmclient)
 
+	var masters []string
+	if mastersRead, ok := d.Get("masters").([]interface{}); ok {
+		masters = make([]string, len(mastersRead))
+		for i, master := range mastersRead {
+			masters[i] = master.(string)
+		}
+	}
+
 	dnszone := readDNSzoneSchema(d)
 
-	err, objRef := c.CreateDNSzone(dnszone)
+	err, objRef := c.CreateDNSzone(dnszone, masters)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -211,6 +233,7 @@ func resourceDNSzoneUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	c := m.(*Mmclient)
 	ref := d.Id()
 	dnszone := readDNSzoneSchema(d)
+
 	err := c.UpdateDNSZone(dnszone.DNSZoneProperties, ref)
 
 	if err != nil {
