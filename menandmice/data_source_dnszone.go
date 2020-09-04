@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func DataSourceDNSzone() *schema.Resource {
+func DataSourceDNSZone() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDNSzoneRead,
+		ReadContext: dataSourceDNSZoneRead,
 		Schema: map[string]*schema.Schema{
 
 			"domain": &schema.Schema{
@@ -87,17 +87,17 @@ func DataSourceDNSzone() *schema.Resource {
 	}
 }
 
-func dataSourceDNSzoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceDNSZoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 	c := m.(*Mmclient)
 
-	err, dnszone := c.ReadDNSzone(d.Get("domain").(string))
+	err, dnszone := c.ReadDNSZone(d.Get("domain").(string))
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeDNSzoneSchema(d, dnszone)
+	writeDNSZoneSchema(d, dnszone)
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags

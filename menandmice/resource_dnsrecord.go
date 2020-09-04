@@ -10,12 +10,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceDNSrec() *schema.Resource {
+func resourceDNSRec() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDNSrecCreate,
-		ReadContext:   resourceDNSrecRead,
-		UpdateContext: resourceDNSrecUpdate,
-		DeleteContext: resourceDNSrecDelete,
+		CreateContext: resourceDNSRecCreate,
+		ReadContext:   resourceDNSRecRead,
+		UpdateContext: resourceDNSRecUpdate,
+		DeleteContext: resourceDNSRecDelete,
 		Schema: map[string]*schema.Schema{
 
 			"last_updated": &schema.Schema{
@@ -129,7 +129,7 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 	return dnsrec
 }
 
-func resourceDNSrecCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSRecCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*Mmclient)
 
 	dnsrec := readDNSRecSchema(d)
@@ -141,11 +141,11 @@ func resourceDNSrecCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	d.SetId(objRef)
 
-	return resourceDNSrecRead(ctx, d, m)
+	return resourceDNSRecRead(ctx, d, m)
 
 }
 
-func resourceDNSrecRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSRecRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 
 	var diags diag.Diagnostics
@@ -161,12 +161,12 @@ func resourceDNSrecRead(ctx context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-func resourceDNSrecUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSRecUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	//can't change read only property
 	if d.HasChange("dnszone") || d.HasChange("type") || d.HasChange("ref") {
 		// this can't never error can never happen because of "ForceNew: true," for these properties
-		return diag.Errorf("can't change readonly property, of DNSRecord")
+
 	}
 	c := m.(*Mmclient)
 	ref := d.Id()
@@ -177,10 +177,10 @@ func resourceDNSrecUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	d.Set("last_updated", time.Now().Format(time.RFC850))
-	return resourceDNSrecRead(ctx, d, m)
+	return resourceDNSRecRead(ctx, d, m)
 }
 
-func resourceDNSrecDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSRecDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 
 	c := m.(*Mmclient)

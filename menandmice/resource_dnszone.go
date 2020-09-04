@@ -8,12 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceDNSzone() *schema.Resource {
+func resourceDNSZone() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDNSzoneCreate,
-		ReadContext:   resourceDNSzoneRead,
-		UpdateContext: resourceDNSzoneUpdate,
-		DeleteContext: resourceDNSzoneDelete,
+		CreateContext: resourceDNSZoneCreate,
+		ReadContext:   resourceDNSZoneRead,
+		UpdateContext: resourceDNSZoneUpdate,
+		DeleteContext: resourceDNSZoneDelete,
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -132,7 +132,7 @@ func resourceDNSzone() *schema.Resource {
 	}
 }
 
-func writeDNSzoneSchema(d *schema.ResourceData, dnszone DNSzone) {
+func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
 
 	d.Set("ref", dnszone.Ref)
 	d.Set("name", dnszone.Name)
@@ -157,7 +157,7 @@ func writeDNSzoneSchema(d *schema.ResourceData, dnszone DNSzone) {
 
 }
 
-func readDNSzoneSchema(d *schema.ResourceData) DNSzone {
+func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 	// TODO  check dnsViewRef and dnsViewRefs are not both set
 
 	dnsViewRefsRead := d.Get("dnsviewrefs").(*schema.Set).List() //TODO check succes
@@ -165,7 +165,7 @@ func readDNSzoneSchema(d *schema.ResourceData) DNSzone {
 	for i, view := range dnsViewRefsRead {
 		dnsViewRefs[i] = view.(string)
 	}
-	dnszone := DNSzone{
+	dnszone := DNSZone{
 		Ref:          tryGetString(d, "ref"),
 		AdIntegrated: d.Get("adintegrated").(bool),
 		DnsViewRef:   tryGetString(d, "dnsviewref"),
@@ -189,7 +189,7 @@ func readDNSzoneSchema(d *schema.ResourceData) DNSzone {
 	return dnszone
 }
 
-func resourceDNSzoneCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSZoneCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*Mmclient)
 
 	var masters []string
@@ -200,35 +200,35 @@ func resourceDNSzoneCreate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 
-	dnszone := readDNSzoneSchema(d)
+	dnszone := readDNSZoneSchema(d)
 
-	err, objRef := c.CreateDNSzone(dnszone, masters)
+	err, objRef := c.CreateDNSZone(dnszone, masters)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.SetId(objRef)
 
-	return resourceDNSzoneRead(ctx, d, m)
+	return resourceDNSZoneRead(ctx, d, m)
 
 }
 
-func resourceDNSzoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSZoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
 	c := m.(*Mmclient)
 
-	err, dnszone := c.ReadDNSzone(d.Id())
+	err, dnszone := c.ReadDNSZone(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeDNSzoneSchema(d, dnszone)
+	writeDNSZoneSchema(d, dnszone)
 
 	return diags
 }
 
-func resourceDNSzoneUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSZoneUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	//can't change read only property
 	if d.HasChange("ref") || d.HasChange("adintegrated") ||
@@ -239,17 +239,17 @@ func resourceDNSzoneUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	c := m.(*Mmclient)
 	ref := d.Id()
-	dnszone := readDNSzoneSchema(d)
+	dnszone := readDNSZoneSchema(d)
 
 	err := c.UpdateDNSZone(dnszone.DNSZoneProperties, ref)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	return resourceDNSzoneRead(ctx, d, m)
+	return resourceDNSZoneRead(ctx, d, m)
 }
 
-func resourceDNSzoneDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSZoneDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	c := m.(*Mmclient)
 	var diags diag.Diagnostics

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccMenandmiceDNSrecBasic(t *testing.T) {
+func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 	name := "rec1"
 	date := "127.0.0.1"
 	rectype := "A"

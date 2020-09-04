@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func DataSourceDNSrec() *schema.Resource {
+func DataSourceDNSRec() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDNSrectRead,
+		ReadContext: dataSourceDNSRectRead,
 		Schema: map[string]*schema.Schema{
 
 			"fqdn": &schema.Schema{
@@ -58,7 +58,7 @@ func DataSourceDNSrec() *schema.Resource {
 	}
 }
 
-func dataSourceDNSrectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceDNSRectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 	c := m.(*Mmclient)

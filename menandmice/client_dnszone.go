@@ -1,6 +1,6 @@
 package menandmice
 
-type DNSzone struct {
+type DNSZone struct {
 	Ref          string   `json:"ref,omitempty"`
 	AdIntegrated bool     `json:"adIntegrated"`
 	DnsViewRef   string   `json:"dnsViewRef,omitempty"`
@@ -25,40 +25,40 @@ type DNSZoneProperties struct {
 	DisplayName string `json:"displyaName,omitempty"`
 }
 
-type ReadDNSzoneResponse struct {
+type ReadDNSZoneResponse struct {
 	Result struct {
-		DNSzone `json:"dnsZone"`
+		DNSZone `json:"dnsZone"`
 	} `json:"result"`
 }
 
-func (c Mmclient) ReadDNSzone(ref string) (error, DNSzone) {
-	var re ReadDNSzoneResponse
+func (c Mmclient) ReadDNSZone(ref string) (error, DNSZone) {
+	var re ReadDNSZoneResponse
 	//TODO fix ref
 	err := c.Get(&re, "dnszones/"+ref)
-	return err, re.Result.DNSzone
+	return err, re.Result.DNSZone
 }
 
-type CreateDNSzoneRequest struct {
-	DNSzone     DNSzone  `json:"dnsZone"`
+type CreateDNSZoneRequest struct {
+	DNSZone     DNSZone  `json:"dnsZone"`
 	SaveComment string   `json:"saveComment"`
 	Masters     []string `json:"masters,omitempty"`
 }
 
-type CreateDNSzoneResponse struct {
+type CreateDNSZoneResponse struct {
 	Result struct {
 		Ref string `json:"ref"`
 	} `json:"result"`
 }
 
-func (c *Mmclient) CreateDNSzone(dnszone DNSzone, masters []string) (error, string) {
+func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (error, string) {
 	var objRef string
-	postcreate := CreateDNSzoneRequest{
-		DNSzone:     dnszone,
+	postcreate := CreateDNSZoneRequest{
+		DNSZone:     dnszone,
 		SaveComment: "created by terraform",
 		Masters:     masters,
 	}
-	var re CreateDNSzoneResponse
-	err := c.Post(postcreate, &re, "DNSzones")
+	var re CreateDNSZoneResponse
+	err := c.Post(postcreate, &re, "DNSZones")
 
 	if err != nil {
 		return err, objRef
@@ -68,7 +68,7 @@ func (c *Mmclient) CreateDNSzone(dnszone DNSzone, masters []string) (error, stri
 }
 
 // TODO this could be shared between all delete
-type DeleteDNSzoneRequest struct {
+type DeleteDNSZoneRequest struct {
 	SaveComment  string `json:"saveComment"`
 	ForceRemoval bool   `json:"forceRemoval"`
 	// objType string
@@ -77,7 +77,7 @@ type DeleteDNSzoneRequest struct {
 
 func (c *Mmclient) DeleteDNSZone(ref string) error {
 
-	del := DeleteDNSzoneRequest{
+	del := DeleteDNSZoneRequest{
 		ForceRemoval: true,
 		SaveComment:  "deleted by terraform",
 	}
