@@ -230,6 +230,13 @@ func resourceDNSzoneRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 func resourceDNSzoneUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
+	//can't change read only property
+	if d.HasChange("ref") || d.HasChange("adintegrated") ||
+		d.HasChange("dnsviewref") || d.HasChange("dnsviewrefs") ||
+		d.HasChange("authority") {
+		// this can't never error can never happen because of "ForceNew: true," for these properties
+		return diag.Errorf("can't change readonly property, of DNSZone")
+	}
 	c := m.(*Mmclient)
 	ref := d.Id()
 	dnszone := readDNSzoneSchema(d)

@@ -52,7 +52,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetBasicAuth(c.MMUsername, c.MMPassword)
 	client.SetHeader("Content-Type", "application/json")
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
-	client.SetHostURL("https://" + c.MMEndpoint + "/mmws/api")
+	client.SetHostURL("http://" + c.MMEndpoint + "/mmws/api")
 
 	return &client, nil
 }

@@ -24,7 +24,12 @@ func TestAccMenandmiceDNSrecBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dnsrecord.testrec"),
 				),
-
+			},
+			{
+				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, "::1", "AAAA", zone),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_dnsrecord.testrec"),
+				),
 				// TODO test minimal parameters,
 				// TODO test with all parameters set to non default
 				// TODO test update, and recreate with change zone

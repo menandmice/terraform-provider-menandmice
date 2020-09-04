@@ -38,6 +38,7 @@ func resourceDNSrec() *schema.Resource {
 			},
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Optional: true,
 				Default:  "A",
 				ValidateFunc: validation.StringInSlice([]string{
@@ -115,9 +116,9 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 	dnsrec := DNSRecord{
 		Ref:        tryGetString(d, "ref"),
 		DNSZoneRef: d.Get("dnszone").(string),
+		Rectype:    d.Get("type").(string),
 		DNSProperties: DNSProperties{
 			Name:    d.Get("name").(string),
-			Rectype: d.Get("type").(string),
 			Ttl:     optionalTTL,
 			Data:    d.Get("data").(string),
 			Comment: d.Get("comment").(string),
@@ -162,11 +163,10 @@ func resourceDNSrecRead(ctx context.Context, d *schema.ResourceData, m interface
 
 func resourceDNSrecUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	//can't change read only property zone
-	if d.HasChange("dnszone") {
-		// this can't never error can never happen because of "ForceNew: true," for dnszone
-		// TODO this messages use dnszone but it is a dnszone ref
-		return diag.Errorf("cant update dnszone of %s.%s. you could try to delete dnsrecord first", d.Get("name"), d.Get("dnszone"))
+	//can't change read only property
+	if d.HasChange("dnszone") || d.HasChange("type") || d.HasChange("ref") {
+		// this can't never error can never happen because of "ForceNew: true," for these properties
+		return diag.Errorf("can't change readonly property, of DNSRecord")
 	}
 	c := m.(*Mmclient)
 	ref := d.Id()

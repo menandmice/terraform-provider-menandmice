@@ -7,6 +7,7 @@ import (
 type DNSRecord struct {
 	Ref        string `json:"ref,omitempty"`
 	DNSZoneRef string `json:"dnsZoneRef"`
+	Rectype    string `json:"type"`
 	DNSProperties
 }
 
