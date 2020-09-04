@@ -1,7 +1,11 @@
 package menandmice
 
 type DNSzone struct {
-	Ref          *string  `json:"ref,omitempty"`
+	Ref string `json:"ref,omitempty"`
+	DNSZoneProperties
+}
+
+type DNSZoneProperties struct {
 	Name         string   `json:"name"`
 	Dynamic      bool     `json:"dynamic,omitempty"`
 	AdIntegrated bool     `json:"adIntegrated"`
@@ -13,11 +17,12 @@ type DNSzone struct {
 	KskIDs       string   `json:"kskIDs,omitempty"`
 	ZskIDs       string   `json:"zskIDs,omitempty"`
 	// TODO CustomProperties map[string]string `json:"customProperties,omitempty"`
-	// TODO adReplicationType
-	// TODO adPartition
-	Created      string `json:"created,omitempty"`
-	LastModified string `json:"lastModified,omitempty"`
-	DisplayName  string `json:"displyaName,omitempty"`
+	AdReplicationType string `json:"adReplicationType,omitempty"`
+	AdPartition       string `json:"adPartition,omitempty"`
+	Created           string `json:"created,omitempty"`
+	LastModified      string `json:"lastModified,omitempty"`
+
+	DisplayName string `json:"displyaName,omitempty"`
 }
 
 type ReadDNSzoneResponse struct {
@@ -34,11 +39,9 @@ func (c Mmclient) ReadDNSzone(ref string) (error, DNSzone) {
 }
 
 type CreateDNSzoneRequest struct {
-	DNSzone     DNSzone `json:"dnsZone"`
-	SaveComment string  `json:"saveComment"`
-	// TODO autoAssignRangeRef string
-	// TODO dnsZoneRef string
-	Master []string `json:"master,omitempty"`
+	DNSzone     DNSzone  `json:"dnsZone"`
+	SaveComment string   `json:"saveComment"`
+	Master      []string `json:"master,omitempty"`
 }
 
 type CreateDNSzoneResponse struct {
@@ -72,11 +75,30 @@ type DeleteDNSzoneRequest struct {
 
 }
 
-func (c *Mmclient) DeleteDNSzone(ref string) error {
+func (c *Mmclient) DeleteDNSZone(ref string) error {
 
 	del := DeleteDNSzoneRequest{
 		ForceRemoval: true,
 		SaveComment:  "deleted by terraform",
 	}
 	return c.Delete(del, "DNSZones/"+ref)
+}
+
+type UpdateDNSZoneRequest struct {
+	Ref string `json:"ref"`
+	// objType Unknown
+	SaveComment       string            `json:"saveComment"`
+	DeleteUnspecified bool              `json:"deleteUnspecified"`
+	Properties        DNSZoneProperties `json:"properties"`
+}
+
+func (c *Mmclient) UpdateDNSZone(dnsZoneProperties DNSZoneProperties, ref string) error {
+
+	update := UpdateDNSZoneRequest{
+		Ref:               ref,
+		SaveComment:       "updated by terraform",
+		DeleteUnspecified: true,
+		Properties:        dnsZoneProperties,
+	}
+	return c.Put(update, "DNSZones/"+ref)
 }

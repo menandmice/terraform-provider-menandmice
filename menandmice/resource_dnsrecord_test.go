@@ -22,8 +22,12 @@ func TestAccMenandmiceDNSrecBasic(t *testing.T) {
 			{
 				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, zone),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMenandmiceDNSRecExists("menandmice_dnsrecord.testrec"),
+					testAccCheckResourceExists("menandmice_dnsrecord.testrec"),
 				),
+
+				// TODO test minimal parameters,
+				// TODO test with all parameters set to non default
+				// TODO test update, and recreate with change zone
 			},
 		},
 	})
@@ -57,20 +61,4 @@ func testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, zone string) s
 		dnszone = "%s"
 	}
 	`, name, date, rectype, zone)
-}
-
-func testAccCheckMenandmiceDNSRecExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Ref set")
-		}
-
-		return nil
-	}
 }

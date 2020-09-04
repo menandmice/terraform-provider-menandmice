@@ -21,7 +21,7 @@ data "menandmice_dnszone" "zone1" {
 resource menandmice_dnszone zone2{
   name    = "test"
   dnsviewref = "DNSView/1"
-
+  authority   = "mandm.example.net."
   # adintegrated = true
   # dnsviewrefs = ["DNSView/1"]
 }

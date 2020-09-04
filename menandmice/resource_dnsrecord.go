@@ -106,20 +106,14 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 
 func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 
-	var ref string = d.Get("ref").(string)
-	var optionalRef *string
-	if ref != "" {
-		optionalRef = &ref
-	}
-	var ttl int = d.Get("ttl").(int)
 	var optionalTTL *string
-	if ttl != 0 {
+	if ttl, ok := d.Get("ttl").(int); ok {
 		ttlString := strconv.Itoa(ttl)
 		optionalTTL = &ttlString
 	}
 
 	dnsrec := DNSRecord{
-		Ref:        optionalRef,
+		Ref:        tryGetString(d, "ref"),
 		DNSZoneRef: d.Get("dnszone").(string),
 		DNSProperties: DNSProperties{
 			Name:    d.Get("name").(string),

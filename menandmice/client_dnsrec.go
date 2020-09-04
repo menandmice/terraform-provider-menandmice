@@ -4,9 +4,9 @@ import (
 	"errors"
 )
 
-type DNSRecord struct { // TODO do we neet point if omit empty
-	Ref        *string `json:"ref,omitempty"`
-	DNSZoneRef string  `json:"dnsZoneRef"`
+type DNSRecord struct {
+	Ref        string `json:"ref,omitempty"`
+	DNSZoneRef string `json:"dnsZoneRef"`
 	DNSProperties
 }
 
