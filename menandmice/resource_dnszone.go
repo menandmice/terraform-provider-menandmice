@@ -1,19 +1,18 @@
 package menandmice
 
 import (
-	"context"
+	"terraform-provider-menandmice/diag"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func resourceDNSZone() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDNSZoneCreate,
-		ReadContext:   resourceDNSZoneRead,
-		UpdateContext: resourceDNSZoneUpdate,
-		DeleteContext: resourceDNSZoneDelete,
+		Create: resourceDNSZoneCreate,
+		Read:   resourceDNSZoneRead,
+		Update: resourceDNSZoneUpdate,
+		Delete: resourceDNSZoneDelete,
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -53,6 +52,7 @@ func resourceDNSZone() *schema.Resource {
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
+					// TODO Default:
 				},
 				ForceNew: true,
 				Optional: true,
@@ -168,9 +168,10 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 	dnszone := DNSZone{
 		Ref:          tryGetString(d, "ref"),
 		AdIntegrated: d.Get("adintegrated").(bool),
-		DnsViewRef:   tryGetString(d, "dnsviewref"),
-		DnsViewRefs:  dnsViewRefs,
-		Authority:    tryGetString(d, "authority"),
+
+		DnsViewRef:  tryGetString(d, "dnsviewref"),
+		DnsViewRefs: dnsViewRefs,
+		Authority:   tryGetString(d, "authority"),
 
 		DNSZoneProperties: DNSZoneProperties{
 			Name:              d.Get("name").(string),
@@ -189,7 +190,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 	return dnszone
 }
 
-func resourceDNSZoneCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSZoneCreate(d *schema.ResourceData, m interface{}) error {
 	c := m.(*Mmclient)
 
 	var masters []string
@@ -209,11 +210,11 @@ func resourceDNSZoneCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	d.SetId(objRef)
 
-	return resourceDNSZoneRead(ctx, d, m)
+	return resourceDNSZoneRead(d, m)
 
 }
 
-func resourceDNSZoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSZoneRead(d *schema.ResourceData, m interface{}) error {
 
 	var diags diag.Diagnostics
 
@@ -228,7 +229,7 @@ func resourceDNSZoneRead(ctx context.Context, d *schema.ResourceData, m interfac
 	return diags
 }
 
-func resourceDNSZoneUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSZoneUpdate(d *schema.ResourceData, m interface{}) error {
 
 	//can't change read only property
 	if d.HasChange("ref") || d.HasChange("adintegrated") ||
@@ -246,10 +247,10 @@ func resourceDNSZoneUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	return resourceDNSZoneRead(ctx, d, m)
+	return resourceDNSZoneRead(d, m)
 }
 
-func resourceDNSZoneDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSZoneDelete(d *schema.ResourceData, m interface{}) error {
 
 	c := m.(*Mmclient)
 	var diags diag.Diagnostics

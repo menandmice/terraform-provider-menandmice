@@ -1,17 +1,17 @@
 package menandmice
 
 import (
-	"context"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"terraform-provider-menandmice/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func DataSourceDNSRec() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDNSRectRead,
+		Read: dataSourceDNSRectRead,
 		Schema: map[string]*schema.Schema{
 
 			"fqdn": &schema.Schema{
@@ -58,7 +58,7 @@ func DataSourceDNSRec() *schema.Resource {
 	}
 }
 
-func dataSourceDNSRectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceDNSRectRead(d *schema.ResourceData, m interface{}) error {
 
 	var diags diag.Diagnostics
 	c := m.(*Mmclient)

@@ -1,21 +1,21 @@
 package menandmice
 
 import (
-	"context"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"terraform-provider-menandmice/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func resourceDNSRec() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDNSRecCreate,
-		ReadContext:   resourceDNSRecRead,
-		UpdateContext: resourceDNSRecUpdate,
-		DeleteContext: resourceDNSRecDelete,
+		Create: resourceDNSRecCreate,
+		Read:   resourceDNSRecRead,
+		Update: resourceDNSRecUpdate,
+		Delete: resourceDNSRecDelete,
 		Schema: map[string]*schema.Schema{
 
 			"last_updated": &schema.Schema{
@@ -129,7 +129,7 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 	return dnsrec
 }
 
-func resourceDNSRecCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSRecCreate(d *schema.ResourceData, m interface{}) error {
 	c := m.(*Mmclient)
 
 	dnsrec := readDNSRecSchema(d)
@@ -141,11 +141,11 @@ func resourceDNSRecCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	d.SetId(objRef)
 
-	return resourceDNSRecRead(ctx, d, m)
+	return resourceDNSRecRead(d, m)
 
 }
 
-func resourceDNSRecRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSRecRead(d *schema.ResourceData, m interface{}) error {
 	// Warning or errors can be collected in a slice type
 
 	var diags diag.Diagnostics
@@ -161,7 +161,7 @@ func resourceDNSRecRead(ctx context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-func resourceDNSRecUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSRecUpdate(d *schema.ResourceData, m interface{}) error {
 
 	//can't change read only property
 	if d.HasChange("dnszone") || d.HasChange("type") || d.HasChange("ref") {
@@ -177,10 +177,10 @@ func resourceDNSRecUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	d.Set("last_updated", time.Now().Format(time.RFC850))
-	return resourceDNSRecRead(ctx, d, m)
+	return resourceDNSRecRead(d, m)
 }
 
-func resourceDNSRecDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSRecDelete(d *schema.ResourceData, m interface{}) error {
 	// Warning or errors can be collected in a slice type
 
 	c := m.(*Mmclient)
