@@ -1,19 +1,18 @@
 package menandmice
 
 import (
-	"context"
+	"terraform-provider-menandmice/diag"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func resourceDNSzone() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDNSzoneCreate,
-		ReadContext:   resourceDNSzoneRead,
-		UpdateContext: resourceDNSzoneUpdate,
-		DeleteContext: resourceDNSzoneDelete,
+		Create: resourceDNSzoneCreate,
+		Read:   resourceDNSzoneRead,
+		Update: resourceDNSzoneUpdate,
+		Delete: resourceDNSzoneDelete,
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -163,7 +162,7 @@ func readDNSzoneSchema(d *schema.ResourceData) DNSzone {
 	return dnszone
 }
 
-func resourceDNSzoneCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSzoneCreate(d *schema.ResourceData, m interface{}) error {
 	c := m.(*Mmclient)
 
 	dnszone := readDNSzoneSchema(d)
@@ -175,11 +174,11 @@ func resourceDNSzoneCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	d.SetId(objRef)
 
-	return resourceDNSzoneRead(ctx, d, m)
+	return resourceDNSzoneRead(d, m)
 
 }
 
-func resourceDNSzoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSzoneRead(d *schema.ResourceData, m interface{}) error {
 
 	var diags diag.Diagnostics
 
@@ -194,7 +193,7 @@ func resourceDNSzoneRead(ctx context.Context, d *schema.ResourceData, m interfac
 	return diags
 }
 
-func resourceDNSzoneUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSzoneUpdate(d *schema.ResourceData, m interface{}) error {
 
 	// c := m.(*Mmclient)
 	// ref := d.Id()
@@ -204,10 +203,10 @@ func resourceDNSzoneUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	// if err != nil {
 	// 	return diag.FromErr(err)
 	// }
-	return resourceDNSzoneRead(ctx, d, m)
+	return resourceDNSzoneRead(d, m)
 }
 
-func resourceDNSzoneDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSzoneDelete(d *schema.ResourceData, m interface{}) error {
 
 	c := m.(*Mmclient)
 	var diags diag.Diagnostics

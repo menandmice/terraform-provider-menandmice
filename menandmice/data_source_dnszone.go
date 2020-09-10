@@ -1,17 +1,17 @@
 package menandmice
 
 import (
-	"context"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"terraform-provider-menandmice/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func DataSourceDNSzone() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDNSzoneRead,
+		// ReadContext: dataSourceDNSzoneRead,
 		Schema: map[string]*schema.Schema{
 
 			"domain": &schema.Schema{
@@ -87,7 +87,7 @@ func DataSourceDNSzone() *schema.Resource {
 	}
 }
 
-func dataSourceDNSzoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceDNSzoneRead(d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 	c := m.(*Mmclient)
