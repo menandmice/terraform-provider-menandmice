@@ -29,22 +29,32 @@ install: build
 	# mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
 	mkdir -p ~/.terraform.d/plugins/${OS_ARCH}
-	mv ${BINARY} ~/.terraform.d/plugins/${OS_ARCH}
+	cp ${BINARY} ~/.terraform.d/plugins/${OS_ARCH}
+
+
+
+example-0.10:
+	# you have to have docker installed, and be a member of docker group
+
+	mkdir -p examples/terraform-0.10.8/.terraform.d/plugins/${OS_ARCH}
+	cp ${BINARY} examples/terraform-0.10.8/.terraform.d/plugins/${OS_ARCH}/${BINARY}
+	docker run -it --entrypoint env -v ${PWD}/examples/terraform-0.10.8:/root hashicorp/terraform:0.10.8 sh -c \
+		'apk add libc6-compat && cd /root && terraform init && terraform apply -auto-approve'
 
 example: init
-	cd examples && terraform init && terraform apply -auto-approve && terraform destroy -auto-approve
+	cd examples/terraform-0.12 && terraform init && terraform apply -auto-approve && terraform destroy -auto-approve
 
 init : install
-	cd examples && terraform init
+	cd examples/terraform-0.12 && terraform init
 
 apply: init
-	cd examples && terraform apply -auto-approve
+	cd examples/terraform-0.12 && terraform apply -auto-approve
 
 plan: init
-	cd examples && terraform plan
+	cd examples/terraform-0.12 && terraform plan
 
 destroy : init
-	cd examples && terraform destroy -auto-approve
+	cd examples/terraform-0.12 && terraform destroy -auto-approve
 
 test:
 	go test -i $(TEST) || exit 1

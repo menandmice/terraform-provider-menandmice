@@ -37,6 +37,5 @@ terraform.rc
 terraform
 
 vendor
-pandoc.out
-env*
-TODO.md
+terraform-provider-menandmice 
+
