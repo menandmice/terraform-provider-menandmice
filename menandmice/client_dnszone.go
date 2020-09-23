@@ -34,7 +34,6 @@ type FindDNSZoneResponse struct {
 
 func (c Mmclient) FindDNSZone(filter map[string]string) (error, []DNSZone) {
 	var re FindDNSZoneResponse
-	//TODO fix ref
 	err := c.Get(&re, "dnszones/", filter)
 	return err, re.Result.DNSZones
 }
@@ -47,7 +46,6 @@ type ReadDNSZoneResponse struct {
 
 func (c Mmclient) ReadDNSZone(ref string) (error, DNSZone) {
 	var re ReadDNSZoneResponse
-	//TODO fix ref
 	err := c.Get(&re, "dnszones/"+ref, nil)
 	return err, re.Result.DNSZone
 }

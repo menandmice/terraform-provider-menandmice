@@ -65,7 +65,6 @@ type ErrorResponse struct {
 	} `json:"error"`
 }
 
-// TODO maybe use filter here?
 func (c *Mmclient) Get(result interface{}, path string, query map[string]string) error {
 
 	//TODO better error Message
