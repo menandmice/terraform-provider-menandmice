@@ -9,7 +9,7 @@ func FromErr(err error) error {
 }
 
 func Errorf(format string, a ...interface{}) error {
-	return fmt.Errorf(format, a)
+	return fmt.Errorf(format, a...)
 }
 func Append(err1, err2 Diagnostics) Diagnostics {
 	return err1
