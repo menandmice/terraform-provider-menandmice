@@ -32,8 +32,9 @@ func resourceDNSRec() *schema.Resource {
 				Required: true,
 			},
 			"data": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
 				// You cannot validate data here, because you dont have acces to what kind of record it is
 			},
 			"type": &schema.Schema{
@@ -71,12 +72,13 @@ func resourceDNSRec() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-
-			// TODO it is not dnszone but dnszoneref
+			// TODO rename dns_zone_ref
+			// TODO validate format, you can validate if it exist here because maybe it will be created later
 			"dnszone": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			// TODO add force oferwrite
 			// TODO add autoAssignRangeRef
@@ -181,7 +183,6 @@ func resourceDNSRecUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceDNSRecDelete(d *schema.ResourceData, m interface{}) error {
-	// Warning or errors can be collected in a slice type
 
 	c := m.(*Mmclient)
 	var diags diag.Diagnostics

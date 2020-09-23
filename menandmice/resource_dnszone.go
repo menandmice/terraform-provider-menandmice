@@ -41,11 +41,13 @@ func resourceDNSZone() *schema.Resource {
 				ForceNew: true,
 			},
 
+			// TODO maybe compute based on authority
 			// TODO maybe choose between ref or refs automatic
 			"dnsviewref": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringIsNotEmpty,
+				Optional:     true,
+				ForceNew:     true,
 				//TODO Default:  "DNSView/1", ?
 			},
 			"dnsviewrefs": &schema.Schema{
@@ -79,9 +81,10 @@ func resourceDNSZone() *schema.Resource {
 			},
 
 			"authority": &schema.Schema{
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 
 			"dnssecsigned": &schema.Schema{
