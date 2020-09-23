@@ -63,7 +63,7 @@ func testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, zone string) s
 		name    = "%s"
 		data    = "%s"
 		type    = "%s"
-		dnszone = "%s"
+		dns_zone_ref = "%s"
 	}
 	`, name, date, rectype, zone)
 }

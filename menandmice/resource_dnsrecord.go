@@ -72,9 +72,8 @@ func resourceDNSRec() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-			// TODO rename dns_zone_ref
 			// TODO validate format, you can validate if it exist here because maybe it will be created later
-			"dnszone": &schema.Schema{
+			"dns_zone_ref": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
@@ -99,7 +98,7 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 		}
 	}
 	d.Set("enabled", dnsrec.Enabled)
-	d.Set("dnszone", dnsrec.DNSZoneRef)
+	d.Set("dns_zone_ref", dnsrec.DNSZoneRef)
 
 	d.Set("aging", dnsrec.Aging)
 	d.Set("comment", dnsrec.Comment) // comment is always given, but sometimes ""
@@ -117,7 +116,7 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 
 	dnsrec := DNSRecord{
 		Ref:        tryGetString(d, "ref"),
-		DNSZoneRef: d.Get("dnszone").(string),
+		DNSZoneRef: d.Get("dns_zone_ref").(string),
 		Rectype:    d.Get("type").(string),
 		DNSProperties: DNSProperties{
 			Name:    d.Get("name").(string),

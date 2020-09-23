@@ -14,12 +14,12 @@ provider menandmice {
 }
 
 
-data "menandmice_dnszone" "zone1" {
+data "menandmice_dns_zone" "zone1" {
   name = "rens.nl."
   authority = "mandm.example.net."
 }
 
-resource menandmice_dnszone zone2{
+resource menandmice_dns_zone zone2{
   name    = "test"
   dnsviewref = "DNSView/1"
   authority   = "mandm.example.com."
@@ -39,15 +39,15 @@ resource menandmice_dnsrecord rec2 {
   name    = "test"
   data    = "127.0.0.7"
   type    = "A"
-  dnszone =  data.menandmice_dnszone.zone1.ref
+  dns_zone_ref =  data.menandmice_dns_zone.zone1.ref
 }
 
 output zone1{
-  value = data.menandmice_dnszone.zone1
+  value = data.menandmice_dns_zone.zone1
 }
 
 output zone2{
-  value = menandmice_dnszone.zone2
+  value = menandmice_dns_zone.zone2
 }
 
 output rec1{

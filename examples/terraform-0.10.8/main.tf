@@ -1,6 +1,6 @@
 terraform {
   required_providers {
-    menandmice = { 
+    menandmice = {
       versions = ["0.2"],
     }
   }
@@ -13,12 +13,12 @@ provider "menandmice" {
 }
 
 
-data "menandmice_dnszone" "zone1" {
+data "menandmice_dns_zone" "zone1" {
   name = "rens.nl."
   authority = "mandm.example.net."
 }
 
-resource menandmice_dnszone zone2{
+resource menandmice_dns_zone zone2{
   name    = "test"
   dnsviewref = "DNSView/1"
 
@@ -26,5 +26,5 @@ resource menandmice_dnszone zone2{
 
 
 output "zone2"{
-  value = "${menandmice_dnszone.zone2.name}"
+  value = "${menandmice_dns_zone.zone2.name}"
 }

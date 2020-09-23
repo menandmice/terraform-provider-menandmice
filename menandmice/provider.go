@@ -49,11 +49,11 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"menandmice_dnsrecord": resourceDNSRec(),
-			"menandmice_dnszone":   resourceDNSZone(),
+			"menandmice_dns_zone":  resourceDNSZone(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"menandmice_dnsrecord": DataSourceDNSRec(),
-			"menandmice_dnszone":   DataSourceDNSZone(),
+			"menandmice_dns_zone":  DataSourceDNSZone(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

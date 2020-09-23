@@ -22,13 +22,13 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 			{
 				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, viewref, authority),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckResourceExists("menandmice_dnszone.testzone"),
+					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
 				),
 			},
 			{
 				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, viewref, "mandm.example.com."),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckResourceExists("menandmice_dnszone.testzone"),
+					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
 				),
 			},
 
@@ -43,7 +43,7 @@ func testAccCheckMenandmiceDNSZoneDestroy(s *terraform.State) error {
 	c := testAccProvider.Meta().(*Mmclient)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "menandmice_dnszone" {
+		if rs.Type != "menandmice_dns_zone" {
 			continue
 		}
 
@@ -60,7 +60,7 @@ func testAccCheckMenandmiceDNSZoneDestroy(s *terraform.State) error {
 
 func testAccCheckMenandmiceDNSZoneConfigBasic(name, viewref, authority string) string {
 	return fmt.Sprintf(`
-	resource menandmice_dnszone testzone{
+	resource menandmice_dns_zone testzone{
 		name    = "%s"
 		dnsviewref = "%s"
 		authority   = "%s"
