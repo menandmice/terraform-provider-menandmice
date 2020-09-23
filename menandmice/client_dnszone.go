@@ -25,6 +25,20 @@ type DNSZoneProperties struct {
 	DisplayName string `json:"displyaName,omitempty"`
 }
 
+type FindDNSZoneResponse struct {
+	Result struct {
+		DNSZones     []DNSZone `json:"dnsZones"`
+		TotalResults int       `json:"totalResults"`
+	} `json:"result"`
+}
+
+func (c Mmclient) FindDNSZone(filter map[string]string) (error, []DNSZone) {
+	var re FindDNSZoneResponse
+	//TODO fix ref
+	err := c.Get(&re, "dnszones/", filter)
+	return err, re.Result.DNSZones
+}
+
 type ReadDNSZoneResponse struct {
 	Result struct {
 		DNSZone `json:"dnsZone"`
@@ -34,7 +48,7 @@ type ReadDNSZoneResponse struct {
 func (c Mmclient) ReadDNSZone(ref string) (error, DNSZone) {
 	var re ReadDNSZoneResponse
 	//TODO fix ref
-	err := c.Get(&re, "dnszones/"+ref)
+	err := c.Get(&re, "dnszones/"+ref, nil)
 	return err, re.Result.DNSZone
 }
 

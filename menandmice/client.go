@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -65,22 +66,35 @@ type ErrorResponse struct {
 }
 
 // TODO maybe use filter here?
-func (c *Mmclient) Get(result interface{}, path string) error {
+func (c *Mmclient) Get(result interface{}, path string, query map[string]string) error {
 
 	//TODO better error Message
 	var errorResponse ErrorResponse
-	r, err := c.R().
-		SetError(&errorResponse).
-		Get(path)
+	var querystring string
+
+	request := c.R().SetError(&errorResponse)
+
+	if query != nil {
+
+		conditions := make([]string, 0, len(query))
+		for key, val := range query {
+			conditions = append(conditions, fmt.Sprintf("%s=%s", key, val))
+		}
+		querystring = strings.Join(conditions, "&")
+		request = request.SetQueryParam("filter", querystring)
+	}
+
+	r, err := request.Get(path)
+
 	if err != nil {
 		return err
 	}
 
 	if !r.IsSuccess() {
 		jsonError := r.Error().(*ErrorResponse)
-		return errors.New(fmt.Sprintf("HTTP error code:%v\n%v",
+		return fmt.Errorf("HTTP error code:%v\n%v",
 			r.StatusCode(),
-			jsonError.Error.Message))
+			jsonError.Error.Message)
 	}
 	if err != nil {
 		return err

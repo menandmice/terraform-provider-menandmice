@@ -13,9 +13,10 @@ provider "menandmice" {
 }
 
 
-# data "menandmice_dnszone" "zone1" {
-#   domain = "rens.nl."
-# }
+data "menandmice_dnszone" "zone1" {
+  name = "rens.nl."
+  authority = "mandm.example.net."
+}
 
 resource menandmice_dnszone zone2{
   name    = "test"

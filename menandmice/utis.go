@@ -16,6 +16,27 @@ func tryGetString(d *schema.ResourceData, key string) string {
 	return ""
 }
 
+// TODO remove. make it easy to add filters to data_source, but not practical
+func ToFilter(d *schema.ResourceData) map[string]string {
+	switch v := d.Get("").(type) {
+
+	case map[string]interface{}:
+		var result = make(map[string]string)
+		for key, _ := range v {
+			if val, ok := d.GetOk(key); ok {
+				// TODO this will only work Aggregate Types
+				// TODO this wont work with if name is diffrent
+
+				result[key] = fmt.Sprintf("%v", val)
+			}
+		}
+		return result
+
+	default:
+		panic("you can not do this with this schema")
+	}
+}
+
 func testAccCheckResourceExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]

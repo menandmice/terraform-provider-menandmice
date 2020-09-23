@@ -29,7 +29,7 @@ type ReadDNSRecResponse struct {
 
 func (c *Mmclient) ReadDNSRec(ref string) (error, DNSRecord) {
 	var re ReadDNSRecResponse
-	err := c.Get(&re, "dnsrecords/"+ref)
+	err := c.Get(&re, "dnsrecords/"+ref, nil)
 	return err, re.Result.DNSRecord
 }
 

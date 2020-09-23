@@ -16,6 +16,7 @@ provider menandmice {
 
 data "menandmice_dnszone" "zone1" {
   name = "rens.nl."
+  authority = "mandm.example.net."
 }
 
 resource menandmice_dnszone zone2{
@@ -38,7 +39,7 @@ resource menandmice_dnsrecord rec2 {
   name    = "test"
   data    = "127.0.0.7"
   type    = "A"
-  dnszoneref =  data.menandmice_dnszone.zone1.ref
+  dnszone =  data.menandmice_dnszone.zone1.ref
 }
 
 output zone1{

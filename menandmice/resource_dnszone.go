@@ -22,6 +22,7 @@ func resourceDNSZone() *schema.Resource {
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				// TODO beter to force name ending with .
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if old == new+"." {
 						return true
@@ -34,6 +35,7 @@ func resourceDNSZone() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			// TODO add . ?
 			"adintegrated": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
