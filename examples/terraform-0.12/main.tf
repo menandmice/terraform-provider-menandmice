@@ -14,7 +14,7 @@ provider menandmice {
 }
 
 
-data "menandmice_dns_zone" "zone1" {
+data menandmice_dns_zone zone1 {
   name = "rens.nl."
   authority = "mandm.example.net."
 }
@@ -31,11 +31,11 @@ resource menandmice_dns_zone zone2{
   dnssecsigned = true
 }
 
-data "menandmice_dnsrecord" "rec1" {
+data menandmice_dns_record rec1 {
   fqdn = "test2.rens.nl."
 }
 
-resource menandmice_dnsrecord rec2 {
+resource menandmice_dns_record rec2 {
   name    = "test"
   data    = "127.0.0.7"
   type    = "A"
@@ -51,9 +51,9 @@ output zone2{
 }
 
 output rec1{
-  value = data.menandmice_dnsrecord.rec1
+  value = data.menandmice_dns_record.rec1
 }
 
 output rec2 {
-  value = menandmice_dnsrecord.rec2
+  value = menandmice_dns_record.rec2
 }

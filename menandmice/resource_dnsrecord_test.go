@@ -22,13 +22,13 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 			{
 				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, zone),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckResourceExists("menandmice_dnsrecord.testrec"),
+					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
 			},
 			{
 				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, "::1", "AAAA", zone),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckResourceExists("menandmice_dnsrecord.testrec"),
+					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
 				// TODO test minimal parameters,
 				// TODO test with all parameters set to non default
@@ -42,7 +42,7 @@ func testAccCheckMenandmiceDNSRecDestroy(s *terraform.State) error {
 	c := testAccProvider.Meta().(*Mmclient)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "menandmice_dnsrecord" {
+		if rs.Type != "menandmice_dns_record" {
 			continue
 		}
 
@@ -59,7 +59,7 @@ func testAccCheckMenandmiceDNSRecDestroy(s *terraform.State) error {
 
 func testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, zone string) string {
 	return fmt.Sprintf(`
-	resource menandmice_dnsrecord testrec{
+	resource menandmice_dns_record testrec{
 		name    = "%s"
 		data    = "%s"
 		type    = "%s"

@@ -69,7 +69,7 @@ func (c *Mmclient) CreateDNSRec(dnsrec DNSRecord) (error, string) {
 	}
 
 	if len(re.Result.ObjRef) != 1 {
-		return errors.New("faild to create dnsrecord"), objRef
+		return errors.New("faild to create dns_record"), objRef
 	}
 
 	return err, re.Result.ObjRef[0]
