@@ -55,6 +55,13 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
 	client.SetHostURL("http://" + c.MMEndpoint + "/mmws/api")
 
+	// TODO check if this works well with dns round robin
+	client.SetRetryCount(5)
+	client.SetRetryWaitTime(1 * time.Second)
+	client.AddRetryCondition(func(r *resty.Response, e error) bool {
+		// also retry  on server errors
+		return r.StatusCode() >= 500 && r.StatusCode() < 600
+	})
 	return &client, nil
 }
 
