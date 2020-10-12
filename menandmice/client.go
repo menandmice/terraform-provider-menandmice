@@ -58,6 +58,11 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	return &client, nil
 }
 
+type RefResponse struct {
+	Result struct {
+		Ref string `json:"ref"`
+	} `json:"result"`
+}
 type ErrorResponse struct {
 	Error struct {
 		Code    int    `json:"code"`

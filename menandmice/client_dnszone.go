@@ -56,12 +56,6 @@ type CreateDNSZoneRequest struct {
 	Masters     []string `json:"masters,omitempty"`
 }
 
-type CreateDNSZoneResponse struct {
-	Result struct {
-		Ref string `json:"ref"`
-	} `json:"result"`
-}
-
 func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (error, string) {
 	var objRef string
 	postcreate := CreateDNSZoneRequest{
@@ -69,7 +63,7 @@ func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (error, stri
 		SaveComment: "created by terraform",
 		Masters:     masters,
 	}
-	var re CreateDNSZoneResponse
+	var re RefResponse
 	err := c.Post(postcreate, &re, "DNSZones")
 
 	if err != nil {
