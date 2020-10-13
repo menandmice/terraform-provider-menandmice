@@ -5,7 +5,7 @@ type Group struct {
 	Name         string   `json:"name"`
 	Description  string   `json:"description"`
 	AdIntegrated bool     `json:"adIntegrated"`
-	BuiltIn      bool     `json:builtin`
+	BuiltIn      bool     `json:"builtin"`
 	GroupMembers []Member `json:"groupMembers"`
 	Roles        []Member `json:"roles"`
 }

@@ -35,31 +35,27 @@ func resourceDNSZone() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			// TODO add . ?
 			"adintegrated": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 				ForceNew: true,
 			},
-
-			// TODO maybe compute based on authority
-			// TODO maybe choose between ref or refs automatic
+			"view": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
 			"dnsviewref": &schema.Schema{
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringIsNotEmpty,
-				Optional:     true,
-				ForceNew:     true,
-				//TODO Default:  "DNSView/1", ?
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"dnsviewrefs": &schema.Schema{
-				Type: schema.TypeSet,
+				Type:     schema.TypeSet,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
-					// TODO Default:
 				},
-				ForceNew: true,
-				Optional: true,
 			},
 
 			"type": &schema.Schema{
@@ -83,9 +79,10 @@ func resourceDNSZone() *schema.Resource {
 			},
 
 			"authority": &schema.Schema{
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Required:     true,
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+				// TODO Requires . at end
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 
@@ -173,10 +170,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 	dnszone := DNSZone{
 		Ref:          tryGetString(d, "ref"),
 		AdIntegrated: d.Get("adintegrated").(bool),
-
-		DNSViewRef:  tryGetString(d, "dnsviewref"),
-		DNSViewRefs: dnsViewRefs,
-		Authority:   tryGetString(d, "authority"),
+		Authority:    tryGetString(d, "authority"),
 
 		DNSZoneProperties: DNSZoneProperties{
 			Name:              d.Get("name").(string),
@@ -192,6 +186,16 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 			DisplayName:       tryGetString(d, "displayname"),
 		},
 	}
+
+	dnsviewref := dnszone.Authority + ":" + tryGetString(d, "view")
+	if dnszone.AdIntegrated {
+
+		dnszone.DNSViewRefs = []string{dnsviewref}
+	} else {
+		dnszone.DNSViewRef = dnsviewref
+
+	}
+
 	return dnszone
 }
 

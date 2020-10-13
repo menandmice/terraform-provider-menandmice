@@ -21,12 +21,10 @@ data menandmice_dns_zone zone1 {
 
 resource menandmice_dns_zone zone2{
   name    = "test"
-  dnsviewref = "DNSView/1"
-  authority   = "mandm.example.com."
+  authority   = "mandm.example.net."
   adintegrated = false
   type = "Master"
   # masters = ["::1"]
-  # dnsviewrefs = ["DNSView/1"]
   # adreplicationtype = "None"
   dnssecsigned = true
 }

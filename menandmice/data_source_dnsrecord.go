@@ -14,6 +14,9 @@ func DataSourceDNSRec() *schema.Resource {
 		Read: dataSourceDNSRectRead,
 		Schema: map[string]*schema.Schema{
 
+			// TODO this is not uniq
+			// TODO use Authorization:view:zone: and type
+
 			"fqdn": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
