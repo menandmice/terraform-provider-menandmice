@@ -63,7 +63,7 @@ func dataSourceDNSRectRead(d *schema.ResourceData, m interface{}) error {
 	var diags diag.Diagnostics
 	c := m.(*Mmclient)
 
-	err, dnsrec := c.ReadDNSRec(d.Get("fqdn").(string))
+	dnsrec, err := c.ReadDNSRec(d.Get("fqdn").(string))
 
 	if err != nil {
 		return diag.FromErr(err)

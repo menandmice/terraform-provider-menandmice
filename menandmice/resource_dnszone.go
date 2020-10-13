@@ -144,8 +144,8 @@ func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
 	d.Set("dynamic", dnszone.Dynamic)
 	d.Set("adintegrated", dnszone.AdIntegrated)
 
-	d.Set("dnsviewref", dnszone.DnsViewRef)
-	d.Set("dnsviewrefs", dnszone.DnsViewRefs)
+	d.Set("dnsviewref", dnszone.DNSViewRef)
+	d.Set("dnsviewrefs", dnszone.DNSViewRefs)
 	d.Set("authority", dnszone.Authority)
 	d.Set("type", dnszone.ZoneType)
 	d.Set("dnssecsigned", dnszone.DnssecSigned)
@@ -174,8 +174,8 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		Ref:          tryGetString(d, "ref"),
 		AdIntegrated: d.Get("adintegrated").(bool),
 
-		DnsViewRef:  tryGetString(d, "dnsviewref"),
-		DnsViewRefs: dnsViewRefs,
+		DNSViewRef:  tryGetString(d, "dnsviewref"),
+		DNSViewRefs: dnsViewRefs,
 		Authority:   tryGetString(d, "authority"),
 
 		DNSZoneProperties: DNSZoneProperties{
@@ -208,7 +208,7 @@ func resourceDNSZoneCreate(d *schema.ResourceData, m interface{}) error {
 
 	dnszone := readDNSZoneSchema(d)
 
-	err, objRef := c.CreateDNSZone(dnszone, masters)
+	objRef, err := c.CreateDNSZone(dnszone, masters)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -225,7 +225,7 @@ func resourceDNSZoneRead(d *schema.ResourceData, m interface{}) error {
 
 	c := m.(*Mmclient)
 
-	err, dnszone := c.ReadDNSZone(d.Id())
+	dnszone, err := c.ReadDNSZone(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

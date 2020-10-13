@@ -22,10 +22,10 @@ type ReadGroupResponse struct {
 	} `json:"result"`
 }
 
-func (c *Mmclient) readGroup(ref string) (error, Group) {
+func (c *Mmclient) readGroup(ref string) (Group, error) {
 	var re ReadGroupResponse
 	err := c.Get(&re, "Groups/"+ref, nil)
-	return err, re.Result.Group
+	return re.Result.Group, err
 
 }
 
@@ -34,7 +34,7 @@ type CreateGroupRequest struct {
 	SaveComment string `json:"saveComment"`
 }
 
-func (c *Mmclient) CreatGroup(group Group) (error, string) {
+func (c *Mmclient) CreatGroup(group Group) (string, error) {
 	var objRef string
 	postcreate := CreateGroupRequest{
 		Group:       group,
@@ -44,8 +44,8 @@ func (c *Mmclient) CreatGroup(group Group) (error, string) {
 	err := c.Post(postcreate, &re, "Groups/")
 
 	if err != nil {
-		return err, objRef
+		return objRef, err
 	}
 
-	return err, re.Result.Ref
+	return re.Result.Ref, err
 }

@@ -98,7 +98,7 @@ func dataSourceDNSZoneRead(d *schema.ResourceData, m interface{}) error {
 	filter["name"] = d.Get("name").(string)
 	filter["authority"] = d.Get("authority").(string)
 
-	err, dnszones := c.FindDNSZone(filter)
+	dnszones, err := c.FindDNSZone(filter)
 
 	if err != nil {
 		return diag.FromErr(err)

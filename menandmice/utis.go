@@ -22,7 +22,7 @@ func ToFilter(d *schema.ResourceData) map[string]string {
 
 	case map[string]interface{}:
 		var result = make(map[string]string)
-		for key, _ := range v {
+		for key := range v {
 			if val, ok := d.GetOk(key); ok {
 				// TODO this will only work Aggregate Types
 				// TODO this wont work with if name is diffrent

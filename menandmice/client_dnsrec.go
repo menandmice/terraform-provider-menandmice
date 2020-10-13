@@ -27,10 +27,10 @@ type ReadDNSRecResponse struct {
 	} `json:"result"`
 }
 
-func (c *Mmclient) ReadDNSRec(ref string) (error, DNSRecord) {
+func (c *Mmclient) ReadDNSRec(ref string) (DNSRecord, error) {
 	var re ReadDNSRecResponse
 	err := c.Get(&re, "dnsrecords/"+ref, nil)
-	return err, re.Result.DNSRecord
+	return re.Result.DNSRecord, err
 }
 
 type CreateDNSRecResponse struct {
@@ -48,7 +48,7 @@ type CreateDNSRecRequest struct {
 	ForceOverrideOfNamingConflictCheck bool `json:"forceOverrideOfNamingConflictCheck"`
 }
 
-func (c *Mmclient) CreateDNSRec(dnsrec DNSRecord) (error, string) {
+func (c *Mmclient) CreateDNSRec(dnsrec DNSRecord) (string, error) {
 	var objRef string
 	postcreate := CreateDNSRecRequest{
 		DNSRecords:                         []DNSRecord{dnsrec},
@@ -61,18 +61,18 @@ func (c *Mmclient) CreateDNSRec(dnsrec DNSRecord) (error, string) {
 	// TODO if dnsZoneRef does not exit you can confusing error "Missing object reference." give better messages
 
 	if err != nil {
-		return err, objRef
+		return objRef, err
 	}
 
 	if len(re.Result.Error) > 0 {
-		return errors.New(re.Result.Error[0]), objRef
+		return objRef, errors.New(re.Result.Error[0])
 	}
 
 	if len(re.Result.ObjRef) != 1 {
-		return errors.New("faild to create dns_record"), objRef
+		return objRef, errors.New("faild to create dns_record")
 	}
 
-	return err, re.Result.ObjRef[0]
+	return re.Result.ObjRef[0], err
 }
 
 type DeleteDNSRecRequest struct {

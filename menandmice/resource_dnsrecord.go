@@ -73,6 +73,7 @@ func resourceDNSRec() *schema.Resource {
 				Default:  true,
 			},
 			// TODO validate format, you can validate if it exist here because maybe it will be created later
+			// TODO replace if with server viewname zonename
 			"dns_zone_ref": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
@@ -135,7 +136,7 @@ func resourceDNSRecCreate(d *schema.ResourceData, m interface{}) error {
 
 	dnsrec := readDNSRecSchema(d)
 
-	err, objRef := c.CreateDNSRec(dnsrec)
+	objRef, err := c.CreateDNSRec(dnsrec)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -153,7 +154,7 @@ func resourceDNSRecRead(d *schema.ResourceData, m interface{}) error {
 
 	c := m.(*Mmclient)
 
-	err, dnsrec := c.ReadDNSRec(d.Id())
+	dnsrec, err := c.ReadDNSRec(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

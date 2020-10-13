@@ -3,8 +3,8 @@ package menandmice
 type DNSZone struct {
 	Ref          string   `json:"ref,omitempty"`
 	AdIntegrated bool     `json:"adIntegrated"`
-	DnsViewRef   string   `json:"dnsViewRef,omitempty"`
-	DnsViewRefs  []string `json:"dnsViewRefs,omitempty"`
+	DNSViewRef   string   `json:"dnsViewRef,omitempty"`
+	DNSViewRefs  []string `json:"dnsViewRefs,omitempty"`
 	Authority    string   `json:"authority,omitempty"`
 	DNSZoneProperties
 }
@@ -32,10 +32,10 @@ type FindDNSZoneResponse struct {
 	} `json:"result"`
 }
 
-func (c Mmclient) FindDNSZone(filter map[string]string) (error, []DNSZone) {
+func (c Mmclient) FindDNSZone(filter map[string]string) ([]DNSZone, error) {
 	var re FindDNSZoneResponse
 	err := c.Get(&re, "dnszones/", filter)
-	return err, re.Result.DNSZones
+	return re.Result.DNSZones, err
 }
 
 type ReadDNSZoneResponse struct {
@@ -44,10 +44,10 @@ type ReadDNSZoneResponse struct {
 	} `json:"result"`
 }
 
-func (c Mmclient) ReadDNSZone(ref string) (error, DNSZone) {
+func (c Mmclient) ReadDNSZone(ref string) (DNSZone, error) {
 	var re ReadDNSZoneResponse
 	err := c.Get(&re, "dnszones/"+ref, nil)
-	return err, re.Result.DNSZone
+	return re.Result.DNSZone, err
 }
 
 type CreateDNSZoneRequest struct {
@@ -56,7 +56,7 @@ type CreateDNSZoneRequest struct {
 	Masters     []string `json:"masters,omitempty"`
 }
 
-func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (error, string) {
+func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (string, error) {
 	var objRef string
 	postcreate := CreateDNSZoneRequest{
 		DNSZone:     dnszone,
@@ -67,10 +67,10 @@ func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (error, stri
 	err := c.Post(postcreate, &re, "DNSZones")
 
 	if err != nil {
-		return err, objRef
+		return objRef, err
 	}
 
-	return err, re.Result.Ref
+	return re.Result.Ref, err
 }
 
 // TODO this could be shared between all delete
