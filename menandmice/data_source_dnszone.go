@@ -1,11 +1,13 @@
 package menandmice
 
 import (
+	"regexp"
 	"strconv"
 	"terraform-provider-menandmice/diag"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 // schema for DNSZone resource
@@ -20,16 +22,15 @@ func DataSourceDNSZone() *schema.Resource {
 				Computed: true,
 				// TODO ref or name and authority
 			},
-			// TODO add  .
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "name must end with '.'"),
+				Required:     true,
 			},
 			"dynamic": &schema.Schema{
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			// TODO add  .
 			"adintegrated": &schema.Schema{
 				Type:     schema.TypeBool,
 				Computed: true,

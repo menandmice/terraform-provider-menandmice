@@ -10,8 +10,7 @@ import (
 
 func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 
-	name := "zone1"
-	viewref := "DNSViews/1"
+	name := "zone1."
 	authority := "mandm.example.net."
 
 	resource.Test(t, resource.TestCase{
@@ -20,17 +19,17 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 		CheckDestroy: testAccCheckMenandmiceDNSZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, viewref, authority),
+				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, authority),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
 				),
 			},
-			{
-				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, viewref, "mandm.example.com."),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
-				),
-			},
+			// {
+			// 	Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, "mandm.example.com."),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheckResourceExists("menandmice_dns_zone.testzone"),
+			// 	),
+			// },
 
 			// TODO test minimal parameters,
 			// TODO test with all parameters set to non default
@@ -58,12 +57,11 @@ func testAccCheckMenandmiceDNSZoneDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckMenandmiceDNSZoneConfigBasic(name, viewref, authority string) string {
+func testAccCheckMenandmiceDNSZoneConfigBasic(name, authority string) string {
 	return fmt.Sprintf(`
 	resource menandmice_dns_zone testzone{
 		name    = "%s"
-		dnsviewref = "%s"
 		authority   = "%s"
 	}
-	`, name, viewref, authority)
+	`, name, authority)
 }

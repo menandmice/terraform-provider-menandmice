@@ -1,6 +1,7 @@
 package menandmice
 
 import (
+	"regexp"
 	"terraform-provider-menandmice/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -20,15 +21,9 @@ func resourceDNSZone() *schema.Resource {
 				Computed: true,
 			},
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				// TODO beter to force name ending with .
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if old == new+"." {
-						return true
-					}
-					return false
-				},
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "name must end with '.'"),
 			},
 			"dynamic": &schema.Schema{
 				Type:     schema.TypeBool,
@@ -79,11 +74,10 @@ func resourceDNSZone() *schema.Resource {
 			},
 
 			"authority": &schema.Schema{
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
-				// TODO Requires . at end
-				ValidateFunc: validation.StringIsNotEmpty,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Required:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "authority should end with '.'"),
 			},
 
 			"dnssecsigned": &schema.Schema{

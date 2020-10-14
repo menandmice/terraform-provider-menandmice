@@ -20,7 +20,7 @@ data menandmice_dns_zone zone1 {
 }
 
 resource menandmice_dns_zone zone2{
-  name    = "test"
+  name    = "test."
   authority   = "mandm.example.net."
   adintegrated = false
   type = "Master"
