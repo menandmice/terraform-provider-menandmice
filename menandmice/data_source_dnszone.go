@@ -67,10 +67,13 @@ func DataSourceDNSZone() *schema.Resource {
 				Computed: true,
 			},
 
-			// TODO "customProperties": &schema.Schema{
-			// 	Type:     ?
-			// 	Computed: true,
-			// }
+			"customp_properties": &schema.Schema{
+				Type: schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Computed: true,
+			},
 
 			"created": &schema.Schema{
 				Type:     schema.TypeString,

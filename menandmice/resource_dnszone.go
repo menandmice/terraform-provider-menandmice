@@ -101,10 +101,14 @@ func resourceDNSZone() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			// TODO  "customProperties": &schema.Schema{
-			// 	Type:     ?
-			// 	Computed: true,
-			// }
+
+			"custom_properties": &schema.Schema{
+				Type: schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+			},
 			"adreplicationtype": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -148,29 +152,39 @@ func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
 	d.Set("dnssecsigned", dnszone.DnssecSigned)
 	d.Set("kskids", dnszone.KskIDs)
 	d.Set("zskids", dnszone.ZskIDs)
-	// TODO set customProperties
+	d.Set("custom_properties", dnszone.CustomProperties)
 
 	d.Set("adreplicationtype", dnszone.AdReplicationType)
 	d.Set("adpartition", dnszone.AdPartition)
-	d.Set("created", dnszone.Created)
-	d.Set("lastmodified", dnszone.LastModified)
+	d.Set("created", dnszone.Created)           // TODO convert to timeformat RFC 3339
+	d.Set("lastmodified", dnszone.LastModified) // TODO convert to timeformat RFC 3339
 	d.Set("displayname", dnszone.DisplayName)
 	return
 
 }
 
 func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
-	// TODO  check dnsViewRef and dnsViewRefs are not both set
 
 	dnsViewRefsRead := d.Get("dnsviewrefs").(*schema.Set).List() //TODO check succes
 	var dnsViewRefs = make([]string, len(dnsViewRefsRead))
 	for i, view := range dnsViewRefsRead {
 		dnsViewRefs[i] = view.(string)
 	}
+
+	var CustomProperties = make(map[string]string)
+	if customPropertiesRead, ok := d.GetOk("custom_properties"); ok {
+		for key, value := range customPropertiesRead.(map[string]interface{}) {
+			CustomProperties[key] = value.(string)
+		}
+	}
 	dnszone := DNSZone{
 		Ref:          tryGetString(d, "ref"),
 		AdIntegrated: d.Get("adintegrated").(bool),
 		Authority:    tryGetString(d, "authority"),
+
+		// you should not set this youself
+		// Created:      d.Get("created").(string),
+		// LastModified: tryGetString(d, "lastmodified"),
 
 		DNSZoneProperties: DNSZoneProperties{
 			Name:              d.Get("name").(string),
@@ -181,8 +195,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 			ZskIDs:            tryGetString(d, "zskids"),
 			AdReplicationType: tryGetString(d, "adreplicationtype"),
 			AdPartition:       tryGetString(d, "adpartition"),
-			Created:           d.Get("created").(string),       // TODO convert to timeformat RFC 3339
-			LastModified:      tryGetString(d, "lastmodified"), // TODO convert to timeformat RFC 3339
+			CustomProperties:  CustomProperties,
 			DisplayName:       tryGetString(d, "displayname"),
 		},
 	}

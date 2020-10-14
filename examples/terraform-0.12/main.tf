@@ -24,9 +24,10 @@ resource menandmice_dns_zone zone2{
   authority   = "mandm.example.net."
   adintegrated = false
   type = "Master"
+  custom_properties = {"place" = "city","owner" = "me"}
   # masters = ["::1"]
   # adreplicationtype = "None"
-  dnssecsigned = true
+  dnssecsigned = false
 }
 
 data menandmice_dns_record rec1 {
