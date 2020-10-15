@@ -20,14 +20,14 @@ data menandmice_dns_zone zone1 {
 }
 
 resource menandmice_dns_zone zone2{
-  name    = "test."
+  name    = "zone2."
   authority   = "mandm.example.net."
   adintegrated = false
-  type = "Master"
   custom_properties = {"place" = "city","owner" = "me"}
-  # masters = ["::1"]
-  # adreplicationtype = "None"
-  dnssecsigned = false
+
+  view = ""             # default ""
+  type = "Master"       # default "Master"
+  dnssecsigned = false  # default false
 }
 
 data menandmice_dns_record rec1 {
@@ -36,9 +36,10 @@ data menandmice_dns_record rec1 {
 
 resource menandmice_dns_record rec2 {
   name    = "test"
+  zone    = "example.net."
+  server  = "mandm.example.net."
   data    = "127.0.0.7"
   type    = "A"
-  dns_zone_ref =  data.menandmice_dns_zone.zone1.ref
 }
 
 output zone1{

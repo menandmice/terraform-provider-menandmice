@@ -1,8 +1,8 @@
 package menandmice
 
 import (
+	"regexp"
 	"strconv"
-	"time"
 
 	"terraform-provider-menandmice/diag"
 
@@ -18,11 +18,6 @@ func resourceDNSRec() *schema.Resource {
 		Delete: resourceDNSRecDelete,
 		Schema: map[string]*schema.Schema{
 
-			"last_updated": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"ref": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -72,13 +67,30 @@ func resourceDNSRec() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-			// TODO validate format, you can validate if it exist here because maybe it will be created later
-			// TODO replace if with server viewname zonename
-			"dns_zone_ref": &schema.Schema{
+
+			"server": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
+			},
+			"view": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+				ForceNew: true,
+			},
+
+			"zone": &schema.Schema{
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
+			},
+
+			"dns_zone_ref": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			// TODO add force oferwrite
 			// TODO add autoAssignRangeRef
@@ -117,8 +129,9 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 
 	dnsrec := DNSRecord{
 		Ref:        tryGetString(d, "ref"),
-		DNSZoneRef: d.Get("dns_zone_ref").(string),
-		Rectype:    d.Get("type").(string),
+		DNSZoneRef: tryGetString(d, "server") + ":" + tryGetString(d, "view") + ":" + tryGetString(d, "zone"),
+
+		Rectype: d.Get("type").(string),
 		DNSProperties: DNSProperties{
 			Name:    d.Get("name").(string),
 			Ttl:     optionalTTL,
@@ -165,11 +178,6 @@ func resourceDNSRecRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceDNSRecUpdate(d *schema.ResourceData, m interface{}) error {
 
-	//can't change read only property
-	if d.HasChange("dnszone") || d.HasChange("type") || d.HasChange("ref") {
-		// this can't never error can never happen because of "ForceNew: true," for these properties
-
-	}
 	c := m.(*Mmclient)
 	ref := d.Id()
 	dnsrec := readDNSRecSchema(d)
@@ -178,7 +186,6 @@ func resourceDNSRecUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("last_updated", time.Now().Format(time.RFC850))
 	return resourceDNSRecRead(d, m)
 }
 

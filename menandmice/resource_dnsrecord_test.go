@@ -12,7 +12,8 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 	name := "rec1"
 	date := "127.0.0.1"
 	rectype := "A"
-	zone := "DNSZones/217"
+	server := "mandm.example.net."
+	zone := "example.net."
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -20,13 +21,13 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 		CheckDestroy: testAccCheckMenandmiceDNSRecDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, zone),
+				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, server, zone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
 			},
 			{
-				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, "::1", "AAAA", zone),
+				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, "::1", "AAAA", server, zone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
@@ -57,13 +58,14 @@ func testAccCheckMenandmiceDNSRecDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, zone string) string {
+func testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, server, zone string) string {
 	return fmt.Sprintf(`
 	resource menandmice_dns_record testrec{
 		name    = "%s"
 		data    = "%s"
 		type    = "%s"
-		dns_zone_ref = "%s"
+		server  = "%s"
+		zone    = "%s"
 	}
-	`, name, date, rectype, zone)
+	`, name, date, rectype, server, zone)
 }
