@@ -32,7 +32,7 @@ install: build
 	cp ${BINARY} ~/.terraform.d/plugins/${OS_ARCH}
 
 
-
+# this does not work yet
 example-0.10:
 	# you have to have docker installed, and be a member of docker group
 
