@@ -1,3 +1,7 @@
+
+# TODO this config was to test backwards compatibiliti old versions terraform. but is now bit outdated
+
+
 terraform {
   required_providers {
     menandmice = {
@@ -5,6 +9,7 @@ terraform {
     }
   }
 }
+
 
 provider "menandmice" {
   endpoint = "mandm.example.net"
