@@ -67,7 +67,7 @@ func resourceDNSZone() *schema.Resource {
 					Type: schema.TypeString,
 					ValidateFunc: validation.Any(
 						validation.IsIPv4Address,
-						validation.IsIPv4Address),
+						validation.IsIPv6Address),
 				},
 				ForceNew: true,
 				Optional: true,

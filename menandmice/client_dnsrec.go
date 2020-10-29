@@ -75,20 +75,9 @@ func (c *Mmclient) CreateDNSRec(dnsrec DNSRecord) (string, error) {
 	return re.Result.ObjRef[0], err
 }
 
-type DeleteDNSRecRequest struct {
-	SaveComment  string `json:"saveComment"`
-	ForceRemoval bool   `json:"forceRemoval"`
-	// objType string
-
-}
-
 func (c *Mmclient) DeleteDNSRec(ref string) error {
 
-	del := DeleteDNSRecRequest{
-		ForceRemoval: true,
-		SaveComment:  "deleted by terraform",
-	}
-	return c.Delete(del, "DNSRecords/"+ref)
+	return c.Delete(deleteRequest("DNSRecord"), "DNSRecords/"+ref)
 }
 
 type UpdateDNSRecRequest struct {

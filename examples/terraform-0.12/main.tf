@@ -42,6 +42,17 @@ resource menandmice_dns_record rec2 {
   type    = "A"
 }
 
+
+data menandmice_ipam_record ipam1 {
+  address = "2001:db8:0:0:0:0:0:25"
+}
+resource menandmice_ipam_record ipam2 {
+  address = "2001:db8:0:0:0:0:0:25"
+  custom_properties = {"location":"here"}
+  claimed = false
+
+}
+
 output zone1{
   value = data.menandmice_dns_zone.zone1
 }
@@ -56,4 +67,12 @@ output rec1{
 
 output rec2 {
   value = menandmice_dns_record.rec2
+}
+
+
+output ipam1 {
+  value = menandmice_ipam_record.ipam2
+}
+output ipam2 {
+  value = menandmice_ipam_record.ipam2
 }

@@ -65,6 +65,20 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	return &client, nil
 }
 
+type DeleteRequest struct {
+	SaveComment  string `json:"saveComment"`
+	ForceRemoval bool   `json:"forceRemoval"`
+	ObjType      string `json:"objType,omitempty"`
+}
+
+func deleteRequest(objType string) DeleteRequest {
+	return DeleteRequest{
+		ForceRemoval: true,
+		SaveComment:  "deleted by terraform",
+		ObjType:      objType,
+	}
+}
+
 type RefResponse struct {
 	Result struct {
 		Ref string `json:"ref"`

@@ -1,6 +1,7 @@
 package menandmice
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -51,4 +52,22 @@ func testAccCheckResourceExists(n string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+// convert structure to map ignore `json:"omitempty"`
+func toMap(item interface{}) (map[string]interface{}, error) {
+
+	var properties map[string]interface{}
+	serialized, err := json.Marshal(item)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(serialized, &properties)
+
+	if err != nil {
+		return nil, err
+	}
+	return properties, nil
 }

@@ -161,8 +161,8 @@ func resourceDNSRecCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceDNSRecRead(d *schema.ResourceData, m interface{}) error {
-	// Warning or errors can be collected in a slice type
 
+	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	c := m.(*Mmclient)

@@ -1,7 +1,5 @@
 package menandmice
 
-import "encoding/json"
-
 type DNSZone struct {
 	Ref          string   `json:"ref,omitempty"`
 	AdIntegrated bool     `json:"adIntegrated"`
@@ -77,21 +75,9 @@ func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (string, err
 	return re.Result.Ref, err
 }
 
-// TODO this could be shared between all delete
-type DeleteDNSZoneRequest struct {
-	SaveComment  string `json:"saveComment"`
-	ForceRemoval bool   `json:"forceRemoval"`
-	// objType string
-
-}
-
 func (c *Mmclient) DeleteDNSZone(ref string) error {
 
-	del := DeleteDNSZoneRequest{
-		ForceRemoval: true,
-		SaveComment:  "deleted by terraform",
-	}
-	return c.Delete(del, "DNSZones/"+ref)
+	return c.Delete(deleteRequest("DNSZone"), "DNSZones/"+ref)
 }
 
 type UpdateDNSZoneRequest struct {
@@ -108,21 +94,17 @@ func (c *Mmclient) UpdateDNSZone(dnsZoneProperties DNSZoneProperties, ref string
 
 	// A work around to create properties with same fields as DNSZoneProperties but with flattend CustomProperties
 	// first mask CustomProperties in DNSZoneProperties
-	// Then marshal and Unmarshal in Map[string]interface
+	// Then convert to map considerting `json:"omitempty"`
 	// Then add CustomProperties 1 by 1
 
 	customProperties := dnsZoneProperties.CustomProperties
 	dnsZoneProperties.CustomProperties = nil
 
-	var properties map[string]interface{}
-	serialized, err := json.Marshal(dnsZoneProperties)
+	properties, err := toMap(dnsZoneProperties)
 
 	if err != nil {
 		return err
 	}
-
-	json.Unmarshal(serialized, &properties)
-
 	for key, value := range customProperties {
 		properties[key] = value
 	}
@@ -134,8 +116,6 @@ func (c *Mmclient) UpdateDNSZone(dnsZoneProperties DNSZoneProperties, ref string
 		DeleteUnspecified: true,
 		Properties:        properties,
 	}
-
-	dnsZoneProperties.CustomProperties = nil
 
 	return c.Put(update, "DNSZones/"+ref)
 }

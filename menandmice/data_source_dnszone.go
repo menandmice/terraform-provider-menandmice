@@ -55,6 +55,8 @@ func DataSourceDNSZone() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			// TODO add "view"
+
 			"dnssecsigned": &schema.Schema{
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -102,6 +104,7 @@ func dataSourceDNSZoneRead(d *schema.ResourceData, m interface{}) error {
 	filter["name"] = d.Get("name").(string)
 	filter["authority"] = d.Get("authority").(string)
 
+	// TODO dont search but use dnszoneref = <authority>:<view>:<zonename>
 	dnszones, err := c.FindDNSZone(filter)
 
 	if err != nil {
