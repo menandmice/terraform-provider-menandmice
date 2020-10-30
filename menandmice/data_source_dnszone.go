@@ -15,12 +15,21 @@ func DataSourceDNSZone() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceDNSZoneRead,
 		Schema: map[string]*schema.Schema{
-			// TODO add more search criteria
 
 			"ref": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
-				// TODO ref or name and authority
+			},
+
+			"server": &schema.Schema{
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
+			},
+			"view": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
 			},
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
@@ -53,10 +62,8 @@ func DataSourceDNSZone() *schema.Resource {
 			},
 			"authority": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Computed: true,
 			},
-			// TODO add "view"
-
 			"dnssecsigned": &schema.Schema{
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -99,25 +106,14 @@ func dataSourceDNSZoneRead(d *schema.ResourceData, m interface{}) error {
 	var diags diag.Diagnostics
 	c := m.(*Mmclient)
 
-	filter := make(map[string]string)
-
-	filter["name"] = d.Get("name").(string)
-	filter["authority"] = d.Get("authority").(string)
-
-	// TODO dont search but use dnszoneref = <authority>:<view>:<zonename>
-	dnszones, err := c.FindDNSZone(filter)
+	dnsZoneRef := tryGetString(d, "server") + ":" + tryGetString(d, "view") + ":" + tryGetString(d, "name")
+	dnszone, err := c.ReadDNSZone(dnsZoneRef)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	switch {
-	case len(dnszones) <= 0:
-		return diag.Errorf("no DNSZOnes found matching you criteria")
-	case len(dnszones) > 1:
-		return diag.Errorf("%v DNSZOnes found matching you criteria, but should be only 1", len(dnszones))
-	}
 
-	writeDNSZoneSchema(d, dnszones[0])
+	writeDNSZoneSchema(d, dnszone)
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags

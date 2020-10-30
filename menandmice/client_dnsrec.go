@@ -21,6 +21,19 @@ type DNSProperties struct {
 	Enabled bool    `json:"enabled,omitempty"`
 }
 
+type FindDNSRecResponse struct {
+	Result struct {
+		DNSRecords   []DNSRecord `json:"dnsRecords"`
+		TotalResults int         `json:"totalResults"`
+	} `json:"result"`
+}
+
+func (c Mmclient) FindDNSRec(zone string, filter map[string]string) ([]DNSRecord, error) {
+	var re FindDNSRecResponse
+	err := c.Get(&re, "DNSZones/"+zone+"/DNSRecords", filter)
+	return re.Result.DNSRecords, err
+}
+
 type ReadDNSRecResponse struct {
 	Result struct {
 		DNSRecord `json:"dnsRecord"`

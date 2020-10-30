@@ -34,6 +34,7 @@ type FindDNSZoneResponse struct {
 	} `json:"result"`
 }
 
+// Is no longer used
 func (c Mmclient) FindDNSZone(filter map[string]string) ([]DNSZone, error) {
 	var re FindDNSZoneResponse
 	err := c.Get(&re, "dnszones/", filter)
@@ -48,7 +49,7 @@ type ReadDNSZoneResponse struct {
 
 func (c Mmclient) ReadDNSZone(ref string) (DNSZone, error) {
 	var re ReadDNSZoneResponse
-	err := c.Get(&re, "dnszones/"+ref, nil)
+	err := c.Get(&re, "DNSZones/"+ref, nil)
 	return re.Result.DNSZone, err
 }
 

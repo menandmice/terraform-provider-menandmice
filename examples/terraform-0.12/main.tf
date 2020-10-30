@@ -16,7 +16,7 @@ provider menandmice {
 
 data menandmice_dns_zone zone1 {
   name = "rens.nl."
-  authority = "mandm.example.net."
+  server = "mandm.example.net."
 }
 
 resource menandmice_dns_zone zone2{
@@ -31,7 +31,10 @@ resource menandmice_dns_zone zone2{
 }
 
 data menandmice_dns_record rec1 {
-  fqdn = "test2.rens.nl."
+  name = "test2"
+  zone = "rens.nl."
+  server = "mandm.example.net."
+  type = "A"
 }
 
 resource menandmice_dns_record rec2 {
@@ -47,7 +50,7 @@ data menandmice_ipam_record ipam1 {
   address = "2001:db8:0:0:0:0:0:25"
 }
 resource menandmice_ipam_record ipam2 {
-  address = "2001:db8:0:0:0:0:0:25"
+  address = "2001:db8:0:0:0:0:0:29"
   custom_properties = {"location":"here"}
   claimed = false
 

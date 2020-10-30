@@ -1,12 +1,14 @@
 package menandmice
 
 import (
+	"regexp"
 	"strconv"
 	"time"
 
 	"terraform-provider-menandmice/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func DataSourceDNSRec() *schema.Resource {
@@ -14,22 +16,31 @@ func DataSourceDNSRec() *schema.Resource {
 		Read: dataSourceDNSRectRead,
 		Schema: map[string]*schema.Schema{
 
-			// TODO this is not uniq
-			// TODO use Authorization:view:zone: and type
-
-			"fqdn": &schema.Schema{
+			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"ref": &schema.Schema{
+			"view": &schema.Schema{
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
+				Default:  "",
 			},
-			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+			"zone": &schema.Schema{
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
+			},
+			"server": &schema.Schema{
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
 			},
 			"type": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
+
+			"ref": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -66,12 +77,24 @@ func dataSourceDNSRectRead(d *schema.ResourceData, m interface{}) error {
 	var diags diag.Diagnostics
 	c := m.(*Mmclient)
 
-	dnsrec, err := c.ReadDNSRec(d.Get("fqdn").(string))
+	dnsZoneRef := tryGetString(d, "server") + ":" + tryGetString(d, "view") + ":" + tryGetString(d, "zone")
+
+	dnsrecs, err := c.FindDNSRec(dnsZoneRef, map[string]string{
+		"name": tryGetString(d, "name"),
+		"type": tryGetString(d, "type"),
+	})
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeDNSRecSchema(d, dnsrec)
+
+	switch {
+	case len(dnsrecs) <= 0:
+		return diag.Errorf("no DNSRecord found matching you criteria")
+	case len(dnsrecs) > 1:
+		return diag.Errorf("%v DNSRecords found matching you criteria, but should be only 1", len(dnsrecs))
+	}
+	writeDNSRecSchema(d, dnsrecs[0])
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags
