@@ -24,7 +24,7 @@ type ReadGroupResponse struct {
 
 func (c *Mmclient) readGroup(ref string) (Group, error) {
 	var re ReadGroupResponse
-	err := c.Get(&re, "Groups/"+ref, nil)
+	err := c.Get(&re, "Groups/"+ref, nil, nil)
 	return re.Result.Group, err
 
 }

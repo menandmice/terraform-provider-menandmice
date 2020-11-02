@@ -7,22 +7,22 @@ type IPAMRecord struct {
 	// DHCPReservations          []??? `json:"dhcpReservations,omitempty"`
 	// DHCPLeases []???  "dhcpLeases,omitempty"`
 	//TODO how to set DiscoveryType
-	DiscoveryType             string `json:"discoveryType,omitempty"`
-	PTRStatus                 string `json:"ptrStatus,omitempty"`
-	LastSeenDate              string `json:"lastSeenDate,omitempty"`
-	LastDiscoveryDate         string `json:"lastDiscoveryDate,omitempty"`
-	LastKnownClientIdentifier string `json:"lastKnownClientIdentifier,omitempty"`
-	ExtraneousPTR             bool   `json:"extraneousPTR,omitempty"`
-	Device                    string `json:"device,omitempty"`
-	State                     string `json:"state,omitempty"`
-	Usage                     int    `json:"usage,omitempty"`
+	DiscoveryType             string    `json:"discoveryType,omitempty"`
+	PTRStatus                 string    `json:"ptrStatus,omitempty"`
+	LastSeenDate              string    `json:"lastSeenDate,omitempty"`
+	LastDiscoveryDate         string    `json:"lastDiscoveryDate,omitempty"`
+	LastKnownClientIdentifier string    `json:"lastKnownClientIdentifier,omitempty"`
+	ExtraneousPTR             bool      `json:"extraneousPTR,omitempty"`
+	Device                    string    `json:"device,omitempty"`
+	State                     string    `json:"state,omitempty"`
+	Usage                     int       `json:"usage,omitempty"`
+	HoldInfo                  *HoldInfo `json:"holdInfo,omitempty"`
 	IPAMProperties
 }
 type IPAMProperties struct {
 	Claimed          bool              `json:"claimed"`
 	Interface        string            `json:"interace,omitempty"`
 	CustomProperties map[string]string `json:"customProperties,omitempty"`
-	HoldInfo         *HoldInfo         `json:"holdInfo,omitempty"`
 
 	// CloudDeviceInfo []string `json:"cloudDeviceInfo,omitempty"`
 }
@@ -46,7 +46,7 @@ type ReadIPAMRECResponse struct {
 
 func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
 	var re ReadIPAMRECResponse
-	err := c.Get(&re, "IPAMRecords/"+ref, nil)
+	err := c.Get(&re, "IPAMRecords/"+ref, nil, nil)
 	return re.Result.IPAMRecord, err
 }
 
@@ -65,7 +65,7 @@ type UpdateIPAMRecRequest struct {
 	SaveComment       string `json:"saveComment"`
 	DeleteUnspecified bool   `json:"deleteUnspecified"`
 
-	// we cant use DNSZoneProperties for this because CustomProperties should be flattend first
+	// we cant use IPAMProperties for this because CustomProperties should be flattend first
 	Properties map[string]interface{} `json:"properties"`
 }
 
@@ -75,9 +75,6 @@ func (c *Mmclient) UpdateIPAMRec(ipamProperties IPAMProperties, ref string) erro
 	// first mask CustomProperties in DNSZoneProperties
 	// Then convert to map considerting `json:"omitempty"`
 	// Then add CustomProperties 1 by 1
-
-	HoldInfo := ipamProperties.HoldInfo
-	ipamProperties.HoldInfo = nil
 
 	customProperties := ipamProperties.CustomProperties
 	ipamProperties.CustomProperties = nil
@@ -90,17 +87,6 @@ func (c *Mmclient) UpdateIPAMRec(ipamProperties IPAMProperties, ref string) erro
 
 	for key, value := range customProperties {
 		properties[key] = value
-	}
-
-	// TODO you cant create/update holdInfo
-	if HoldInfo != nil {
-		if HoldInfo.ExpiryTime != "" {
-			properties["expiryTime"] = HoldInfo.ExpiryTime
-		}
-
-		if HoldInfo.Username != "" {
-			properties["username"] = HoldInfo.Username
-		}
 	}
 
 	update := UpdateIPAMRecRequest{

@@ -88,7 +88,7 @@ func DataSourceIPAMRec() *schema.Resource {
 			"hold_info": &schema.Schema{
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
+				// MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"expiry_time": &schema.Schema{

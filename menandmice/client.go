@@ -91,7 +91,7 @@ type ErrorResponse struct {
 	} `json:"error"`
 }
 
-func (c *Mmclient) Get(result interface{}, path string, query map[string]string) error {
+func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}, filter map[string]string) error {
 
 	//TODO better error Message
 	var errorResponse ErrorResponse
@@ -100,9 +100,15 @@ func (c *Mmclient) Get(result interface{}, path string, query map[string]string)
 	request := c.R().SetError(&errorResponse)
 
 	if query != nil {
-
-		conditions := make([]string, 0, len(query))
 		for key, val := range query {
+
+			request = request.SetQueryParam(key, fmt.Sprintf("%v", val))
+		}
+	}
+	if filter != nil {
+
+		conditions := make([]string, 0, len(filter))
+		for key, val := range filter {
 			conditions = append(conditions, fmt.Sprintf("%s=%s", key, val))
 		}
 		querystring = strings.Join(conditions, "&")

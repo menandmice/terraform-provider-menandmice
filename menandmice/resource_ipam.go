@@ -1,7 +1,6 @@
 package menandmice
 
 import (
-	"net"
 	"terraform-provider-menandmice/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -164,14 +163,14 @@ func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 func readIPAMRecSchema(d *schema.ResourceData) IPAMRecord {
 
 	var holdInfo HoldInfo
-	// if holdInfoList, ok := d.GetOk("hold_info"); ok {
-	// 	holdInfoMap := holdInfoList.([]interface{})[0]
-	// 	holdInfoRead := holdInfoMap.(map[string]interface{})
-	// 	holdInfo = HoldInfo{
-	// 		Username:   holdInfoRead["username"].(string),
-	// 		ExpiryTime: holdInfoRead["expiry_time"].(string),
-	// 	}
-	// }
+	if holdInfoList, ok := d.GetOk("hold_info"); ok {
+		holdInfoMap := holdInfoList.([]interface{})[0]
+		holdInfoRead := holdInfoMap.(map[string]interface{})
+		holdInfo = HoldInfo{
+			Username:   holdInfoRead["username"].(string),
+			ExpiryTime: holdInfoRead["expiry_time"].(string),
+		}
+	}
 	var CustomProperties = make(map[string]string)
 	if customPropertiesRead, ok := d.GetOk("custom_properties"); ok {
 		for key, value := range customPropertiesRead.(map[string]interface{}) {
@@ -190,6 +189,8 @@ func readIPAMRecSchema(d *schema.ResourceData) IPAMRecord {
 		ExtraneousPTR: d.Get("extraneous_ptr").(bool),
 		Device:        tryGetString(d, "device"),
 		State:         tryGetString(d, "state"),
+		HoldInfo:      &holdInfo,
+
 		// Usage read only
 		IPAMProperties: IPAMProperties{
 			Claimed: d.Get("claimed").(bool),
@@ -198,7 +199,6 @@ func readIPAMRecSchema(d *schema.ResourceData) IPAMRecord {
 			// DHCPLeases
 			Interface:        tryGetString(d, "interface"),
 			CustomProperties: CustomProperties,
-			HoldInfo:         &holdInfo,
 			// CloudDeviceInfo // not inpleneted
 		},
 	}
@@ -245,14 +245,6 @@ func resourceIPAMRecCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIPAMRecUpdate(d *schema.ResourceData, m interface{}) error {
 
-	// TODO can't change read only property
-	// if d.HasChange("ref") || d.HasChange("adintegrated") ||
-	// 	d.HasChange("dnsviewref") || d.HasChange("dnsviewrefs") ||
-	// 	d.HasChange("authority") {
-	// 	// this can't never error can never happen because of "ForceNew: true," for these properties
-	// 	return diag.Errorf("can't change readonly property, of DNSZone")
-	// }
-
 	c := m.(*Mmclient)
 	ref := d.Id()
 	ipamrec := readIPAMRecSchema(d)
@@ -276,10 +268,4 @@ func resourceIPAMRecDelete(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId("")
 	return diags
-}
-func ipv6AddressDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	oldIP := net.ParseIP(old)
-	newIP := net.ParseIP(new)
-
-	return oldIP.Equal(newIP)
 }

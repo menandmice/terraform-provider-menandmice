@@ -45,15 +45,27 @@ resource menandmice_dns_record rec2 {
   type    = "A"
 }
 
-
 data menandmice_ipam_record ipam1 {
   address = "2001:db8:0:0:0:0:0:25"
 }
+
 resource menandmice_ipam_record ipam2 {
   address = "2001:db8:0:0:0:0:0:29"
   custom_properties = {"location":"here"}
   claimed = false
 
+}
+
+resource menandmice_dhcp_reservation reservation2 {
+  owner = "mandm.example.net."
+  name    = "test5"
+  client_identifier = "44:55:66:77:88:00"
+  servername = "testname"
+  next_server = "server1"
+  reservation_method = "ClientIdentifier"
+  # description = "test description"
+  addresses = ["172.16.17.5","172.16.17.6"]
+  ddns_hostname = "test"
 }
 
 output zone1{
@@ -72,10 +84,13 @@ output rec2 {
   value = menandmice_dns_record.rec2
 }
 
-
 output ipam1 {
   value = menandmice_ipam_record.ipam2
 }
+
 output ipam2 {
   value = menandmice_ipam_record.ipam2
+}
+output reservation2 {
+  value = menandmice_dhcp_reservation.reservation2
 }

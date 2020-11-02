@@ -215,7 +215,7 @@ func resourceDNSZoneCreate(d *schema.ResourceData, m interface{}) error {
 		for i, master := range mastersRead {
 			masters[i] = master.(string)
 		}
-	}
+	} // TODO error?
 
 	dnszone := readDNSZoneSchema(d)
 

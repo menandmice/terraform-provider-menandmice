@@ -30,7 +30,7 @@ type FindDNSRecResponse struct {
 
 func (c Mmclient) FindDNSRec(zone string, filter map[string]string) ([]DNSRecord, error) {
 	var re FindDNSRecResponse
-	err := c.Get(&re, "DNSZones/"+zone+"/DNSRecords", filter)
+	err := c.Get(&re, "DNSZones/"+zone+"/DNSRecords", nil, filter)
 	return re.Result.DNSRecords, err
 }
 
@@ -42,7 +42,7 @@ type ReadDNSRecResponse struct {
 
 func (c *Mmclient) ReadDNSRec(ref string) (DNSRecord, error) {
 	var re ReadDNSRecResponse
-	err := c.Get(&re, "dnsrecords/"+ref, nil)
+	err := c.Get(&re, "dnsrecords/"+ref, nil, nil)
 	return re.Result.DNSRecord, err
 }
 

@@ -97,6 +97,7 @@ func resourceDNSRec() *schema.Resource {
 		},
 	}
 }
+
 func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 
 	d.Set("ref", dnsrec.Ref)
