@@ -1,5 +1,7 @@
 package menandmice
 
+import "fmt"
+
 type IPAMRecord struct {
 	Ref     string    `json:"addrRef,omitempty"`
 	Address string    `json:"address"`
@@ -51,6 +53,17 @@ func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
 }
 
 func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
+
+	// we need to check if IPAMRecord not already exist. because creation is done via update/PUT
+
+	existingIPAMRecord, err := c.ReadIPAMRec(ipamRecord.Address)
+
+	if err != nil {
+		return err
+	}
+	if existingIPAMRecord.Claimed == true {
+		return fmt.Errorf("There already exist a DHCPReservations for: %v", existingIPAMRecord.Address)
+	}
 	return c.UpdateIPAMRec(ipamRecord.IPAMProperties, ipamRecord.Address)
 }
 

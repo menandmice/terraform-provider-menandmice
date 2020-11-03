@@ -52,8 +52,7 @@ data menandmice_ipam_record ipam1 {
 resource menandmice_ipam_record ipam2 {
   address = "2001:db8:0:0:0:0:0:29"
   custom_properties = {"location":"here"}
-  claimed = false
-
+  claimed = true
 }
 
 data menandmice_dhcp_reservation reservation1 {
