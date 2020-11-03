@@ -9,13 +9,11 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-
-	"encoding/json"
 )
 
-// Cfg config to construct client
 type Mmclient struct{ resty.Client }
 
+// Cfg config to construct client
 type Cfg struct {
 	MMEndpoint string
 	MMUsername string
@@ -91,13 +89,37 @@ type ErrorResponse struct {
 	} `json:"error"`
 }
 
+type RequestError struct {
+	HTTPCode   int
+	StatusCode int
+	ErrMessage string
+}
+
+func (r *RequestError) Error() string {
+	return fmt.Sprintf("HTTP code:%v: %v", r.HTTPCode, r.ErrMessage)
+}
+
+func ResponseError(response *resty.Response, errorResponse ErrorResponse) error {
+
+	if !response.IsSuccess() {
+		return &RequestError{
+			HTTPCode:   response.StatusCode(),
+			StatusCode: errorResponse.Error.Code,
+			ErrMessage: errorResponse.Error.Message,
+		}
+	}
+	return nil
+}
+
 func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}, filter map[string]string) error {
 
 	//TODO better error Message
 	var errorResponse ErrorResponse
 	var querystring string
 
-	request := c.R().SetError(&errorResponse)
+	request := c.R().
+		SetError(&errorResponse).
+		SetResult(&result)
 
 	if query != nil {
 		for key, val := range query {
@@ -121,18 +143,7 @@ func (c *Mmclient) Get(result interface{}, path string, query map[string]interfa
 		return err
 	}
 
-	if !r.IsSuccess() {
-		jsonError := r.Error().(*ErrorResponse)
-		return fmt.Errorf("HTTP error code:%v\n%v",
-			r.StatusCode(),
-			jsonError.Error.Message)
-	}
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(r.Body(), &result)
-
-	return err
+	return ResponseError(r, errorResponse)
 }
 
 func (c *Mmclient) Post(data interface{}, result interface{}, path string) error {
@@ -142,23 +153,14 @@ func (c *Mmclient) Post(data interface{}, result interface{}, path string) error
 	r, err := c.R().
 		SetBody(data).
 		SetError(&errorResponse).
+		SetResult(&result).
 		Post(path)
 
 	if err != nil {
 		return err
 	}
 
-	if !r.IsSuccess() {
-		return fmt.Errorf("HTTP error code:%v\n%v",
-			r.StatusCode(),
-			errorResponse.Error.Message)
-	}
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(r.Body(), &result)
-
-	return err
+	return ResponseError(r, errorResponse)
 }
 
 func (c *Mmclient) Delete(data interface{}, path string) error {
@@ -174,13 +176,7 @@ func (c *Mmclient) Delete(data interface{}, path string) error {
 		return err
 	}
 
-	if !r.IsSuccess() {
-		return fmt.Errorf("HTTP error code:%v\n%v",
-			r.StatusCode(),
-			errorResponse.Error.Message)
-	}
-
-	return err
+	return ResponseError(r, errorResponse)
 }
 
 func (c *Mmclient) Put(data interface{}, path string) error {
@@ -193,12 +189,5 @@ func (c *Mmclient) Put(data interface{}, path string) error {
 	if err != nil {
 		return err
 	}
-
-	if !r.IsSuccess() {
-		return fmt.Errorf("HTTP error code:%v\n%v",
-			r.StatusCode(),
-			errorResponse.Error.Message)
-	}
-
-	return err
+	return ResponseError(r, errorResponse)
 }

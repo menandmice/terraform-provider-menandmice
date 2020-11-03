@@ -1,5 +1,9 @@
 package menandmice
 
+const (
+	DNSZoneNotFound = 16544
+)
+
 type DNSZone struct {
 	Ref          string   `json:"ref,omitempty"`
 	AdIntegrated bool     `json:"adIntegrated"`
@@ -77,8 +81,13 @@ func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (string, err
 }
 
 func (c *Mmclient) DeleteDNSZone(ref string) error {
+	err := c.Delete(deleteRequest("DNSZone"), "DNSZones/"+ref)
 
-	return c.Delete(deleteRequest("DNSZone"), "DNSZones/"+ref)
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == DNSZoneNotFound {
+		//DNS Zone not found, so nothing to delete
+		return nil
+	}
+	return err
 }
 
 type UpdateDNSZoneRequest struct {
@@ -87,7 +96,7 @@ type UpdateDNSZoneRequest struct {
 	SaveComment       string `json:"saveComment"`
 	DeleteUnspecified bool   `json:"deleteUnspecified"`
 
-	// we cant use DNSZoneProperties for this because CustomProperties should be flattend first
+	// we can`t use DNSZoneProperties for this because CustomProperties should be flattend first
 	Properties map[string]interface{} `json:"properties"`
 }
 
