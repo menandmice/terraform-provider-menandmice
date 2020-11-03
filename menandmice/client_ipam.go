@@ -6,7 +6,7 @@ type IPAMRecord struct {
 	Ref     string    `json:"addrRef,omitempty"`
 	Address string    `json:"address"`
 	DNSHost []DNSHost `json:"dnsHosts,omitempty"`
-	// DHCPReservations          []??? `json:"dhcpReservations,omitempty"`
+	// DHCPReservations []DHCPReservation `json:"dhcpReservations,omitempty"`
 	// DHCPLeases []???  "dhcpLeases,omitempty"`
 	//TODO how to set DiscoveryType
 	DiscoveryType             string    `json:"discoveryType,omitempty"`

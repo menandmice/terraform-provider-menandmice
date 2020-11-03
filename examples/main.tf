@@ -54,6 +54,27 @@ resource menandmice_ipam_record ipam2 {
   claimed = true
 }
 
+resource menandmice_ipam_record ipam3 {
+  free_ip {
+    range = "172.16.17.0/24"
+  }
+  claimed = true
+}
+
+# // TODO can i make it so that this is possible
+# locals {
+#   free_ip_range ={
+#     range = "172.16.17.0/24"
+#     start_at = "172.16.17.100"
+#     ping = true
+#
+#   }
+# }
+#
+# resource menandmice_ipam_record ipam4 {
+#   free_ip = local.free_ip_range
+# }
+
 data menandmice_dhcp_reservation reservation1 {
    name = "test"
 }
@@ -93,6 +114,14 @@ output ipam1 {
 output ipam2 {
   value = menandmice_ipam_record.ipam2
 }
+
+output ipam3 {
+  value = menandmice_ipam_record.ipam3
+}
+
+# output ipam4 {
+#   value = menandmice_ipam_record.ipam4
+# }
 output reservation1 {
   value = data.menandmice_dhcp_reservation.reservation1
 }

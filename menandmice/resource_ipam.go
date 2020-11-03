@@ -1,10 +1,11 @@
 package menandmice
 
 import (
+	"bytes"
 	"context"
+	"net"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -21,14 +22,61 @@ func resourceIPAMRec() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"free_ip": &schema.Schema{
+				Type:         schema.TypeList,
+				Optional:     true,
+				ExactlyOneOf: []string{"free_ip", "address"},
+				MaxItems:     1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"range": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"start_at": &schema.Schema{
+							Type:     schema.TypeString,
+							Default:  "",
+							Optional: true,
+							// TODO validate that its valide ip in the range of range
+						},
+						"ping": &schema.Schema{
+							Type:     schema.TypeBool,
+							Default:  false,
+							Optional: true,
+						},
+						"exclude_dhcp": &schema.Schema{
+							Type:     schema.TypeBool,
+							Default:  false,
+							Optional: true,
+						},
+
+						"temporary_claim_time": &schema.Schema{
+							Type:         schema.TypeInt,
+							Default:      60,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(0, 300),
+						},
+					},
+				},
+			},
 			"address": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				ExactlyOneOf: []string{"free_ip", "address"},
+				Optional:     true,
 				ValidateFunc: validation.Any(
 					validation.IsIPv4Address,
 					validation.IsIPv6Address),
-				DiffSuppressFunc: ipv6AddressDiffSuppress,
-				ForceNew:         true,
+				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
+					if ipv6AddressDiffSuppress(key, old, new, d) {
+						return true
+					}
+					if freeIPRead, ok := d.GetOk("free_ip"); ok {
+
+						return inFreeIPRange(readFreeIPMap(freeIPRead), old)
+					}
+					return false
+				},
+				ForceNew: true,
 			},
 			"claimed": &schema.Schema{
 				Type:     schema.TypeBool,
@@ -126,6 +174,30 @@ func resourceIPAMRec() *schema.Resource {
 	}
 }
 
+// TODO write test for this
+func inFreeIPRange(freeIPMap map[string]interface{}, ipStr string) bool {
+	_, ipnet, err := net.ParseCIDR(freeIPMap["range"].(string))
+	if err != nil {
+		return false
+	}
+	ip := net.ParseIP(ipStr)
+	if ip == nil || ipnet.Contains(ip) == false {
+		return false
+	}
+	if minimumIPStr := freeIPMap["start_at"].(string); minimumIPStr != "" {
+
+		minimumIP := net.ParseIP(minimumIPStr)
+		if minimumIP == nil {
+			return false
+		}
+
+		return bytes.Compare(ip, minimumIP) >= 0
+
+	}
+
+	return true
+
+}
 func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 
 	d.Set("ref", ipamrec.Ref)
@@ -223,12 +295,38 @@ func resourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interface{
 	return diags
 }
 
+func readFreeIPMap(freeIPRead interface{}) map[string]interface{} {
+
+	freeIPReadList := freeIPRead.([]interface{})[0]
+	return freeIPReadList.(map[string]interface{})
+}
 func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
 	client := m.(*Mmclient)
 
+	if _, ok := d.GetOk("address"); !ok {
+		freeIPRead, ok := d.GetOk("free_ip")
+		if !ok {
+			return diag.Errorf("could not read address or free_ip")
+		}
+
+		freeIPMap := readFreeIPMap(freeIPRead)
+		ipRange := freeIPMap["range"].(string)
+		startIP := freeIPMap["start_at"].(string)
+		ping := freeIPMap["ping"].(bool)
+		excludeDHCP := freeIPMap["exclude_dhcp"].(bool)
+		temporaryClaimTime := freeIPMap["temporary_claim_time"].(int)
+
+		address, err := client.NextFreeAddress(ipRange, startIP, ping, excludeDHCP, temporaryClaimTime)
+
+		if err != nil {
+			return diag.Errorf("could not read Not find a free ipaddress in %s", ipRange)
+		}
+
+		d.Set("address", address)
+	}
 	ipamrec := readIPAMRecSchema(d)
 
 	err := client.CreateIPAMRec(ipamrec)
