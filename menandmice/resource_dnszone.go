@@ -1,19 +1,21 @@
 package menandmice
 
 import (
+	"context"
 	"regexp"
-	"terraform-provider-menandmice/diag"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceDNSZone() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDNSZoneCreate,
-		Read:   resourceDNSZoneRead,
-		Update: resourceDNSZoneUpdate,
-		Delete: resourceDNSZoneDelete,
+		CreateContext: resourceDNSZoneCreate,
+		ReadContext:   resourceDNSZoneRead,
+		UpdateContext: resourceDNSZoneUpdate,
+		DeleteContext: resourceDNSZoneDelete,
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -206,8 +208,8 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 	return dnszone
 }
 
-func resourceDNSZoneCreate(d *schema.ResourceData, m interface{}) error {
-	c := m.(*Mmclient)
+func resourceDNSZoneCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*Mmclient)
 
 	var masters []string
 	if mastersRead, ok := d.Get("masters").([]interface{}); ok {
@@ -219,24 +221,24 @@ func resourceDNSZoneCreate(d *schema.ResourceData, m interface{}) error {
 
 	dnszone := readDNSZoneSchema(d)
 
-	objRef, err := c.CreateDNSZone(dnszone, masters)
+	objRef, err := client.CreateDNSZone(dnszone, masters)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.SetId(objRef)
 
-	return resourceDNSZoneRead(d, m)
+	return resourceDNSZoneRead(c, d, m)
 
 }
 
-func resourceDNSZoneRead(d *schema.ResourceData, m interface{}) error {
+func resourceDNSZoneRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 
-	dnszone, err := c.ReadDNSZone(d.Id())
+	dnszone, err := client.ReadDNSZone(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -245,7 +247,7 @@ func resourceDNSZoneRead(d *schema.ResourceData, m interface{}) error {
 	return diags
 }
 
-func resourceDNSZoneUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceDNSZoneUpdate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	//can't change read only property
 	if d.HasChange("ref") || d.HasChange("adintegrated") ||
@@ -254,24 +256,24 @@ func resourceDNSZoneUpdate(d *schema.ResourceData, m interface{}) error {
 		// this can't never error can never happen because of "ForceNew: true," for these properties
 		return diag.Errorf("can't change readonly property, of DNSZone")
 	}
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 	ref := d.Id()
 	dnszone := readDNSZoneSchema(d)
 
-	err := c.UpdateDNSZone(dnszone.DNSZoneProperties, ref)
+	err := client.UpdateDNSZone(dnszone.DNSZoneProperties, ref)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	return resourceDNSZoneRead(d, m)
+	return resourceDNSZoneRead(c, d, m)
 }
 
-func resourceDNSZoneDelete(d *schema.ResourceData, m interface{}) error {
+func resourceDNSZoneDelete(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 	var diags diag.Diagnostics
 	ref := d.Id()
-	err := c.DeleteDNSZone(ref)
+	err := client.DeleteDNSZone(ref)
 	if err != nil {
 		return diag.FromErr(err)
 	}

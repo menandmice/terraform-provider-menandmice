@@ -1,17 +1,19 @@
 package menandmice
 
 import (
+	"context"
 	"strconv"
-	"terraform-provider-menandmice/diag"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func DataSourceIPAMRec() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIPAMRecRead,
+		ReadContext: dataSourceIPAMRecRead,
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -116,12 +118,12 @@ func DataSourceIPAMRec() *schema.Resource {
 	}
 }
 
-func dataSourceIPAMRecRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 
-	ipam, err := c.ReadIPAMRec(d.Get("address").(string))
+	ipam, err := client.ReadIPAMRec(d.Get("address").(string))
 
 	if err != nil {
 		return diag.FromErr(err)

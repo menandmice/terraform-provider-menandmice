@@ -1,18 +1,20 @@
 package menandmice
 
 import (
-	"terraform-provider-menandmice/diag"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceIPAMRec() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIPAMRecCreate,
-		Read:   resourceIPAMRecRead,
-		Update: resourceIPAMRecUpdate,
-		Delete: resourceIPAMRecDelete,
+		CreateContext: resourceIPAMRecCreate,
+		ReadContext:   resourceIPAMRecRead,
+		UpdateContext: resourceIPAMRecUpdate,
+		DeleteContext: resourceIPAMRecDelete,
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -114,7 +116,7 @@ func resourceIPAMRec() *schema.Resource {
 			// },
 
 			"usage": &schema.Schema{
-				Type:     schema.TypeBool,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
@@ -143,7 +145,7 @@ func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 	d.Set("interface", ipamrec.Interface)
 	d.Set("ptr_status", ipamrec.PTRStatus)
 	d.Set("extraneous_ptr", ipamrec.ExtraneousPTR)
-	d.Set("CustomProperties", ipamrec.CustomProperties)
+	d.Set("custom_properties", ipamrec.CustomProperties)
 
 	d.Set("state", ipamrec.State)
 
@@ -205,14 +207,14 @@ func readIPAMRecSchema(d *schema.ResourceData) IPAMRecord {
 	return ipamrec
 }
 
-func resourceIPAMRecRead(d *schema.ResourceData, m interface{}) error {
+func resourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 
-	ipamrec, err := c.ReadIPAMRec(d.Id())
+	ipamrec, err := client.ReadIPAMRec(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -221,48 +223,51 @@ func resourceIPAMRecRead(d *schema.ResourceData, m interface{}) error {
 	return diags
 }
 
-func resourceIPAMRecCreate(d *schema.ResourceData, m interface{}) error {
-	c := m.(*Mmclient)
+func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
+	var diags diag.Diagnostics
+
+	client := m.(*Mmclient)
 
 	ipamrec := readIPAMRecSchema(d)
 
-	err := c.CreateIPAMRec(ipamrec)
+	err := client.CreateIPAMRec(ipamrec)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(ipamrec.Address)
-	err = resourceIPAMRecRead(d, m)
+	diags = resourceIPAMRecRead(c, d, m)
 
-	if err != nil {
-		return diag.FromErr(err)
+	if diags != nil {
+		return diags
 	}
 	d.SetId(d.Get("ref").(string))
-	return err
+	return diags
 
 }
 
-func resourceIPAMRecUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIPAMRecUpdate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 	ref := d.Id()
 	ipamrec := readIPAMRecSchema(d)
 
-	err := c.UpdateIPAMRec(ipamrec.IPAMProperties, ref)
+	err := client.UpdateIPAMRec(ipamrec.IPAMProperties, ref)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	return resourceIPAMRecRead(d, m)
+	return resourceIPAMRecRead(c, d, m)
 }
 
-func resourceIPAMRecDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIPAMRecDelete(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 	var diags diag.Diagnostics
 	ref := d.Id()
-	err := c.DeleteIPAMRec(ref)
+	err := client.DeleteIPAMRec(ref)
 	if err != nil {
 		return diag.FromErr(err)
 	}

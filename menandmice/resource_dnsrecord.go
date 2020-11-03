@@ -1,21 +1,22 @@
 package menandmice
 
 import (
+	"context"
 	"regexp"
 	"strconv"
 
-	"terraform-provider-menandmice/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceDNSRec() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDNSRecCreate,
-		Read:   resourceDNSRecRead,
-		Update: resourceDNSRecUpdate,
-		Delete: resourceDNSRecDelete,
+		CreateContext: resourceDNSRecCreate,
+		ReadContext:   resourceDNSRecRead,
+		UpdateContext: resourceDNSRecUpdate,
+		DeleteContext: resourceDNSRecDelete,
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -145,30 +146,30 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 	return dnsrec
 }
 
-func resourceDNSRecCreate(d *schema.ResourceData, m interface{}) error {
-	c := m.(*Mmclient)
+func resourceDNSRecCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*Mmclient)
 
 	dnsrec := readDNSRecSchema(d)
 
-	objRef, err := c.CreateDNSRec(dnsrec)
+	objRef, err := client.CreateDNSRec(dnsrec)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.SetId(objRef)
 
-	return resourceDNSRecRead(d, m)
+	return resourceDNSRecRead(c, d, m)
 
 }
 
-func resourceDNSRecRead(d *schema.ResourceData, m interface{}) error {
+func resourceDNSRecRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 
-	dnsrec, err := c.ReadDNSRec(d.Id())
+	dnsrec, err := client.ReadDNSRec(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -177,25 +178,25 @@ func resourceDNSRecRead(d *schema.ResourceData, m interface{}) error {
 	return diags
 }
 
-func resourceDNSRecUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceDNSRecUpdate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 	ref := d.Id()
 	dnsrec := readDNSRecSchema(d)
-	err := c.UpdateDNSRec(dnsrec.DNSProperties, ref)
+	err := client.UpdateDNSRec(dnsrec.DNSProperties, ref)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	return resourceDNSRecRead(d, m)
+	return resourceDNSRecRead(c, d, m)
 }
 
-func resourceDNSRecDelete(d *schema.ResourceData, m interface{}) error {
+func resourceDNSRecDelete(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 	var diags diag.Diagnostics
 	ref := d.Id()
-	err := c.DeleteDNSRec(ref)
+	err := client.DeleteDNSRec(ref)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -1,18 +1,20 @@
 package menandmice
 
 import (
-	"terraform-provider-menandmice/diag"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceDHCPReservation() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDHCPResvationCreate,
-		Read:   resourceDHCPResvationRead,
-		Update: resourceDHCPResvationUpdate,
-		Delete: resourceDHCPResvationDelete,
+		CreateContext: resourceDHCPResvationCreate,
+		ReadContext:   resourceDHCPResvationRead,
+		UpdateContext: resourceDHCPResvationUpdate,
+		DeleteContext: resourceDHCPResvationDelete,
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -137,14 +139,14 @@ func readDHCPReservationSchema(d *schema.ResourceData) DHCPReservation {
 	return dhcpReservation
 }
 
-func resourceDHCPResvationRead(d *schema.ResourceData, m interface{}) error {
+func resourceDHCPResvationRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 
-	dhcpReservation, err := c.ReadDHCPReservation(d.Id())
+	dhcpReservation, err := client.ReadDHCPReservation(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -153,43 +155,43 @@ func resourceDHCPResvationRead(d *schema.ResourceData, m interface{}) error {
 	return diags
 }
 
-func resourceDHCPResvationCreate(d *schema.ResourceData, m interface{}) error {
-	c := m.(*Mmclient)
+func resourceDHCPResvationCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*Mmclient)
 
 	dhcpReservation := readDHCPReservationSchema(d)
 
-	ref, err := c.CreateDHCPReservation(dhcpReservation, tryGetString(d, "owner"))
+	ref, err := client.CreateDHCPReservation(dhcpReservation, tryGetString(d, "owner"))
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(ref)
-	return resourceDHCPResvationRead(d, m)
+	return resourceDHCPResvationRead(c, d, m)
 
 }
 
-func resourceDHCPResvationUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceDHCPResvationUpdate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 	ref := d.Id()
 	dhcpReservation := readDHCPReservationSchema(d)
-	err := c.UpdateDHCPReservation(dhcpReservation.DHCPReservationPropertie, ref)
+	err := client.UpdateDHCPReservation(dhcpReservation.DHCPReservationPropertie, ref)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	return resourceDHCPResvationRead(d, m)
+	return resourceDHCPResvationRead(c, d, m)
 }
 
-func resourceDHCPResvationDelete(d *schema.ResourceData, m interface{}) error {
+func resourceDHCPResvationDelete(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 
 	var diags diag.Diagnostics
 
 	ref := d.Id()
-	err := c.DeleteDHCPReservation(ref)
+	err := client.DeleteDHCPReservation(ref)
 	if err != nil {
 		return diag.FromErr(err)
 	}

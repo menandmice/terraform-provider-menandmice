@@ -1,9 +1,11 @@
 package menandmice
 
 import (
-	"terraform-provider-menandmice/diag"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider -
@@ -58,10 +60,10 @@ func Provider() *schema.Provider {
 			"menandmice_dns_zone":    DataSourceDNSZone(),
 			"menandmice_ipam_record": DataSourceIPAMRec(),
 		},
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(c context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 	var diags diag.Diagnostics
 
@@ -74,13 +76,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	if params.MMEndpoint == "" {
-		diags = diag.Append(diags, diag.Errorf("REST API endpoint set for provider menandmice."))
+		diags = append(diags, diag.Errorf("REST API endpoint set for provider menandmice.")...)
 	}
 	if params.MMUsername == "" {
-		diags = diag.Append(diags, diag.Errorf("No username set for provider menandmice."))
+		diags = append(diags, diag.Errorf("No username set for provider menandmice.")...)
 	}
 	if params.MMPassword == "" {
-		diags = diag.Append(diags, diag.Errorf("No password set for provider menandmice."))
+		diags = append(diags, diag.Errorf("No password set for provider menandmice.")...)
 	}
 	if diags != nil {
 		return nil, diags

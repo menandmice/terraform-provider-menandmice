@@ -1,19 +1,21 @@
 package menandmice
 
 import (
+	"context"
 	"regexp"
 	"strconv"
-	"terraform-provider-menandmice/diag"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // schema for DNSZone resource
 func DataSourceDNSZone() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDNSZoneRead,
+		ReadContext: dataSourceDNSZoneRead,
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -101,13 +103,13 @@ func DataSourceDNSZone() *schema.Resource {
 	}
 }
 
-func dataSourceDNSZoneRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceDNSZoneRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
-	c := m.(*Mmclient)
+	client := m.(*Mmclient)
 
 	dnsZoneRef := tryGetString(d, "server") + ":" + tryGetString(d, "view") + ":" + tryGetString(d, "name")
-	dnszone, err := c.ReadDNSZone(dnsZoneRef)
+	dnszone, err := client.ReadDNSZone(dnsZoneRef)
 
 	if err != nil {
 		return diag.FromErr(err)
