@@ -56,6 +56,10 @@ resource menandmice_ipam_record ipam2 {
 
 }
 
+data menandmice_dhcp_reservation reservation1 {
+   name = "test"
+}
+
 resource menandmice_dhcp_reservation reservation2 {
   owner = "mandm.example.net."
   name    = "test5"
@@ -90,6 +94,9 @@ output ipam1 {
 
 output ipam2 {
   value = menandmice_ipam_record.ipam2
+}
+output reservation1 {
+  value = data.menandmice_dhcp_reservation.reservation1
 }
 output reservation2 {
   value = menandmice_dhcp_reservation.reservation2

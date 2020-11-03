@@ -24,16 +24,15 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
 				),
 			},
-			// {
-			// 	Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, "mandm.example.com."),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckResourceExists("menandmice_dns_zone.testzone"),
-			// 	),
-			// },
+			{
+				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, "mandm.example.com."),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
+				),
+			},
 
 			// TODO test minimal parameters,
 			// TODO test with all parameters set to non default
-			// TODO test update, and recreate
 		},
 	})
 }

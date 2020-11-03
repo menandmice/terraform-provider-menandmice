@@ -56,9 +56,10 @@ func Provider() *schema.Provider {
 			"menandmice_dhcp_reservation": resourceDHCPReservation(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"menandmice_dns_record":  DataSourceDNSRec(),
-			"menandmice_dns_zone":    DataSourceDNSZone(),
-			"menandmice_ipam_record": DataSourceIPAMRec(),
+			"menandmice_dns_record":       DataSourceDNSRec(),
+			"menandmice_dns_zone":         DataSourceDNSZone(),
+			"menandmice_ipam_record":      DataSourceIPAMRec(),
+			"menandmice_dhcp_reservation": DataSourceDHCPReservation(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
