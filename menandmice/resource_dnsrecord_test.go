@@ -33,7 +33,6 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 				),
 				// TODO test minimal parameters,
 				// TODO test with all parameters set to non default
-				// TODO test update, and recreate with change zone
 			},
 		},
 	})

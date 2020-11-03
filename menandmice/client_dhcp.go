@@ -1,22 +1,22 @@
 package menandmice
 
 type DHCPReservation struct {
-	Ref      string `json:"ref,omitempty"`
-	OwnerRef string `json:"ownerRef,omitempty"`
+	Ref               string   `json:"ref,omitempty"`
+	OwnerRef          string   `json:"ownerRef,omitempty"`
+	ReservationMethod string   `json:"reservationMethod,omitempty"`
+	Addresses         []string `json:"addresses,omitempty"`
 	DHCPReservationPropertie
 }
 
 type DHCPReservationPropertie struct {
-	Name              string   `json:"name"`
-	Type              string   `json:"type,omitempty"`
-	Description       string   `json:"description,omitempty"`
-	ClientIdentifier  string   `json:"clientIdentifier,omitempty"`
-	ReservationMethod string   `json:"reservationMethod,omitempty"`
-	Addresses         []string `json:"addresses,omitempty"`
-	DDNSHostName      string   `json:"ddnsHostName,omitempty"`
-	Filename          string   `json:"filename,omitempty"`
-	ServerName        string   `json:"serverName,omitempty"`
-	NextServer        string   `json:"nextServer,omitempty"`
+	Name             string `json:"name"`
+	Type             string `json:"type,omitempty"`
+	Description      string `json:"description,omitempty"`
+	ClientIdentifier string `json:"clientIdentifier,omitempty"`
+	DDNSHostName     string `json:"ddnsHostName,omitempty"`
+	Filename         string `json:"filename,omitempty"`
+	ServerName       string `json:"serverName,omitempty"`
+	NextServer       string `json:"nextServer,omitempty"`
 }
 
 type ReadDHCPReservationResponse struct {

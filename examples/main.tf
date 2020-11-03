@@ -13,7 +13,6 @@ provider menandmice {
   tls_verify= false
 }
 
-
 data menandmice_dns_zone zone1 {
   name = "rens.nl."
   server = "mandm.example.net."

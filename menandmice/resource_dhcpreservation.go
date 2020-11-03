@@ -47,6 +47,7 @@ func resourceDHCPReservation() *schema.Resource {
 			"reservation_method": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				Default:  "HardwareAddress", // TODO maybe ClientIdentifier is better for terraform
 				ValidateFunc: validation.StringInSlice([]string{
 					"HardwareAddress", "ClientIdentifier",
@@ -54,6 +55,7 @@ func resourceDHCPReservation() *schema.Resource {
 			},
 			"addresses": &schema.Schema{
 				Type:     schema.TypeList,
+				ForceNew: true,
 				Required: true,
 				MinItems: 1,
 				Elem: &schema.Schema{
@@ -121,19 +123,19 @@ func readDHCPReservationSchema(d *schema.ResourceData) DHCPReservation {
 		addresses[i] = address.(string)
 	}
 	dhcpReservation := DHCPReservation{
-		Ref:      tryGetString(d, "ref"),
-		OwnerRef: tryGetString(d, "owner_ref"),
+		Ref:               tryGetString(d, "ref"),
+		OwnerRef:          tryGetString(d, "owner_ref"),
+		ReservationMethod: tryGetString(d, "reservation_method"),
+		Addresses:         addresses,
 		DHCPReservationPropertie: DHCPReservationPropertie{
-			Name:              tryGetString(d, "name"),
-			Type:              tryGetString(d, "type"),
-			Description:       tryGetString(d, "description"),
-			ClientIdentifier:  tryGetString(d, "client_identifier"),
-			ReservationMethod: tryGetString(d, "reservation_method"),
-			Addresses:         addresses,
-			DDNSHostName:      tryGetString(d, "ddns_hostname"),
-			Filename:          tryGetString(d, "filename"),
-			ServerName:        tryGetString(d, "servername"),
-			NextServer:        tryGetString(d, "next_server"),
+			Name:             tryGetString(d, "name"),
+			Type:             tryGetString(d, "type"),
+			Description:      tryGetString(d, "description"),
+			ClientIdentifier: tryGetString(d, "client_identifier"),
+			DDNSHostName:     tryGetString(d, "ddns_hostname"),
+			Filename:         tryGetString(d, "filename"),
+			ServerName:       tryGetString(d, "servername"),
+			NextServer:       tryGetString(d, "next_server"),
 		},
 	}
 	return dhcpReservation
