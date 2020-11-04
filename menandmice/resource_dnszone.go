@@ -242,7 +242,12 @@ func resourceDNSZoneRead(c context.Context, d *schema.ResourceData, m interface{
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeDNSZoneSchema(d, dnszone)
+	if dnszone == nil {
+		d.SetId("")
+		return diags
+	}
+
+	writeDNSZoneSchema(d, *dnszone)
 
 	return diags
 }

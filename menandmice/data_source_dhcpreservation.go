@@ -79,11 +79,17 @@ func dataSourceDHCPResvationRead(c context.Context, d *schema.ResourceData, m in
 	var diags diag.Diagnostics
 	client := m.(*Mmclient)
 
-	dhcpReservation, err := client.ReadDHCPReservation(d.Get("name").(string))
+	name := d.Get("name").(string)
+	dhcpReservation, err := client.ReadDHCPReservation(name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeDHCPReservationSchema(d, dhcpReservation)
+
+	if dhcpReservation == nil {
+		return diag.Errorf("dhcp_reservation %v does not exist", name)
+	}
+
+	writeDHCPReservationSchema(d, *dhcpReservation)
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags

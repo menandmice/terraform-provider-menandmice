@@ -173,7 +173,11 @@ func resourceDNSRecRead(c context.Context, d *schema.ResourceData, m interface{}
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeDNSRecSchema(d, dnsrec)
+	if dnsrec == nil {
+		d.SetId("")
+		return diags
+	}
+	writeDNSRecSchema(d, *dnsrec)
 
 	return diags
 }

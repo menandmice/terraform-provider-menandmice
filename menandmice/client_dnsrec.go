@@ -40,10 +40,14 @@ type ReadDNSRecResponse struct {
 	} `json:"result"`
 }
 
-func (c *Mmclient) ReadDNSRec(ref string) (DNSRecord, error) {
+func (c *Mmclient) ReadDNSRec(ref string) (*DNSRecord, error) {
 	var re ReadDNSRecResponse
 	err := c.Get(&re, "dnsrecords/"+ref, nil, nil)
-	return re.Result.DNSRecord, err
+
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
+		return nil, nil
+	}
+	return &re.Result.DNSRecord, err
 }
 
 type CreateDNSRecResponse struct {
@@ -90,7 +94,11 @@ func (c *Mmclient) CreateDNSRec(dnsrec DNSRecord) (string, error) {
 
 func (c *Mmclient) DeleteDNSRec(ref string) error {
 
-	return c.Delete(deleteRequest("DNSRecord"), "DNSRecords/"+ref)
+	err := c.Delete(deleteRequest("DNSRecord"), "DNSRecords/"+ref)
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
+		return nil
+	}
+	return err
 }
 
 type UpdateDNSRecRequest struct {

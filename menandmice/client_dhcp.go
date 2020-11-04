@@ -25,10 +25,14 @@ type ReadDHCPReservationResponse struct {
 	} `json:"result"`
 }
 
-func (c *Mmclient) ReadDHCPReservation(ref string) (DHCPReservation, error) {
+func (c *Mmclient) ReadDHCPReservation(ref string) (*DHCPReservation, error) {
 	var re ReadDHCPReservationResponse
 	err := c.Get(&re, "DHCPReservations/"+ref, nil, nil)
-	return re.Result.DHCPReservation, err
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
+		//DHCPReservationNotFound not found
+		return nil, nil
+	}
+	return &re.Result.DHCPReservation, err
 }
 
 type CreateDHCPReservationRequest struct {
@@ -57,7 +61,12 @@ func (c *Mmclient) CreateDHCPReservation(dhcpReservation DHCPReservation, owner 
 
 func (c *Mmclient) DeleteDHCPReservation(ref string) error {
 
-	return c.Delete(deleteRequest("DHCPReservation"), "DHCPReservations/"+ref)
+	err := c.Delete(deleteRequest("DHCPReservation"), "DHCPReservations/"+ref)
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
+		//DHCPReservationNotFound not found, so nothing to delete
+		return nil
+	}
+	return err
 }
 
 type UpdateDHCPReservationRequest struct {

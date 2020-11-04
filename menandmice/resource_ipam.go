@@ -78,6 +78,8 @@ func resourceIPAMRec() *schema.Resource {
 				},
 				ForceNew: true,
 			},
+			// TODO might not be a good idea to make this configerable.
+			// What does it mean to delete unclaimed iprecord
 			"claimed": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -91,12 +93,13 @@ func resourceIPAMRec() *schema.Resource {
 			// },
 			"discovery_type": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "None",
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"None", "Ping", "ARP", "Lease", "Custom",
-				}, false),
+				Computed: true,
+				// Optional: true,
+				// Default:  "None",
+				// ForceNew: true,
+				// ValidateFunc: validation.StringInSlice([]string{
+				// 	"None", "Ping", "ARP", "Lease", "Custom",
+				// }, false),
 			},
 			"last_seen_date": &schema.Schema{
 				Type:     schema.TypeString,
@@ -139,9 +142,6 @@ func resourceIPAMRec() *schema.Resource {
 			"state": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
-				// ValidateFunc: validation.StringInSlice([]string{
-				// 	"Free", "Assigned", "Claimed", "Pending", "Held",
-				// }, false),
 			},
 			// "hold_info": &schema.Schema{
 			// 	Type:     schema.TypeList,

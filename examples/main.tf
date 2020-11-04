@@ -30,7 +30,7 @@ resource menandmice_dns_zone zone2{
 }
 
 data menandmice_dns_record rec1 {
-  name = "test2"
+  name = "test"
   zone = "rens.nl."
   server = "mandm.example.net."
   type = "A"
@@ -108,7 +108,7 @@ output rec2 {
 }
 
 output ipam1 {
-  value = menandmice_ipam_record.ipam2
+  value = data.menandmice_ipam_record.ipam1
 }
 
 output ipam2 {
@@ -122,6 +122,7 @@ output ipam3 {
 # output ipam4 {
 #   value = menandmice_ipam_record.ipam4
 # }
+
 output reservation1 {
   value = data.menandmice_dhcp_reservation.reservation1
 }

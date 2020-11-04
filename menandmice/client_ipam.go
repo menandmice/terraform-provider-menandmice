@@ -52,6 +52,8 @@ func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
 	return re.Result.IPAMRecord, err
 }
 
+// TODO because this will only set IPAMProperties. and ignore other. maybe change to :
+// func (c *Mmclient) CreateIPAMRec(ipamProperites IPAMProperties,rec string) error {
 func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
 
 	// we need to check if IPAMRecord not already exist. because creation is done via update/PUT

@@ -108,14 +108,24 @@ func dataSourceDNSZoneRead(c context.Context, d *schema.ResourceData, m interfac
 	var diags diag.Diagnostics
 	client := m.(*Mmclient)
 
-	dnsZoneRef := tryGetString(d, "server") + ":" + tryGetString(d, "view") + ":" + tryGetString(d, "name")
+	server := tryGetString(d, "server")
+	view := tryGetString(d, "view")
+	name := tryGetString(d, "name")
+	dnsZoneRef := server + ":" + view + ":" + name
 	dnszone, err := client.ReadDNSZone(dnsZoneRef)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	writeDNSZoneSchema(d, dnszone)
+	if dnszone == nil {
+		if view == "" {
+			return diag.Errorf("dnszone %v does not exist on server %v", name, server)
+		} else {
+			return diag.Errorf("dnszone %v does not exist in view %v on %v", name, view, server)
+		}
+	}
+	writeDNSZoneSchema(d, *dnszone)
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	return diags

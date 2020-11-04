@@ -11,6 +11,10 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+const (
+	ResourceNotFound = 16544
+)
+
 type Mmclient struct{ resty.Client }
 
 // Cfg config to construct client

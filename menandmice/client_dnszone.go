@@ -1,9 +1,5 @@
 package menandmice
 
-const (
-	DNSZoneNotFound = 16544
-)
-
 type DNSZone struct {
 	Ref          string   `json:"ref,omitempty"`
 	AdIntegrated bool     `json:"adIntegrated"`
@@ -51,10 +47,14 @@ type ReadDNSZoneResponse struct {
 	} `json:"result"`
 }
 
-func (c Mmclient) ReadDNSZone(ref string) (DNSZone, error) {
+func (c Mmclient) ReadDNSZone(ref string) (*DNSZone, error) {
 	var re ReadDNSZoneResponse
 	err := c.Get(&re, "DNSZones/"+ref, nil, nil)
-	return re.Result.DNSZone, err
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
+		return nil, nil
+	}
+
+	return &re.Result.DNSZone, err
 }
 
 type CreateDNSZoneRequest struct {
@@ -83,7 +83,7 @@ func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (string, err
 func (c *Mmclient) DeleteDNSZone(ref string) error {
 	err := c.Delete(deleteRequest("DNSZone"), "DNSZones/"+ref)
 
-	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == DNSZoneNotFound {
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		//DNS Zone not found, so nothing to delete
 		return nil
 	}

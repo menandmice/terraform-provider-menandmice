@@ -152,7 +152,11 @@ func resourceDHCPResvationRead(c context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeDHCPReservationSchema(d, dhcpReservation)
+	if dhcpReservation == nil {
+		d.SetId("")
+		return diags
+	}
+	writeDHCPReservationSchema(d, *dhcpReservation)
 
 	return diags
 }
