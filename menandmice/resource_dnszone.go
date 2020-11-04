@@ -161,10 +161,12 @@ func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
 
 func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 
-	dnsViewRefsRead := d.Get("dnsviewrefs").(*schema.Set).List() //TODO check succes
-	var dnsViewRefs = make([]string, len(dnsViewRefsRead))
-	for i, view := range dnsViewRefsRead {
-		dnsViewRefs[i] = view.(string)
+	if dnsViewRefsRead, ok := d.GetOk("dnsviewrefs"); ok {
+		dnsViewRefList := dnsViewRefsRead.(*schema.Set).List()
+		var dnsViewRefs = make([]string, len(dnsViewRefList))
+		for i, view := range dnsViewRefList {
+			dnsViewRefs[i] = view.(string)
+		}
 	}
 
 	var CustomProperties = make(map[string]string)
@@ -217,7 +219,9 @@ func resourceDNSZoneCreate(c context.Context, d *schema.ResourceData, m interfac
 		for i, master := range mastersRead {
 			masters[i] = master.(string)
 		}
-	} // TODO error?
+	} else {
+		return diag.Errorf("Could not read masters")
+	}
 
 	dnszone := readDNSZoneSchema(d)
 

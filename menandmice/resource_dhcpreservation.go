@@ -117,7 +117,7 @@ func writeDHCPReservationSchema(d *schema.ResourceData, dhcpReservation DHCPRese
 
 func readDHCPReservationSchema(d *schema.ResourceData) DHCPReservation {
 
-	addressesRead := d.Get("addresses").([]interface{}) //TODO check succes
+	addressesRead := d.Get("addresses").([]interface{})
 	var addresses = make([]string, len(addressesRead))
 	for i, address := range addressesRead {
 		addresses[i] = address.(string)

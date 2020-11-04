@@ -75,8 +75,6 @@ func (c *Mmclient) CreateDNSRec(dnsrec DNSRecord) (string, error) {
 	var re CreateDNSRecResponse
 	err := c.Post(postcreate, &re, "DNSRecords")
 
-	// TODO if dnsZoneRef does not exit you can confusing error "Missing object reference." give better messages
-
 	if err != nil {
 		return objRef, err
 	}
