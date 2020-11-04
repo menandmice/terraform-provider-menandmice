@@ -105,17 +105,19 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 	d.Set("name", dnsrec.Name)
 	d.Set("type", dnsrec.Rectype)
 	d.Set("data", dnsrec.Data)
-	if dnsrec.Ttl != nil {
-		ttl, err := strconv.Atoi(*dnsrec.Ttl)
+	if dnsrec.Ttl != "" {
+		ttl, err := strconv.Atoi(dnsrec.Ttl)
 		if err == nil {
-
 			d.Set("ttl", ttl)
 		}
 	}
-	d.Set("enabled", dnsrec.Enabled)
+
 	d.Set("dns_zone_ref", dnsrec.DNSZoneRef)
 
-	d.Set("aging", dnsrec.Aging)
+	if dnsrec.Aging != 0 {
+		d.Set("aging", dnsrec.Aging)
+	}
+	d.Set("enabled", dnsrec.Enabled)
 	d.Set("comment", dnsrec.Comment) // comment is always given, but sometimes ""
 	return
 
@@ -123,10 +125,9 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 
 func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 
-	var optionalTTL *string
-	if ttl, ok := d.Get("ttl").(int); ok {
-		ttlString := strconv.Itoa(ttl)
-		optionalTTL = &ttlString
+	var ttlString string
+	if ttl, ok := d.Get("ttl").(int); ok && ttl != 0 {
+		ttlString = strconv.Itoa(ttl)
 	}
 
 	dnsrec := DNSRecord{
@@ -136,10 +137,10 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 		Rectype: d.Get("type").(string),
 		DNSProperties: DNSProperties{
 			Name:    d.Get("name").(string),
-			Ttl:     optionalTTL,
+			Ttl:     ttlString,
 			Data:    d.Get("data").(string),
 			Comment: d.Get("comment").(string),
-			Aging:   d.Get("aging").(int), // TODO when not specified it's 0
+			Aging:   d.Get("aging").(int), // when not specified it's 0 witch will be ignored
 			Enabled: d.Get("enabled").(bool),
 		},
 	}

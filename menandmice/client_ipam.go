@@ -8,7 +8,6 @@ type IPAMRecord struct {
 	DNSHost []DNSHost `json:"dnsHosts,omitempty"`
 	// DHCPReservations []DHCPReservation `json:"dhcpReservations,omitempty"`
 	// DHCPLeases []???  "dhcpLeases,omitempty"`
-	//TODO how to set DiscoveryType
 	DiscoveryType             string    `json:"discoveryType,omitempty"`
 	PTRStatus                 string    `json:"ptrStatus,omitempty"`
 	LastSeenDate              string    `json:"lastSeenDate,omitempty"`
