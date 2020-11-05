@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -57,4 +58,19 @@ func ipv6AddressDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	newIP := net.ParseIP(new)
 
 	return oldIP.Equal(newIP)
+}
+
+func toError(diags diag.Diagnostics) error {
+
+	if diags.HasError() {
+
+		var message string
+		for _, diag := range diags {
+			message += diag.Summary + "\n"
+
+		}
+		return fmt.Errorf(message)
+
+	}
+	return nil
 }

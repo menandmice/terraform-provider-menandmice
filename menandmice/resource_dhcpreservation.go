@@ -15,6 +15,9 @@ func resourceDHCPReservation() *schema.Resource {
 		ReadContext:   resourceDHCPResvationRead,
 		UpdateContext: resourceDHCPResvationUpdate,
 		DeleteContext: resourceDHCPResvationDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceDHCPResvationImport,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -84,8 +87,12 @@ func resourceDHCPReservation() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			// TODO one off dhcpserver,dhcpgroup,dhcpscope
 
+			// TODO one off dhcpserver,dhcpgroup,dhcpscope ?
+			// owner is only used for CreateDHCPReservation were it expects a owner_ref,
+			// but when you read the resource latter it will store the cannonical form of owner_ref. which might be different. then owner
+			// which will be detected as difference if you had not a separation between owner and owner_ref
+			// so owner can be a human readable form of owner_ref (serverName,dhcpscopeName,dhcpgroupName), while we can still store cannical form of onwner_ref. owner can't be read via the api
 			"owner": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
@@ -112,6 +119,7 @@ func writeDHCPReservationSchema(d *schema.ResourceData, dhcpReservation DHCPRese
 	d.Set("servername", dhcpReservation.ServerName)
 	d.Set("next_server", dhcpReservation.NextServer)
 	d.Set("owner_ref", dhcpReservation.OwnerRef)
+	// you can't read owner for the api, owner is not set
 	return
 }
 
@@ -203,4 +211,22 @@ func resourceDHCPResvationDelete(c context.Context, d *schema.ResourceData, m in
 	}
 	d.SetId("")
 	return diags
+}
+
+func resourceDHCPResvationImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	diags := resourceDHCPResvationRead(ctx, d, m)
+	if err := toError(diags); err != nil {
+		return nil, err
+	}
+
+	// if we had used schema.ImportStatePassthrough
+	// we could not have set id to its cannical form
+	d.SetId(d.Get("ref").(string))
+
+	// TODO thiss will lead to a config drift
+	//	    but because owner has forceNew:true, it will recreat resource next run
+	// owner does not comme from api but this is closs
+	d.Set("owner", d.Get("owner_ref").(string))
+
+	return []*schema.ResourceData{d}, nil
 }

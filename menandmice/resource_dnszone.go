@@ -16,6 +16,9 @@ func resourceDNSZone() *schema.Resource {
 		ReadContext:   resourceDNSZoneRead,
 		UpdateContext: resourceDNSZoneUpdate,
 		DeleteContext: resourceDNSZoneDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceDNSZoneImport,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -288,4 +291,18 @@ func resourceDNSZoneDelete(c context.Context, d *schema.ResourceData, m interfac
 	}
 	d.SetId("")
 	return diags
+}
+
+func resourceDNSZoneImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+
+	diags := resourceDNSZoneRead(ctx, d, m)
+	if err := toError(diags); err != nil {
+		return nil, err
+	}
+
+	// if we had used schema.ImportStatePassthrough
+	// we could not have set id to its cannical form
+	d.SetId(d.Get("ref").(string))
+
+	return []*schema.ResourceData{d}, nil
 }

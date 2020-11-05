@@ -2,8 +2,10 @@ package menandmice
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -17,6 +19,9 @@ func resourceDNSRec() *schema.Resource {
 		ReadContext:   resourceDNSRecRead,
 		UpdateContext: resourceDNSRecUpdate,
 		DeleteContext: resourceDNSRecDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceDNSRecImport,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -55,7 +60,6 @@ func resourceDNSRec() *schema.Resource {
 			"aging": &schema.Schema{
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      0, // if set to 0 its ignored
 				ValidateFunc: validation.IntAtLeast(0),
 			},
 			"ttl": &schema.Schema{
@@ -113,6 +117,8 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 	}
 
 	d.Set("dns_zone_ref", dnsrec.DNSZoneRef)
+
+	// TODO does not set server and view
 
 	if dnsrec.Aging != 0 {
 		d.Set("aging", dnsrec.Aging)
@@ -207,4 +213,41 @@ func resourceDNSRecDelete(c context.Context, d *schema.ResourceData, m interface
 	}
 	d.SetId("")
 	return diags
+}
+
+func resourceDNSRecImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+
+	arg := d.Id()
+
+	if parts := strings.Split(arg, ":"); len(parts) == 4 {
+
+		// format is authority:view:fqdn
+		d.Set("server", parts[0])
+		d.Set("view", parts[1])
+		fqdn := strings.SplitN(parts[2], ".", 2)
+
+		if len(fqdn) != 2 {
+			return nil, fmt.Errorf("could not parse fqdn %s", parts[2])
+		}
+		d.Set("name", fqdn[0])
+		d.Set("zone", fqdn[1])
+		d.Set("type", parts[3])
+
+		diags := dataSourceDNSRectRead(ctx, d, m)
+		if err := toError(diags); err != nil {
+			return nil, err
+		}
+		d.SetId(d.Get("ref").(string))
+
+	} else {
+		// otherwise format is dnsrecords/<id> which would work for read to
+
+		diags := resourceDNSRecRead(ctx, d, m)
+		if err := toError(diags); err != nil {
+			return nil, err
+		}
+		d.SetId(d.Get("ref").(string))
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

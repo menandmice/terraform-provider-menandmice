@@ -12,6 +12,7 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 
 	name := "zone1."
 	authority := "mandm.example.net."
+	view := ""
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -31,8 +32,18 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 				),
 			},
 
-			// TODO test minimal parameters,
-			// TODO test with all parameters set to non default
+			{
+				ResourceName:      "menandmice_dns_zone.testzone",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+
+			{
+				ResourceName:      "menandmice_dns_zone.testzone",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateId:     "mandm.example.com." + ":" + view + ":" + name,
+			},
 		},
 	})
 }

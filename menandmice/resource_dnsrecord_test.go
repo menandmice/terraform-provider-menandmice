@@ -12,6 +12,7 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 	name := "rec1"
 	date := "127.0.0.1"
 	rectype := "A"
+	view := ""
 	server := "mandm.example.net."
 	zone := "example.net."
 
@@ -31,8 +32,19 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
-				// TODO test minimal parameters,
-				// TODO test with all parameters set to non default
+			},
+			{
+				ResourceName:      "menandmice_dns_record.testrec",
+				ImportState:       true,
+				ImportStateVerify: true,
+				//TODO avoid ImportStateVerifyIgnore: "server", "zone"
+				ImportStateVerifyIgnore: []string{"server", "zone"}, // view is also not set but was empty
+			},
+			{
+				ResourceName:      "menandmice_dns_record.testrec",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateId:     server + ":" + view + ":" + name + "." + zone + ":" + "AAAA",
 			},
 		},
 	})

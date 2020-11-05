@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccMenandmiceDHCPReservationBasic(t *testing.T) {
-	name := "testresrvation"
+	name := "testres"
 	owner := "mandm.example.net."
 	clientIdentifier := "44:55:66:77:88:00"
 	addressess := `"172.16.17.9"`
@@ -22,7 +22,7 @@ func TestAccMenandmiceDHCPReservationBasic(t *testing.T) {
 			{
 				Config: testAccCheckMenandmiceDHCPReservationConfigBasic(name, owner, clientIdentifier, addressess),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckResourceExists("menandmice_dhcp_reservation.testresrvation"),
+					testAccCheckResourceExists("menandmice_dhcp_reservation.testreservation"),
 				),
 			},
 			{
@@ -30,10 +30,31 @@ func TestAccMenandmiceDHCPReservationBasic(t *testing.T) {
 				Config: testAccCheckMenandmiceDHCPReservationConfigBasic(name, owner, clientIdentifier, `"172.16.17.5","172.16.17.6"`),
 				Check: resource.ComposeTestCheckFunc(
 
-					testAccCheckResourceExists("menandmice_dhcp_reservation.testresrvation"),
+					testAccCheckResourceExists("menandmice_dhcp_reservation.testreservation"),
 				),
-				// TODO test minimal parameters,
-				// TODO test with all parameters set to non default
+			},
+			{
+
+				ResourceName:      "menandmice_dhcp_reservation.testreservation",
+				ImportState:       true,
+				ImportStateId:     name,
+				ImportStateVerify: true,
+
+				// owner is not stored on server, only owner-ref
+				// and you can't owner is not unique
+				//TODO avoid ImportStateVerifyIgnore: "owner"
+				ImportStateVerifyIgnore: []string{"owner"},
+			},
+
+			{
+				ResourceName:      "menandmice_dhcp_reservation.testreservation",
+				ImportState:       true,
+				ImportStateVerify: true,
+
+				// owner is not stored on server, only owner-ref
+				// and you can't owner is not unique
+				//TODO avoid ImportStateVerifyIgnore: "owner"
+				ImportStateVerifyIgnore: []string{"owner"},
 			},
 		},
 	})
@@ -58,13 +79,13 @@ func testAccCheckMenandmiceDHCPReservationDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckMenandmiceDHCPReservationConfigBasic(name, owner, client_identifier, addressess string) string {
+func testAccCheckMenandmiceDHCPReservationConfigBasic(name, owner, clientIdentifier, addressess string) string {
 	return fmt.Sprintf(`
-	resource menandmice_dhcp_reservation testresrvation{
+	resource menandmice_dhcp_reservation testreservation{
 		name              = "%s"
 		owner             = "%s"
 		client_identifier = "%s"
 		addresses          = [%s]
 	}
-	`, name, owner, client_identifier, addressess)
+	`, name, owner, clientIdentifier, addressess)
 }

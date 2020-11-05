@@ -16,6 +16,9 @@ func resourceIPAMRec() *schema.Resource {
 		ReadContext:   resourceIPAMRecRead,
 		UpdateContext: resourceIPAMRecUpdate,
 		DeleteContext: resourceIPAMRecDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceIPAMRecImport,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -371,4 +374,16 @@ func resourceIPAMRecDelete(c context.Context, d *schema.ResourceData, m interfac
 	}
 	d.SetId("")
 	return diags
+}
+func resourceIPAMRecImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	diags := resourceIPAMRecRead(ctx, d, m)
+
+	if err := toError(diags); err != nil {
+		return nil, err
+	}
+	// if we had used schema.ImportStatePassthrough
+	// we could not have set id to its cannical form
+	d.SetId(d.Get("ref").(string))
+
+	return []*schema.ResourceData{d}, nil
 }

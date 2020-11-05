@@ -35,6 +35,19 @@ func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
 					testAccCheckResourceExists("menandmice_ipam_record.testipam"),
 				),
 			},
+
+			{
+				ResourceName:      "menandmice_ipam_record.testipam",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateId:     "::5",
+			},
+
+			{
+				ResourceName:      "menandmice_ipam_record.testipam",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -60,7 +73,7 @@ func testAccCheckMenandmiceIPAMRecDestroy(s *terraform.State) error {
 
 func testAccCheckMenandmiceIPAMRecConfigBasic(address, location string, claimed bool) string {
 	return fmt.Sprintf(`
-	resource menandmice_ipam_record testipam{
+	resource menandmice_ipam_record testipam {
 		address= "%s"
 		custom_properties = {"location":"%s"}
 		claimed = %t
