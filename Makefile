@@ -1,9 +1,13 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
-HOSTNAME=miceandmen.com
+HOSTNAME=registry.terraform.io
+NAMESPACE=local
 NAME=menandmice
 BINARY=terraform-provider-${NAME}
 VERSION=0.2
 OS_ARCH=linux_amd64
+
+TERRAFORMVERSION="$(shell terraform version | awk 'NR == 1 {split ($$2 ,version, "."); print version[2]}')"
+TERRAFORMVERSIONGT013=$(shell expr "${TERRAFORMVERSION}" ">" "12" )
 
 default: install
 
@@ -25,11 +29,13 @@ release:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_windows_amd64
 
 install: build
-	# mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
-	# mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
-
+ifeq ("${TERRAFORMVERSIONGT013}","1")
+	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+else
 	mkdir -p ~/.terraform.d/plugins/${OS_ARCH}
 	cp ${BINARY} ~/.terraform.d/plugins/${OS_ARCH}
+endif
 
 
 example: init

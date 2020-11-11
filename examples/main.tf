@@ -1,8 +1,9 @@
 terraform {
   required_providers {
     menandmice = {
-      versions = ["0.2"],
-      #source  = "menandmice.com/menandmice/0.2",
+      # uncomment for terraform 0.13 and higher
+      # version = "~> 0.2",
+      # source  = "local/menandmice",
     }
   }
 }
