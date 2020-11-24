@@ -3,9 +3,9 @@ package menandmice
 import "fmt"
 
 type IPAMRecord struct {
-	Ref     string    `json:"addrRef,omitempty"`
-	Address string    `json:"address"`
-	DNSHost []DNSHost `json:"dnsHosts,omitempty"`
+	Ref     string `json:"addrRef,omitempty"`
+	Address string `json:"address"`
+	// DNSHost []DNSHost `json:"dnsHosts,omitempty"`	// works not used for now
 	// DHCPReservations []DHCPReservation `json:"dhcpReservations,omitempty"`
 	// DHCPLeases []???  "dhcpLeases,omitempty"`
 	DiscoveryType             string    `json:"discoveryType,omitempty"`
@@ -35,7 +35,7 @@ type HoldInfo struct {
 
 type DNSHost struct {
 	DNSRecord      DNSRecord   `json:"dnsRecord"`
-	PTRStatus      bool        `json:"ptrStatus"`
+	PTRStatus      string      `json:"ptrStatus"`
 	RelatedRecords []DNSRecord `json:"relatedRecords"`
 }
 
