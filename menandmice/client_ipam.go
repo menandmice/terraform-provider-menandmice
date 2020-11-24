@@ -55,8 +55,10 @@ func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
 // func (c *Mmclient) CreateIPAMRec(ipamProperites IPAMProperties,rec string) error {
 func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
 
-	// we need to check if IPAMRecord not already exist. because creation is done via update/PUT
+	// TODO this function will query ipamRecord bassed on ip. But this is not unque
+	//		you have to use SetCurrentAddressSpace in the client initalisation. or here en prevent race conditions
 
+	// we need to check if IPAMRecord not already exist. because creation is done via update/PUT
 	existingIPAMRecord, err := c.ReadIPAMRec(ipamRecord.Address)
 
 	if err != nil {

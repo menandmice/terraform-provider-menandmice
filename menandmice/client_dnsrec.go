@@ -60,8 +60,8 @@ type CreateDNSRecResponse struct {
 type CreateDNSRecRequest struct {
 	DNSRecords  []DNSRecord `json:"dnsRecords"`
 	SaveComment string      `json:"saveComment"`
-	// TODO autoAssignRangeRef string
-	// TODO dnsZoneRef string
+	// autoAssignRangeRef string
+	// dnsZoneRef string
 	ForceOverrideOfNamingConflictCheck bool `json:"forceOverrideOfNamingConflictCheck"`
 }
 

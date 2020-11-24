@@ -98,7 +98,6 @@ func resourceDNSRec() *schema.Resource {
 				Computed: true,
 			},
 			// TODO add force oferwrite
-			// TODO add autoAssignRangeRef
 		},
 	}
 }
