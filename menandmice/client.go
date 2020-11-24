@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"strings"
 	"time"
 
@@ -94,19 +95,48 @@ type ErrorResponse struct {
 }
 
 type RequestError struct {
+	Method     string
+	URL        string
 	HTTPCode   int
 	StatusCode int
 	ErrMessage string
 }
 
 func (r *RequestError) Error() string {
-	return fmt.Sprintf("HTTP code:%v: %v", r.HTTPCode, r.ErrMessage)
+
+	var operation string
+	switch r.Method {
+	case "GET":
+		operation = "reading"
+
+	case "PUT":
+		operation = "updating"
+
+	case "POST":
+		operation = "creating"
+
+	case "DELETE":
+		operation = "deleting"
+	default:
+		operation = "accesing"
+	}
+
+	url, err := url.Parse(r.URL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	resource := url.RequestURI()
+
+	return fmt.Sprintf("failed with %v %v\n\tHTTP code:%v: %v", operation, resource, r.HTTPCode, r.ErrMessage)
 }
 
 func ResponseError(response *resty.Response, errorResponse ErrorResponse) error {
 
 	if !response.IsSuccess() {
 		return &RequestError{
+
+			Method:     response.Request.Method,
+			URL:        response.Request.URL,
 			HTTPCode:   response.StatusCode(),
 			StatusCode: errorResponse.Error.Code,
 			ErrMessage: errorResponse.Error.Message,
