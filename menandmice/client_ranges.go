@@ -6,15 +6,15 @@ type NextFreeAddressRespons struct {
 	} `json:"result"`
 }
 
-func (c Mmclient) NextFreeAddress(addressRange, startaddress string, ping, excludeDHCP bool, temporaryClaimTime int) (string, error) {
+func (c Mmclient) NextFreeAddress(addressRange, startAddress string, ping, excludeDHCP bool, temporaryClaimTime int) (string, error) {
 	var re NextFreeAddressRespons
 	query := map[string]interface{}{
 		"ping":               ping,
 		"excludeDHCP":        excludeDHCP,
 		"temporaryClaimTime": temporaryClaimTime,
 	}
-	if startaddress != "" {
-		query["startaddress"] = startaddress
+	if startAddress != "" {
+		query["startAddress"] = startAddress
 	}
 	err := c.Get(&re, "Ranges/"+addressRange+"/NextFreeAddress", query, nil)
 	return re.Result.Address, err
