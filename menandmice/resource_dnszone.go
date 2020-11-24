@@ -79,9 +79,10 @@ func resourceDNSZone() *schema.Resource {
 			},
 
 			"authority": &schema.Schema{
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Required:     true,
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+				// TODO can also be a AD authority
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "authority should end with '.'"),
 			},
 
@@ -204,6 +205,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 	dnsviewref := dnszone.Authority + ":" + tryGetString(d, "view")
 	if dnszone.AdIntegrated {
 
+		// TODO this does not work
 		dnszone.DNSViewRefs = []string{dnsviewref}
 	} else {
 		dnszone.DNSViewRef = dnsviewref
