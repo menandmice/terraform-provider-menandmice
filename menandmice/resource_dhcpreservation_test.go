@@ -9,10 +9,10 @@ import (
 )
 
 func TestAccMenandmiceDHCPReservationBasic(t *testing.T) {
-	name := "testres"
+	name := "terraform-test-resrvation"
 	owner := "mandm.example.net."
 	clientIdentifier := "44:55:66:77:88:00"
-	addressess := `"172.16.17.9"`
+	addressess := `"192.168.1.8"`
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -27,7 +27,7 @@ func TestAccMenandmiceDHCPReservationBasic(t *testing.T) {
 			},
 			{
 
-				Config: testAccCheckMenandmiceDHCPReservationConfigBasic(name, owner, clientIdentifier, `"172.16.17.5","172.16.17.6"`),
+				Config: testAccCheckMenandmiceDHCPReservationConfigBasic(name, owner, clientIdentifier, `"192.168.1.8","192.168.1.9"`),
 				Check: resource.ComposeTestCheckFunc(
 
 					testAccCheckResourceExists("menandmice_dhcp_reservation.testreservation"),

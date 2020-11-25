@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
-	address := "10.0.0.1"
+	address := "192.168.2.15"
 	location := "here"
 
 	resource.Test(t, resource.TestCase{

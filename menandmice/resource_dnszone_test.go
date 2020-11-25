@@ -10,7 +10,7 @@ import (
 
 func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 
-	name := "zone1."
+	name := "terraform-test-zone.net."
 	authority := "mandm.example.net."
 	view := ""
 

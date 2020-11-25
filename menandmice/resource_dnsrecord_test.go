@@ -9,8 +9,8 @@ import (
 )
 
 func TestAccMenandmiceDNSRecBasic(t *testing.T) {
-	name := "rec1"
-	date := "127.0.0.1"
+	name := "terraform-test-rec1"
+	date := "192.168.2.13"
 	rectype := "A"
 	view := ""
 	server := "mandm.example.net."
@@ -28,7 +28,7 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, "::1", "AAAA", server, zone),
+				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, "192.168.2.14", rectype, server, zone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
@@ -44,7 +44,7 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 				ResourceName:      "menandmice_dns_record.testrec",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateId:     server + ":" + view + ":" + name + "." + zone + ":" + "AAAA",
+				ImportStateId:     server + ":" + view + ":" + name + "." + zone + ":" + "A",
 			},
 		},
 	})
