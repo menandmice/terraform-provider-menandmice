@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     menandmice = {
-      # uncomment for terraform 0.13 and higher
+      # # uncomment for terraform 0.13 and higher
       # version = "~> 0.2",
       # source  = "local/menandmice",
     }
@@ -9,108 +9,40 @@ terraform {
 }
 
 provider menandmice {
-  endpoint = "mandm.example.net" # can also be set with MENANDMICE_ENDPOINT environment variable
-  username = "apiuser"           # can also be set with MENANDMICE_USERNAME environment variable
-  passwword = "secret"           # can also be set with MENANDMICE_PASSWORD environment variable
+  # endpoint = "mandm.example.net" # can also be set with MENANDMICE_ENDPOINT environment variable
+  # username = "apiuser"           # can also be set with MENANDMICE_USERNAME environment variable
+  # password = "secret"           # can also be set with MENANDMICE_PASSWORD environment variable
   tls_verify= false              # can also be set with MENANDMICE_TLS_VERIFY environment variable
 }
 
-data menandmice_dns_zone zone1 {
-  name = "zone1.net."
-  server = "mandm.example.net."
+module "resource_ipam_record" {
+  source = "./resources/menandmice_ipam_record"
 }
 
-resource menandmice_dns_zone zone2{
-  name    = "zone2.net."
-  authority   = "mandm.example.net."
-  adintegrated = false
-  custom_properties = {"place" = "city","owner" = "me"}
-
-  view = ""             # default ""
-  type = "Master"       # default "Master"
-  dnssecsigned = false  # default false
+module "resource_dhcp_reservation" {
+  source = "./resources/menandmice_dhcp_reservation"
 }
 
-data menandmice_dns_record rec1 {
-  name = "test"
-  zone = data.menandmice_dns_zone.zone1.name  # "zone1.net."
-  server = "mandm.example.net."
-  type = "A"
+module "resource_dns_record" {
+  source = "./resources/menandmice_dns_record"
 }
 
-resource menandmice_dns_record rec2 {
-  name    = "test"
-  zone    = menandmice_dns_zone.zone2.name      # "zone2.net."
-  server  = "mandm.example.net."
-  data    = "192.168.2.2" # this will asign/claim  "192.168.2.2" ipam records
-  type    = "A"
+module "resource_dns_zone" {
+  source = "./resources/menandmice_dns_zone"
 }
 
-data menandmice_ipam_record ipam1 {
-  address = "192.168.2.2"
+module "data-source_ipam_record" {
+  source = "./data-sources/menandmice_ipam_record"
 }
 
-resource menandmice_ipam_record ipam2 {
-  address = "192.168.2.3"
-  custom_properties = {"location":"here"}
-  claimed = true
+module "data-source_dhcp_reservation" {
+  source = "./data-sources/menandmice_dhcp_reservation"
 }
 
-resource menandmice_ipam_record ipam3 {
-  free_ip {
-    range = "192.168.2.0/24"
-    start_at = "192.168.2.50"
-  }
+module "data-source_dns_record" {
+  source = "./data-sources/menandmice_dns_record"
 }
 
-data menandmice_dhcp_reservation reservation1 {
-   name = "reserved1"
-}
-
-resource menandmice_dhcp_reservation reservation2 {
-  owner = "mandm.example.net."
-  name    = "test5"
-  client_identifier = "44:55:66:77:88:01"
-  servername = "testname"
-  next_server = "server1"
-  reservation_method = "ClientIdentifier"
-  # description = "test description" # only valid for some dhcp servers
-  addresses = ["192.168.2.10"]
-  ddns_hostname = "test"
-}
-
-output zone1{
-  value = data.menandmice_dns_zone.zone1
-}
-
-output zone2{
-  value = menandmice_dns_zone.zone2
-}
-
-output rec1{
-  value = data.menandmice_dns_record.rec1
-}
-
-output rec2 {
-  value = menandmice_dns_record.rec2
-}
-
-output ipam1 {
-  value = data.menandmice_ipam_record.ipam1
-}
-
-output ipam2 {
-  value = menandmice_ipam_record.ipam2
-}
-
-output ipam3 {
-  value = menandmice_ipam_record.ipam3
-}
-
-output reservation1 {
-  value = data.menandmice_dhcp_reservation.reservation1
-}
-
-output reservation2 {
-  value = menandmice_dhcp_reservation.reservation2
+module "data-source_dns_zone" {
+  source = "./data-sources/menandmice_dns_zone"
 }
