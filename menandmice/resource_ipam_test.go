@@ -36,6 +36,7 @@ func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
 				),
 			},
 
+			// TODO add test for find free ip
 			{
 				ResourceName:      "menandmice_ipam_record.testipam",
 				ImportState:       true,
