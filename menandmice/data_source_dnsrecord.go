@@ -18,56 +18,69 @@ func DataSourceDNSRec() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The DNS record name.",
+				Required:    true,
 			},
 			"view": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Description: "The view of DNS record. For example internal.",
+				Optional:    true,
+				Default:     "",
 			},
 			"zone": &schema.Schema{
 				Type:         schema.TypeString,
+				Description:  "The DNS zone were record is in.",
 				Required:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
 			},
 			"server": &schema.Schema{
 				Type:         schema.TypeString,
+				Description:  "The DNS server where DNS record is stored",
 				Required:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
 			},
 			"type": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The DNS recod type. for example: CNAME",
+				Required:    true,
 			},
 
 			"ref": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "internal reference to this DNS record",
+				Computed:    true,
 			},
 			"ttl": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Description: "The DNS recod Time To Live. How long in seconds the record is allowed to be cached",
+				Computed:    true,
 			},
 			"aging": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Description: "The aging timestamp of dynamic records in AD integrated zones. Hours since January 1, 1601, UTC. Providing a non-zero value creates a dynamic record.",
+				Computed:    true,
 			},
 			"data": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The data stored in the record",
+				Computed:    true,
 			},
 			"comment": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Contains the comment string for the record. Note that only records in static DNS zones can have a comment string.",
+				Computed:    true,
 			},
 			"enabled": &schema.Schema{
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Description: "If DNS record is enabled",
+				Computed:    true,
 			},
-			"dnszoneref": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+
+			"dns_zone_ref": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "internal reference to zone where this DNS record is store",
+				Computed:    true,
 			},
 		},
 	}

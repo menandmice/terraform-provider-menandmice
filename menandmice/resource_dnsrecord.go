@@ -25,24 +25,28 @@ func resourceDNSRec() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "internal reference to this DNS record",
+				Computed:    true,
 			},
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The name of DNS record",
+				Required:    true,
 			},
 			"data": &schema.Schema{
 				Type:         schema.TypeString,
+				Description:  "The data stored in the DNS record.",
 				Required:     true,
 				ValidateFunc: validation.StringIsNotEmpty,
 				// You cannot validate data here, because you dont have acces to what kind of record it is
 			},
 			"type": &schema.Schema{
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
-				Default:  "A",
+				Type:        schema.TypeString,
+				Description: "The DNS recod type. This can be: A, AAAA, CNAME, DNAME, DLV, DNSKEY, DS, HINFO, LOC, MX, NAPTR, NS, NSEC3PARAM, PTR, RP, SOA, SPF, SRV, SSHFP, TLSA, TXT. Default: A",
+				ForceNew:    true,
+				Optional:    true,
+				Default:     "A",
 				ValidateFunc: validation.StringInSlice([]string{
 					"A", "AAAA", "CNAME",
 					"DNAME", "DLV", "DNSKEY",
@@ -54,48 +58,56 @@ func resourceDNSRec() *schema.Resource {
 				}, false),
 			},
 			"comment": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Comment string for this record. Note that only records in static DNS zones can have a comment string.",
+				Optional:    true,
 			},
 			"aging": &schema.Schema{
 				Type:         schema.TypeInt,
+				Description:  "The aging timestamp of dynamic records in AD integrated zones. Hours since January 1, 1601, UTC. Providing a non-zero value creates a dynamic record.",
 				Optional:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 			},
 			"ttl": &schema.Schema{
 				Type:         schema.TypeInt,
+				Description:  "The DNS recod Time To Live. How long in seconds the record is allowed to be cached",
 				Optional:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 			},
 			"enabled": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+				Type:        schema.TypeBool,
+				Description: "If this DNS record should enabled. Default: True",
+				Optional:    true,
+				Default:     true,
 			},
 
 			"server": &schema.Schema{
 				Type:         schema.TypeString,
+				Description:  "The DNS server where this DNS record is stored. This should end with a '.'.",
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Server name should end with '.'"),
 			},
 			"view": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Description: "The optional view where this DNS record is in. For example: internal.",
+				Optional:    true,
+				Default:     "",
+				ForceNew:    true,
 			},
 
 			"zone": &schema.Schema{
 				Type:         schema.TypeString,
+				Description:  "The DNS zone were record is in.",
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
 			},
 
 			"dns_zone_ref": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Internal ref to zone where record is in",
+				Computed:    true,
 			},
 			// TODO add force oferwrite
 		},

@@ -30,31 +30,41 @@ resource menandmice_dns_zone zone2{
 
 ### Required
 
-- **authority** (String)
-- **name** (String)
+- **authority** (String) the DNS authoritive server for this zone
+- **name** (String) Name of DNS zone. Name must and with '.'
 
 ### Optional
 
-- **adintegrated** (Boolean)
-- **adpartition** (String)
-- **adreplicationtype** (String)
-- **custom_properties** (Map of String)
-- **displayname** (String)
+- **adintegrated** (Boolean) If DNS zone is intergrated with Active Directory. Default: False.
+- **adpartition** (String) The AD partition if the zone is Active Directory integrated.
+- **adreplicationtype** (String) Replication types for an AD integrated zone.
+- **custom_properties** (Map of String) Map of custom properties associated with this DNS zone.
+- **displayname** (String) A name that can distinguish the zone from other zone instances with the same name.
 - **dnssecsigned** (Boolean)
-- **dynamic** (Boolean)
+- **dynamic** (Boolean) If DNS zone Dynamic, default: False
 - **id** (String) The ID of this resource.
-- **kskids** (String)
-- **masters** (List of String)
-- **type** (String)
-- **view** (String)
-- **zskids** (String)
+- **kskids** (String) A comma separated string of IDs of KSKs, starting with active keys, then inactive keys in parenthesis.
+- **masters** (List of String) List of all masters IP address, for slave zones.
+- **type** (String) the DNS zone type.For example: Master, Slave, Hint, Stub, Forward.
+- **view** (String) Name of the view this DNS zone is in
+- **zskids** (String) A comma separated string of IDs of ZSKs, starting with active keys, then inactive keys in parenthesis.
 
 ### Read-Only
 
-- **created** (String)
-- **dnsviewref** (String)
-- **dnsviewrefs** (Set of String)
-- **lastmodified** (String)
-- **ref** (String)
+- **created** (String) Date when zone was created in the suite.
+- **dnsviewref** (String) Interal references to views.
+- **dnsviewrefs** (Set of String) Interal references to views. Only used with Active Directory.
+- **lastmodified** (String) Date when zone was last modified in the suite.
+- **ref** (String) Internal references to this DNS zone
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# import with dnszone ref
+terraform import menandmice_dns_zone.resourcename DNSZones/659
+
+# import with readable name
+terraform import menandmice_dns_zone.resourcename mandm.example.net::zone1  #<server>:<view>:<dnzzone name>
+```

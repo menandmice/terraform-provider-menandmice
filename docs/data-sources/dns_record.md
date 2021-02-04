@@ -31,24 +31,24 @@ data menandmice_dns_record rec1 {
 
 ### Required
 
-- **name** (String)
-- **server** (String)
-- **type** (String)
-- **zone** (String)
+- **name** (String) The DNS record name.
+- **server** (String) The DNS server where DNS record is stored
+- **type** (String) The DNS recod type. for example: CNAME
+- **zone** (String) The DNS zone were record is in.
 
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **view** (String)
+- **view** (String) The view of DNS record. For example internal.
 
 ### Read-Only
 
-- **aging** (Number)
-- **comment** (String)
-- **data** (String)
-- **dnszoneref** (String)
-- **enabled** (Boolean)
-- **ref** (String)
-- **ttl** (Number)
+- **aging** (Number) The aging timestamp of dynamic records in AD integrated zones. Hours since January 1, 1601, UTC. Providing a non-zero value creates a dynamic record.
+- **comment** (String) Contains the comment string for the record. Note that only records in static DNS zones can have a comment string.
+- **data** (String) The data stored in the record
+- **dns_zone_ref** (String) internal reference to zone where this DNS record is store
+- **enabled** (Boolean) If DNS record is enabled
+- **ref** (String) internal reference to this DNS record
+- **ttl** (Number) The DNS recod Time To Live. How long in seconds the record is allowed to be cached
 
 

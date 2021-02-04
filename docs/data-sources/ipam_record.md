@@ -23,7 +23,7 @@ data menandmice_ipam_record ipam1 {
 
 ### Required
 
-- **address** (String)
+- **address** (String) The IP address
 
 ### Optional
 
@@ -31,20 +31,20 @@ data menandmice_ipam_record ipam1 {
 
 ### Read-Only
 
-- **claimed** (Boolean)
-- **custom_properties** (Map of String)
-- **device** (String)
-- **discovery_type** (String)
-- **extraneous_ptr** (Boolean)
-- **hold_info** (List of Object) (see [below for nested schema](#nestedatt--hold_info))
-- **interface** (String)
-- **last_discovery_date** (String)
-- **last_known_client_identifier** (String)
-- **last_seen_date** (String)
-- **ptr_status** (String)
-- **ref** (String)
-- **state** (String)
-- **usage** (Boolean)
+- **claimed** (Boolean) If this address is claimed
+- **custom_properties** (Map of String) Map of custom properties associated with this IP address.
+- **device** (String) The device associated with the record.
+- **discovery_type** (String) Way IP address use is dicoverd. For example: None, Ping, ARP, Lease, Custom.
+- **extraneous_ptr** (Boolean) Contains true if there are extraneous PTR records for the record.
+- **hold_info** (List of Object) Contains information about who holds the otherwise free IP and for how long. (see [below for nested schema](#nestedatt--hold_info))
+- **interface** (String) The interface associated with the record.
+- **last_discovery_date** (String) The date when the system last performed IP address discovery for this IP address.
+- **last_known_client_identifier** (String) The MAC address associated with the IP address discovery info.
+- **last_seen_date** (String) The date when the address was last seen during IP address discovery.
+- **ptr_status** (String) PTR record status. For example: Unknown, OK, Verify.
+- **ref** (String) Internal reference to ipam record
+- **state** (String) state of IP addres. For exampe: Free, Assigned, Claimed, Pending, Held.
+- **usage** (Number) IP address usage bitmask.
 
 <a id="nestedatt--hold_info"></a>
 ### Nested Schema for `hold_info`

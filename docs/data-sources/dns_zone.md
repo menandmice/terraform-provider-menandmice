@@ -24,29 +24,29 @@ data menandmice_dns_zone zone1 {
 
 ### Required
 
-- **name** (String)
-- **server** (String)
+- **name** (String) Name of DNS zone. Name must and with '.'
+- **server** (String) DNS server where record is stored. DNS server name should with '.'
 
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **view** (String)
+- **view** (String) Name of the view this DNS zone is in
 
 ### Read-Only
 
-- **adintegrated** (Boolean)
-- **authority** (String)
-- **created** (String)
-- **customp_properties** (Map of String)
-- **displayname** (String)
-- **dnssecsigned** (Boolean)
-- **dnsviewref** (String)
-- **dnsviewrefs** (Set of String)
-- **dynamic** (Boolean)
-- **kskids** (String)
-- **lastmodified** (String)
-- **ref** (String)
-- **type** (String)
-- **zskids** (String)
+- **adintegrated** (Boolean) If DNS zone is intergrated with Active Directory.
+- **authority** (String) the DNS authoritive server for this zone
+- **created** (String) Date when zone was created in the suite.
+- **customp_properties** (Map of String) Map of custom properties associated with this DNS zone.
+- **displayname** (String) A name that can distinguish the zone from other zone instances with the same name.
+- **dnssecsigned** (Boolean) If DNS signing is enabled
+- **dnsviewref** (String) Interal references to views.
+- **dnsviewrefs** (Set of String) Interal references to views. Only used with Active Directory.
+- **dynamic** (Boolean) If DNS zone Dynamic
+- **kskids** (String) A comma separated string of IDs of KSKs, starting with active keys, then inactive keys in parenthesis.
+- **lastmodified** (String) Date when zone was last modified in the suite.
+- **ref** (String) Internal references to this DNS zone
+- **type** (String) the DNS zone type.For example: Master, Slave, Hint, Stub, Forward.
+- **zskids** (String) A comma separated string of IDs of ZSKs, starting with active keys, then inactive keys in parenthesis.
 
 

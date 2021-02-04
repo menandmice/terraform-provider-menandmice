@@ -31,25 +31,25 @@ resource menandmice_dhcp_reservation reservation2 {
 
 ### Required
 
-- **addresses** (List of String)
-- **client_identifier** (String)
-- **name** (String)
-- **owner** (String)
+- **addresses** (List of String) A list of zero or more IP addresses used for the reservation.
+- **client_identifier** (String) The client_identifier of this reservation.
+- **name** (String) The name of DHCP reservation you want to query
+- **owner** (String) DHCP group scope or server where this reservation is made.
 
 ### Optional
 
-- **ddns_hostname** (String)
-- **description** (String)
-- **filename** (String)
+- **ddns_hostname** (String) Dynamic DNS host name for reservation. Only applicable for ISC DHCP servers.
+- **description** (String) Description for the reservation. Only applicable for MS DHCP servers.
+- **filename** (String) The filename DHCP option. Only applicable for ISC DHCP servers.
 - **id** (String) The ID of this resource.
-- **next_server** (String)
-- **reservation_method** (String)
-- **servername** (String)
-- **type** (String)
+- **next_server** (String) The next-server ISC DHCP option. Only applicable for ISC DHCP servers.
+- **reservation_method** (String) DHCP reservation method, For example: HardwareAddress , ClientIdentifier. Default: HardwareAddress.
+- **servername** (String) The server-name DHCP option. Only applicable for ISC DHCP servers.
+- **type** (String) The type of this DHCP reservation. For example: DHCP , BOOTP , BOTH.
 
 ### Read-Only
 
-- **owner_ref** (String)
-- **ref** (String)
+- **owner_ref** (String) Internal refference to the DHCP group scope or server where this reservation is made.
+- **ref** (String) Internal reference to this DHCP reservation
 
 

@@ -12,6 +12,8 @@ import (
 
 func resourceIPAMRec() *schema.Resource {
 	return &schema.Resource{
+		Description: "`menandmice_ipam_record` IP address managment",
+
 		CreateContext: resourceIPAMRecCreate,
 		ReadContext:   resourceIPAMRecRead,
 		UpdateContext: resourceIPAMRecUpdate,
@@ -22,39 +24,46 @@ func resourceIPAMRec() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Internal reference to ipam record",
+				Computed:    true,
 			},
 			"free_ip": &schema.Schema{
 				Type:         schema.TypeList,
+				Description:  "Find a free IP address to claim",
 				Optional:     true,
 				ExactlyOneOf: []string{"free_ip", "address"},
 				MaxItems:     1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"range": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
+							Type:        schema.TypeString,
+							Description: "pick IP address from range with name",
+							Required:    true,
 						},
 						"start_at": &schema.Schema{
-							Type:     schema.TypeString,
-							Default:  "",
-							Optional: true,
+							Type:        schema.TypeString,
+							Description: "Start searching for IP from",
+							Default:     "",
+							Optional:    true,
 							// TODO validate that its valide ip in the range of range
 						},
 						"ping": &schema.Schema{
-							Type:     schema.TypeBool,
-							Default:  false,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Description: "Verify ip is free with Ping",
+							Default:     false,
+							Optional:    true,
 						},
 						"exclude_dhcp": &schema.Schema{
-							Type:     schema.TypeBool,
-							Default:  false,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Description: "Exclude IP address that are Assigned via DHCP",
+							Default:     false,
+							Optional:    true,
 						},
 
 						"temporary_claim_time": &schema.Schema{
 							Type:         schema.TypeInt,
+							Description:  "Time in seconds to temporary claim IP address. So it won't be claimed by others, when the claim is in progess",
 							Default:      60,
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 300),
@@ -64,6 +73,7 @@ func resourceIPAMRec() *schema.Resource {
 			},
 			"address": &schema.Schema{
 				Type:         schema.TypeString,
+				Description:  "The IP address to claim",
 				ExactlyOneOf: []string{"free_ip", "address"},
 				Optional:     true,
 				ValidateFunc: validation.Any(
@@ -84,9 +94,10 @@ func resourceIPAMRec() *schema.Resource {
 			// TODO might not be a good idea to make this configerable.
 			// What does it mean to delete unclaimed iprecord
 			"claimed": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+				Type:        schema.TypeBool,
+				Description: "If address should be claimed. Default: true",
+				Optional:    true,
+				Default:     true,
 			},
 			// "dnshost": &schema.Schema{
 			// },
@@ -95,8 +106,9 @@ func resourceIPAMRec() *schema.Resource {
 			// "dhcp_leases": &schema.Schema{
 			// },
 			"discovery_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Way IP address use is dicoverd. For example: None, Ping, ARP, Lease, Custom.",
+				Computed:    true,
 				// Optional: true,
 				// Default:  "None",
 				// ForceNew: true,
@@ -105,49 +117,62 @@ func resourceIPAMRec() *schema.Resource {
 				// }, false),
 			},
 			"last_seen_date": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The date when the address was last seen during IP address discovery.",
+				Computed:    true,
 			},
 
 			"last_discovery_date": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The date when the system last performed IP address discovery for this IP address.",
+				Computed:    true,
 			},
 			"last_known_client_identifier": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The MAC address associated with the IP address discovery info.",
+				Computed:    true,
 			},
 
 			"device": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The device associated with the record.",
+				Computed:    true,
 			},
 
 			"interface": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The interface associated with the record.",
+				Computed:    true,
 			},
 			"ptr_status": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "PTR record status. For example: Unknown, OK, Verify.",
+				Computed:    true,
 			},
 			"extraneous_ptr": &schema.Schema{
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Description: "Contains true if there are extraneous PTR records for the record.",
+				Computed:    true,
 			},
 			"custom_properties": &schema.Schema{
-				Type: schema.TypeMap,
+				Type:        schema.TypeMap,
+				Description: "Map of custom properties associated with this IP address. You can only assign properties that are already defined via propertie devinition",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Optional: true,
 			},
 			"state": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "state of IP addres. For exampe: Free, Assigned, Claimed, Pending, Held.",
+				Computed:    true,
 			},
+			// Hold info is read only property. but whould be inconvient if it was part of resource definition
+			// because if free_ip is used it's state whould change after creation the moment temporaryClaimTime would exipre
+			//
 			// "hold_info": &schema.Schema{
 			// 	Type:     schema.TypeList,
+			// Description: "Contains information about who holds the otherwise free IP and for how long.",
 			// 	Computed: true,
 			// 	MaxItems: 1,
 			// 	Elem: &schema.Resource{
@@ -167,8 +192,9 @@ func resourceIPAMRec() *schema.Resource {
 			// },
 
 			"usage": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Description: "IP address usage bitmask.",
+				Computed:    true,
 			},
 
 			// "cloud_device_info": &schema.Schema{

@@ -22,52 +22,61 @@ func resourceDNSZone() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Internal references to this DNS zone",
+				Computed:    true,
 			},
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
+				Description:  "Name of DNS zone. Name must and with '.' ",
 				Required:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "name must end with '.'"),
 			},
 			"dynamic": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Description: "If DNS zone Dynamic, default: False",
+				Optional:    true,
+				Default:     false,
 			},
+			// TODO following nameing convetion it would be ad_intergrated
 			"adintegrated": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-				ForceNew: true,
+				Type:        schema.TypeBool,
+				Description: "If DNS zone is intergrated with Active Directory. Default: False.",
+				Optional:    true,
+				Default:     false,
+				ForceNew:    true,
 			},
 			"view": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Description: "Name of the view this DNS zone is in",
+				Optional:    true,
+				Default:     "",
 			},
 			"dnsviewref": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Interal references to views.",
+				Computed:    true,
 			},
 			"dnsviewrefs": &schema.Schema{
-				Type:     schema.TypeSet,
-				Computed: true,
+				Type:        schema.TypeSet,
+				Description: "Interal references to views. Only used with Active Directory.",
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-
 			"type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Master",
+				Type:        schema.TypeString,
+				Description: "the DNS zone type.For example: Master, Slave, Hint, Stub, Forward.",
+				Optional:    true,
+				Default:     "Master",
 				ValidateFunc: validation.StringInSlice([]string{
 					"Master", "Slave", "Hint", "Stub", "Forward",
 				}, false),
 			},
 			"masters": &schema.Schema{
-				Type: schema.TypeList,
+				Type:        schema.TypeList,
+				Description: "List of all masters IP address, for slave zones.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateFunc: validation.Any(
@@ -79,13 +88,15 @@ func resourceDNSZone() *schema.Resource {
 			},
 
 			"authority": &schema.Schema{
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "the DNS authoritive server for this zone",
+				ForceNew:    true,
+				Required:    true,
 				// TODO can also be a AD authority
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "authority should end with '.'"),
 			},
 
+			// TODO  following naming convention whould be dnssec_signed
 			"dnssecsigned": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -93,25 +104,29 @@ func resourceDNSZone() *schema.Resource {
 			},
 
 			"kskids": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "A comma separated string of IDs of KSKs, starting with active keys, then inactive keys in parenthesis.",
+				Optional:    true,
 			},
 
 			"zskids": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "A comma separated string of IDs of ZSKs, starting with active keys, then inactive keys in parenthesis.",
+				Optional:    true,
 			},
 
 			"custom_properties": &schema.Schema{
-				Type: schema.TypeMap,
+				Type:        schema.TypeMap,
+				Description: "Map of custom properties associated with this DNS zone.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Optional: true,
 			},
 			"adreplicationtype": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Replication types for an AD integrated zone.",
 				ValidateFunc: validation.StringInSlice([]string{
 					"None", "To_All_DNS_Servers_In_AD_Forrest",
 					"To_All_DNS_Servers_In_AD_Domain", "To_All_Domain_Controllers_In_AD_Domain",
@@ -119,20 +134,24 @@ func resourceDNSZone() *schema.Resource {
 				}, false),
 			},
 			"adpartition": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "The AD partition if the zone is Active Directory integrated.",
+				Optional:    true,
 			},
 			"created": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Date when zone was created in the suite.",
+				Computed:    true,
 			},
 			"lastmodified": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Date when zone was last modified in the suite.",
+				Computed:    true,
 			},
 			"displayname": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "A name that can distinguish the zone from other zone instances with the same name.",
+				Optional:    true,
 			},
 		},
 	}

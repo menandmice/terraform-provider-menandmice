@@ -21,71 +21,81 @@ func resourceDHCPReservation() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Internal reference to this DHCP reservation",
+				Computed:    true,
 			},
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The name of DHCP reservation you want to query",
+				Required:    true,
 			},
 			"type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type: schema.TypeString,
+				// TODO set default, and descripe default instead from letting server pick.
+				Description: "The type of this DHCP reservation. For example: DHCP , BOOTP , BOTH.",
+				Optional:    true,
+				Default:     "",
 				ValidateFunc: validation.StringInSlice([]string{
 					"DHCP", "BOOTP", "BOTH",
 				}, false),
 			},
 			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Description for the reservation. Only applicable for MS DHCP servers.",
+				Optional:    true,
 			},
 			"client_identifier": &schema.Schema{
-
 				Type:         schema.TypeString,
+				Description:  "The client_identifier of this reservation.",
 				Required:     true,
 				ValidateFunc: validation.IsMACAddress, // TODO only when reservation_method is mac
 			},
 
 			"reservation_method": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "HardwareAddress", // TODO maybe ClientIdentifier is better for terraform
+				Type:        schema.TypeString,
+				Description: "DHCP reservation method, For example: HardwareAddress , ClientIdentifier. Default: HardwareAddress.",
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "HardwareAddress", // TODO maybe ClientIdentifier is better for terraform
 				ValidateFunc: validation.StringInSlice([]string{
 					"HardwareAddress", "ClientIdentifier",
 				}, false),
 			},
 			"addresses": &schema.Schema{
-				Type:     schema.TypeList,
-				ForceNew: true,
-				Required: true,
-				MinItems: 1,
+				Type:        schema.TypeList,
+				Description: "A list of zero or more IP addresses used for the reservation.",
+				ForceNew:    true,
+				Required:    true,
+				MinItems:    1,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateFunc: validation.Any(
-
 						validation.IsIPv4Address,
 						validation.IsIPv6Address),
 					DiffSuppressFunc: ipv6AddressDiffSuppress,
 				},
 			},
 			"ddns_hostname": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Dynamic DNS host name for reservation. Only applicable for ISC DHCP servers.",
+				Optional:    true,
 			},
 
 			"filename": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "The filename DHCP option. Only applicable for ISC DHCP servers.",
+				Optional:    true,
 			},
 			"servername": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "The server-name DHCP option. Only applicable for ISC DHCP servers.",
+				Optional:    true,
 			},
 			"next_server": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "The next-server ISC DHCP option. Only applicable for ISC DHCP servers.",
+				Optional:    true,
 			},
 
 			// TODO one off dhcpserver,dhcpgroup,dhcpscope ?
@@ -94,13 +104,15 @@ func resourceDHCPReservation() *schema.Resource {
 			// which will be detected as difference if you had not a separation between owner and owner_ref
 			// so owner can be a human readable form of owner_ref (serverName,dhcpscopeName,dhcpgroupName), while we can still store cannical form of onwner_ref. owner can't be read via the api
 			"owner": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Description: "DHCP group scope or server where this reservation is made.",
+				Required:    true,
+				ForceNew:    true,
 			},
 			"owner_ref": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Internal refference to the DHCP group scope or server where this reservation is made.",
+				Computed:    true,
 			},
 		},
 	}
