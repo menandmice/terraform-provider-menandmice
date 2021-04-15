@@ -39,6 +39,9 @@ module "data-source_dhcp_reservation" {
   source = "./data-sources/menandmice_dhcp_reservation"
 }
 
+module "data-source_dhcp_scope" {
+  source = "./data-sources/menandmice_dhcp_scope"
+}
 module "data-source_dns_record" {
   source = "./data-sources/menandmice_dns_record"
 }

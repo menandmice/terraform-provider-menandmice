@@ -39,6 +39,9 @@ else
 endif
 	rm examples/.terraform.lock.hcl ||true
 
+generate_doc:
+	tfplugindocs  generate # https://github.com/hashicorp/terraform-plugin-docs
+
 example: init
 	cd examples && terraform init && terraform apply -auto-approve && terraform destroy -auto-approve
 
