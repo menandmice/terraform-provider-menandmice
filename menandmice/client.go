@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -40,6 +41,12 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 		return nil, errors.New("REST API endpoint must be configured")
 		//TODO check if it resolaves
 	}
+
+	if match, _ := regexp.MatchString("^(http|https)://", c.MMEndpoint); !match {
+
+		return nil, fmt.Errorf("REST API endpoint: %s must start with \"http://\" or \"https://\"", c.MMEndpoint)
+	}
+
 	if c.MMUsername == "" {
 		return nil, errors.New("Invalid Username setting")
 	}
@@ -56,7 +63,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetBasicAuth(c.MMUsername, c.MMPassword)
 	client.SetHeader("Content-Type", "application/json")
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
-	client.SetHostURL("http://" + c.MMEndpoint + "/mmws/api")
+	client.SetHostURL(c.MMEndpoint + "/mmws/api")
 
 	// TODO check if this works well with dns round robin
 	client.SetRetryCount(5)
@@ -65,7 +72,15 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 		// also retry  on server errors
 		return r.StatusCode() >= 500 && r.StatusCode() < 600
 	})
-	return &client, nil
+
+	// test if we can make a connection
+
+	_, err := client.R().Get("")
+	if err != nil {
+		return nil, fmt.Errorf("could not connect with endpoint: %s\n\t%s", c.MMEndpoint, err)
+	}
+
+	return &client, err
 }
 
 type DeleteRequest struct {

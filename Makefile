@@ -29,6 +29,7 @@ release:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_windows_amd64
 
 install: build
+
 ifeq ("${TERRAFORMVERSIONGT013}","1")
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
@@ -36,7 +37,7 @@ else
 	mkdir -p ~/.terraform.d/plugins/${OS_ARCH}
 	cp ${BINARY} ~/.terraform.d/plugins/${OS_ARCH}
 endif
-
+	rm examples/.terraform.lock.hcl
 
 example: init
 	cd examples && terraform init && terraform apply -auto-approve && terraform destroy -auto-approve

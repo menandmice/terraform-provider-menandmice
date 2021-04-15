@@ -77,7 +77,7 @@ func providerConfigure(c context.Context, d *schema.ResourceData) (interface{}, 
 	}
 
 	if params.MMEndpoint == "" {
-		diags = append(diags, diag.Errorf("REST API endpoint set for provider menandmice.")...)
+		diags = append(diags, diag.Errorf("No REST API endpoint set for provider menandmice.")...)
 	}
 	if params.MMUsername == "" {
 		diags = append(diags, diag.Errorf("No username set for provider menandmice.")...)
