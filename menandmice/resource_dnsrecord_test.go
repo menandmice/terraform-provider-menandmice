@@ -38,7 +38,7 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				//TODO avoid ImportStateVerifyIgnore: "server", "zone"
-				ImportStateVerifyIgnore: []string{"server", "zone"}, // view is also not set but was empty
+				ImportStateVerifyIgnore: []string{"server", "zone", "view"},
 			},
 			{
 				ResourceName:      "menandmice_dns_record.testrec",

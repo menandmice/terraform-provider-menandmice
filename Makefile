@@ -37,7 +37,7 @@ else
 	mkdir -p ~/.terraform.d/plugins/${OS_ARCH}
 	cp ${BINARY} ~/.terraform.d/plugins/${OS_ARCH}
 endif
-	rm examples/.terraform.lock.hcl
+	rm examples/.terraform.lock.hcl ||true
 
 example: init
 	cd examples && terraform init && terraform apply -auto-approve && terraform destroy -auto-approve
