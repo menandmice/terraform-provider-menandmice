@@ -7,8 +7,15 @@ terraform {
     }
   }
 }
-resource menandmice_ipam_record ipam2 {
+resource menandmice_ipam_record ipam1 {
   address = "192.168.2.3"
   custom_properties = {"location":"here"}
   claimed = true
+}
+
+esource menandmice_ipam_record ipam2 {
+  free_ip {
+    range = "192.168.2.0/24"
+    start_at = "192.168.2.50"
+  }
 }

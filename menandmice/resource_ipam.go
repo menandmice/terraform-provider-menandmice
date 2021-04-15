@@ -71,6 +71,7 @@ func resourceIPAMRec() *schema.Resource {
 					},
 				},
 			},
+
 			"address": &schema.Schema{
 				Type:         schema.TypeString,
 				Description:  "The IP address to claim",
@@ -90,6 +91,11 @@ func resourceIPAMRec() *schema.Resource {
 					return false
 				},
 				ForceNew: true,
+			},
+			"current_address": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Address currently used",
+				Computed:    true,
 			},
 			// TODO might not be a good idea to make this configerable.
 			// What does it mean to delete unclaimed iprecord
@@ -231,6 +237,7 @@ func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 
 	d.Set("ref", ipamrec.Ref)
 	d.Set("address", ipamrec.Address)
+	d.Set("current_address", ipamrec.Address)
 	d.Set("claimed", ipamrec.Claimed)
 
 	// d.Set("dnshost", ipamrec.DNSHost)
