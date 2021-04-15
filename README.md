@@ -13,17 +13,20 @@ make install
 First, build and install the provider.
 
 ```shell
-go build -o terraform-provider-menandmice
+go build -o terraform-provider-menandmice.exe
 ```
-copy the binary: terraform-provider-menandmice to:
+copy the binary: terraform-provider-menandmice.exe to:
 
 * terraform-0.12 -> `%APPDATA%\terraform.d\plugins\windows_amd64\`
-* terraform-0.13 -> `%APPDATA%\terraform.d\plugins\terraform-provider-menandmice\local\menandmice\0.2\windows_amd64\`
+* terraform-0.14 -> `%APPDATA%\terraform.d\plugins\registry.terraform.io\local\menandmice\0.2.0\windows_amd64\`
 
+```shell
+terraform.exe init
+```
 
 # run Acceptation test
 
-You need a working man and mince server with:
+You need a working Micetro server with:
   - dnsserver: mandm.example.net. mandm.example.com.
   - dhcpserver: mandm.example.net.
   - ipam-properties: location
