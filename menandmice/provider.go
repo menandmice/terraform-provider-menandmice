@@ -60,6 +60,7 @@ func Provider() *schema.Provider {
 			"menandmice_dns_zone":         DataSourceDNSZone(),
 			"menandmice_ipam_record":      DataSourceIPAMRec(),
 			"menandmice_dhcp_reservation": DataSourceDHCPReservation(),
+			"menandmice_dhcp_scope":       DataSourceDHCPScope(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

@@ -66,6 +66,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetHostURL(c.MMEndpoint + "/mmws/api")
 
 	// TODO check if this works well with dns round robin
+	// TODO is this needed
 	client.SetRetryCount(5)
 	client.SetRetryWaitTime(1 * time.Second)
 	client.AddRetryCondition(func(r *resty.Response, e error) bool {
@@ -75,6 +76,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 
 	// test if we can make a connection
 
+	// TODO use request that need autheication
 	_, err := client.R().Get("")
 	if err != nil {
 		return nil, fmt.Errorf("could not connect with endpoint: %s\n\t%s", c.MMEndpoint, err)
