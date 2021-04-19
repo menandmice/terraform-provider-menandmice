@@ -3,7 +3,7 @@
 page_title: "menandmice_dns_zone Data Source - terraform-provider-menandmice"
 subcategory: ""
 description: |-
-  
+
 ---
 
 # menandmice_dns_zone (Data Source)
@@ -24,7 +24,7 @@ terraform {
 }
 data menandmice_dns_zone zone1 {
   name = "zone1.net."
-  server = "mandm.example.net."
+  server = "micetro.example.net."
 }
 ```
 
@@ -33,29 +33,27 @@ data menandmice_dns_zone zone1 {
 
 ### Required
 
-- **name** (String) Name of DNS zone. Name must and with '.'
-- **server** (String) DNS server where record is stored. DNS server name should with '.'
+- **name** (String) Fully qualified name of DNS zone, ending with the trailing dot '.'.
+- **server** (String) Fully qualified name of the DNS server where the record is stored, ending with the trailing dot '.'.
 
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **view** (String) Name of the view this DNS zone is in
+- **view** (String) Name of the view this DNS zone is in.
 
 ### Read-Only
 
-- **adintegrated** (Boolean) If DNS zone is intergrated with Active Directory.
-- **authority** (String) the DNS authoritive server for this zone
-- **created** (String) Date when zone was created in the suite.
+- **adintegrated** (Boolean) If the DNS zone is AD integrated. (Default: False)
+- **authority** (String) The authoritative DNS server for this zone. Requires FQDN with the trailing dot '.'.
+- **created** (String) Date when zone was created in Micetro.
 - **customp_properties** (Map of String) Map of custom properties associated with this DNS zone.
-- **displayname** (String) A name that can distinguish the zone from other zone instances with the same name.
-- **dnssecsigned** (Boolean) If DNS signing is enabled
-- **dnsviewref** (String) Interal references to views.
-- **dnsviewrefs** (Set of String) Interal references to views. Only used with Active Directory.
-- **dynamic** (Boolean) If DNS zone Dynamic
-- **kskids** (String) A comma separated string of IDs of KSKs, starting with active keys, then inactive keys in parenthesis.
-- **lastmodified** (String) Date when zone was last modified in the suite.
-- **ref** (String) Internal references to this DNS zone
-- **type** (String) the DNS zone type.For example: Master, Slave, Hint, Stub, Forward.
-- **zskids** (String) A comma separated string of IDs of ZSKs, starting with active keys, then inactive keys in parenthesis.
-
-
+- **displayname** (String) A display name to distinguish the zone from other, identically named zone instances.
+- **dnssecsigned** (Boolean) If DNS signing is enabled.
+- **dnsviewref** (String) Internal references to views.
+- **dnsviewrefs** (Set of String) Internal references to views. Only used with Active Directory.
+- **dynamic** (Boolean) If the DNS zone is dynamic. (Default: False)
+- **kskids** (String) A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.
+- **lastmodified** (String) Date when zone was last modified in Micetro.
+- **ref** (String) Internal references to this DNS zone.
+- **type** (String) The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward. (Default: Master)
+- **zskids** (String) A comma-separated string of IDs of ZSKs. Starting with active keys, then inactive keys in parenthesis.

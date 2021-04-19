@@ -18,12 +18,12 @@ func DataSourceIPAMRec() *schema.Resource {
 
 			"ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal reference to ipam record",
+				Description: "Internal reference for the IP address.",
 				Computed:    true,
 			},
 			"address": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The IP address",
+				Description: "The IP address.",
 				Required:    true,
 				ValidateFunc: validation.Any(
 					validation.IsIPv4Address,
@@ -32,7 +32,7 @@ func DataSourceIPAMRec() *schema.Resource {
 			},
 			"claimed": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "If this address is claimed",
+				Description: "If the IP address is claimed.",
 				Computed:    true,
 			},
 			// "dnshost": &schema.Schema{
@@ -43,7 +43,7 @@ func DataSourceIPAMRec() *schema.Resource {
 			// },
 			"discovery_type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Way IP address use is dicoverd. For example: None, Ping, ARP, Lease, Custom.",
+				Description: "The discovery method of the IP address. Example: None, Ping, ARP, Lease, Custom.",
 				Computed:    true,
 			},
 			"last_seen_date": &schema.Schema{
@@ -59,29 +59,29 @@ func DataSourceIPAMRec() *schema.Resource {
 			},
 			"last_known_client_identifier": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The MAC address associated with the IP address discovery info.",
+				Description: "The last known MAC address associated with the IP address discovery information.",
 				Computed:    true,
 			},
 
 			"device": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The device associated with the record.",
+				Description: "The device associated with the object.",
 				Computed:    true,
 			},
 
 			"interface": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The interface associated with the record.",
+				Description: "The interface associated with the object.",
 				Computed:    true,
 			},
 			"ptr_status": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "PTR record status. For example: Unknown, OK, Verify.",
+				Description: "PTR record status. Example: Unknown, OK, Verify.",
 				Computed:    true,
 			},
 			"extraneous_ptr": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "Contains true if there are extraneous PTR records for the record.",
+				Description: "'True' if there are extraneous PTR records for the object.",
 				Computed:    true,
 			},
 			"custom_properties": &schema.Schema{
@@ -94,12 +94,12 @@ func DataSourceIPAMRec() *schema.Resource {
 			},
 			"state": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "state of IP addres. For exampe: Free, Assigned, Claimed, Pending, Held.",
+				Description: "The state of the IP address. Example: Free, Assigned, Claimed, Pending, Held.",
 				Computed:    true,
 			},
 			"hold_info": &schema.Schema{
 				Type:        schema.TypeList,
-				Description: "Contains information about who holds the otherwise free IP and for how long.",
+				Description: "Contains information about who holds the otherwise free IP, and for how long.",
 				Computed:    true,
 				// MaxItems: 1,
 				Elem: &schema.Resource{

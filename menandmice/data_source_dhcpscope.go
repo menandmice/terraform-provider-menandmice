@@ -16,25 +16,25 @@ func DataSourceDHCPScope() *schema.Resource {
 
 			"ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal reference to this DHCP reservation",
+				Description: "Internal reference to this DHCP reservation.",
 				Computed:    true,
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The name of DHCP scope you want to query",
+				Description: "The name of the DHCP scope you want to query.",
 				Computed:    true,
 			},
 
 			"cidr": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The cidr of DHCPScope",
+				Description: "The cidr of DHCPScope.",
 				// TODO validate
 				Required: true,
 			},
 
 			"dhcp_server": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The dhcpserver of this scope",
+				Description: "The DHCP server of this scope.",
 				// TODO validate
 				Optional: true,
 			},
@@ -59,7 +59,7 @@ func DataSourceDHCPScope() *schema.Resource {
 
 			"enabled": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "If this Scope is enabled",
+				Description: "If this scope is enabled",
 				Computed:    true,
 			},
 		},
@@ -95,7 +95,7 @@ func dataSourceDHCPScopeRead(c context.Context, d *schema.ResourceData, m interf
 
 	switch {
 	case len(dhcpScopes) <= 0:
-		return diag.Errorf("no DHCPScopes found matching you criteria")
+		return diag.Errorf("No matching DHCP scopes were found.")
 		// TODO comment why not needed
 		// case len(dnsrecs) > 1:
 		// 	return diag.Errorf("%v DNSRecords found matching you criteria, but should be only 1", len(dnsrecs))

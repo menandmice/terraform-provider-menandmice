@@ -27,13 +27,13 @@ func resourceDHCPReservation() *schema.Resource {
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The name of DHCP reservation you want to query",
+				Description: "The name of DHCP reservation you want to query.",
 				Required:    true,
 			},
 			"type": &schema.Schema{
 				Type: schema.TypeString,
 				// TODO set default, and descripe default instead from letting server pick.
-				Description: "The type of this DHCP reservation. For example: DHCP , BOOTP , BOTH.",
+				Description: "The type of this DHCP reservation. Example: DHCP , BOOTP , BOTH.",
 				Optional:    true,
 				Default:     "",
 				ValidateFunc: validation.StringInSlice([]string{
@@ -54,7 +54,7 @@ func resourceDHCPReservation() *schema.Resource {
 
 			"reservation_method": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "DHCP reservation method, For example: HardwareAddress , ClientIdentifier. Default: HardwareAddress.",
+				Description: "DHCP reservation method. Example: HardwareAddress , ClientIdentifier. (Default: HardwareAddress)",
 				Optional:    true,
 				ForceNew:    true,
 				Default:     "HardwareAddress", // TODO maybe ClientIdentifier is better for terraform
@@ -64,7 +64,7 @@ func resourceDHCPReservation() *schema.Resource {
 			},
 			"addresses": &schema.Schema{
 				Type:        schema.TypeList,
-				Description: "A list of zero or more IP addresses used for the reservation.",
+				Description: "A list of IP addresses used for the reservation.",
 				ForceNew:    true,
 				Required:    true,
 				MinItems:    1,
@@ -78,7 +78,7 @@ func resourceDHCPReservation() *schema.Resource {
 			},
 			"ddns_hostname": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Dynamic DNS host name for reservation. Only applicable for ISC DHCP servers.",
+				Description: "Dynamic DNS hostname for the reservation. Only applicable for ISC DHCP servers.",
 				Optional:    true,
 			},
 
@@ -111,7 +111,7 @@ func resourceDHCPReservation() *schema.Resource {
 			},
 			"owner_ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal refference to the DHCP group scope or server where this reservation is made.",
+				Description: "Internal reference to the DHCP group scope or server where this reservation is made.",
 				Computed:    true,
 			},
 		},

@@ -2,13 +2,13 @@
 
 ## Manual Build and Install
 
-### Install one Mac or Linux
+### Install on Mac or Linux
 
 ```shell
 make install
 ```
 
-### Install on windows
+### Install on Windows
 
 First, build and install the provider.
 
@@ -27,8 +27,8 @@ terraform.exe init
 # run Acceptation test
 
 You need a working Micetro server with:
-  - dnsserver: mandm.example.net. mandm.example.com.
-  - dhcpserver: mandm.example.net.
+  - dnsserver: micetro.example.net. micetro.example.com.
+  - dhcpserver: micetro.example.net.
   - ipam-properties: location
 
 

@@ -26,12 +26,12 @@ func resourceDNSRec() *schema.Resource {
 
 			"ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "internal reference to this DNS record",
+				Description: "Internal reference to this DNS record.",
 				Computed:    true,
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The name of DNS record",
+				Description: "The DNS record name.",
 				Required:    true,
 			},
 			"data": &schema.Schema{
@@ -39,11 +39,11 @@ func resourceDNSRec() *schema.Resource {
 				Description:  "The data stored in the DNS record.",
 				Required:     true,
 				ValidateFunc: validation.StringIsNotEmpty,
-				// You cannot validate data here, because you dont have acces to what kind of record it is
+				// You cannot validate data here, because you dont have access to the record type
 			},
 			"type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The DNS recod type. This can be: A, AAAA, CNAME, DNAME, DLV, DNSKEY, DS, HINFO, LOC, MX, NAPTR, NS, NSEC3PARAM, PTR, RP, SOA, SPF, SRV, SSHFP, TLSA, TXT. Default: A",
+				Description: "The DNS recod type. Accepted types: A, AAAA, CNAME, DNAME, DLV, DNSKEY, DS, HINFO, LOC, MX, NAPTR, NS, NSEC3PARAM, PTR, RP, SOA, SPF, SRV, SSHFP, TLSA, TXT. (Default: A)",
 				ForceNew:    true,
 				Optional:    true,
 				Default:     "A",
@@ -59,7 +59,7 @@ func resourceDNSRec() *schema.Resource {
 			},
 			"comment": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Comment string for this record. Note that only records in static DNS zones can have a comment string.",
+				Description: "Contains the comment string for the record. Only records in static DNS zones can have a comment string. Some cloud DNS provides do not support comments.",
 				Optional:    true,
 			},
 			"aging": &schema.Schema{
@@ -70,27 +70,27 @@ func resourceDNSRec() *schema.Resource {
 			},
 			"ttl": &schema.Schema{
 				Type:         schema.TypeInt,
-				Description:  "The DNS recod Time To Live. How long in seconds the record is allowed to be cached",
+				Description:  "The DNS record's Time To Live value in seconds, setting how long the record is allowed to be cached.",
 				Optional:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 			},
 			"enabled": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "If this DNS record should enabled. Default: True",
+				Description: "If the DNS record is enabled. (Default: True)",
 				Optional:    true,
 				Default:     true,
 			},
 
 			"server": &schema.Schema{
 				Type:         schema.TypeString,
-				Description:  "The DNS server where this DNS record is stored. This should end with a '.'.",
+				Description:  "The DNS server where the DNS record is stored. Requires FQDN with the trialing dot '.'.",
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Server name should end with '.'"),
 			},
 			"view": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The optional view where this DNS record is in. For example: internal.",
+				Description: "The view of the DNS record. Example: internal.",
 				Optional:    true,
 				Default:     "",
 				ForceNew:    true,
@@ -98,7 +98,7 @@ func resourceDNSRec() *schema.Resource {
 
 			"zone": &schema.Schema{
 				Type:         schema.TypeString,
-				Description:  "The DNS zone were record is in.",
+				Description:  "The DNS zone where the record is stored. Requires FQDN with the trailing dot '.'.",
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
@@ -106,10 +106,10 @@ func resourceDNSRec() *schema.Resource {
 
 			"dns_zone_ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal ref to zone where record is in",
+				Description: "Internal reference to the zone where this DNS record is stored.",
 				Computed:    true,
 			},
-			// TODO add force oferwrite
+			// TODO add force overwrite
 		},
 	}
 }
@@ -157,7 +157,7 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 			Ttl:     ttlString,
 			Data:    d.Get("data").(string),
 			Comment: d.Get("comment").(string),
-			Aging:   d.Get("aging").(int), // when not specified it's 0 witch will be ignored
+			Aging:   d.Get("aging").(int), // when not specified it's 0 which will be ignored
 			Enabled: d.Get("enabled").(bool),
 		},
 	}
@@ -238,7 +238,7 @@ func resourceDNSRecImport(ctx context.Context, d *schema.ResourceData, m interfa
 		fqdn := strings.SplitN(parts[2], ".", 2)
 
 		if len(fqdn) != 2 {
-			return nil, fmt.Errorf("could not parse fqdn %s", parts[2])
+			return nil, fmt.Errorf("Could not parse FQDN %s", parts[2])
 		}
 		d.Set("name", fqdn[0])
 		d.Set("zone", fqdn[1])

@@ -23,32 +23,32 @@ func resourceDNSZone() *schema.Resource {
 
 			"ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal references to this DNS zone",
+				Description: "Internal references to this DNS zone.",
 				Computed:    true,
 			},
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
-				Description:  "Name of DNS zone. Name must and with '.' ",
+				Description:  "Fully qualified name of DNS zone, ending with the trailing dot '.'.",
 				Required:     true,
-				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "name must end with '.'"),
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Name must end with '.'"),
 			},
 			"dynamic": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "If DNS zone Dynamic, default: False",
+				Description: "If the DNS zone is dynamic. (Default: False)",
 				Optional:    true,
 				Default:     false,
 			},
 			// TODO following nameing convetion it would be ad_intergrated
 			"adintegrated": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "If DNS zone is intergrated with Active Directory. Default: False.",
+				Description: "If the DNS zone is AD integrated. (Default: False)",
 				Optional:    true,
 				Default:     false,
 				ForceNew:    true,
 			},
 			"view": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Name of the view this DNS zone is in",
+				Description: "Name of the view this DNS zone is in.",
 				Optional:    true,
 				Default:     "",
 			},
@@ -67,7 +67,7 @@ func resourceDNSZone() *schema.Resource {
 			},
 			"type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "the DNS zone type.For example: Master, Slave, Hint, Stub, Forward.",
+				Description: "The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward. (Default: Master)",
 				Optional:    true,
 				Default:     "Master",
 				ValidateFunc: validation.StringInSlice([]string{
@@ -76,7 +76,7 @@ func resourceDNSZone() *schema.Resource {
 			},
 			"masters": &schema.Schema{
 				Type:        schema.TypeList,
-				Description: "List of all masters IP address, for slave zones.",
+				Description: "List of IP addresses of all master zones, for slave zones.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateFunc: validation.Any(
@@ -89,7 +89,7 @@ func resourceDNSZone() *schema.Resource {
 
 			"authority": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "the DNS authoritive server for this zone",
+				Description: "The authoritative DNS server for this zone. Requires FQDN with the trailing dot '.'.",
 				ForceNew:    true,
 				Required:    true,
 				// TODO can also be a AD authority
@@ -105,13 +105,13 @@ func resourceDNSZone() *schema.Resource {
 
 			"kskids": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "A comma separated string of IDs of KSKs, starting with active keys, then inactive keys in parenthesis.",
+				Description: "A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.",
 				Optional:    true,
 			},
 
 			"zskids": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "A comma separated string of IDs of ZSKs, starting with active keys, then inactive keys in parenthesis.",
+				Description: "A comma-separated string of IDs of ZSKs. Starting with active keys, then inactive keys in parenthesis.",
 				Optional:    true,
 			},
 
@@ -126,7 +126,7 @@ func resourceDNSZone() *schema.Resource {
 			"adreplicationtype": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Replication types for an AD integrated zone.",
+				Description: "Replication type if the zone is AD integrated.",
 				ValidateFunc: validation.StringInSlice([]string{
 					"None", "To_All_DNS_Servers_In_AD_Forrest",
 					"To_All_DNS_Servers_In_AD_Domain", "To_All_Domain_Controllers_In_AD_Domain",
@@ -135,22 +135,22 @@ func resourceDNSZone() *schema.Resource {
 			},
 			"adpartition": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The AD partition if the zone is Active Directory integrated.",
+				Description: "The AD partition if the zone is AD integrated.",
 				Optional:    true,
 			},
 			"created": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Date when zone was created in the suite.",
+				Description: "DDate when zone was created in Micetro.",
 				Computed:    true,
 			},
 			"lastmodified": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Date when zone was last modified in the suite.",
+				Description: "Date when zone was last modified in Micetro.",
 				Computed:    true,
 			},
 			"displayname": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "A name that can distinguish the zone from other zone instances with the same name.",
+				Description: "A display name to distinguish the zone from other, identically named zone instances.",
 				Optional:    true,
 			},
 		},
@@ -203,7 +203,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		AdIntegrated: d.Get("adintegrated").(bool),
 		Authority:    tryGetString(d, "authority"),
 
-		// you should not set this youself
+		// you should not set this yourself
 		// Created:      d.Get("created").(string),
 		// LastModified: tryGetString(d, "lastmodified"),
 
@@ -287,7 +287,7 @@ func resourceDNSZoneUpdate(c context.Context, d *schema.ResourceData, m interfac
 		d.HasChange("dnsviewref") || d.HasChange("dnsviewrefs") ||
 		d.HasChange("authority") {
 		// this can't never error can never happen because of "ForceNew: true," for these properties
-		return diag.Errorf("can't change readonly property, of DNSZone")
+		return diag.Errorf("can't change read-only property of DNS zone")
 	}
 	client := m.(*Mmclient)
 	ref := d.Id()
@@ -322,7 +322,7 @@ func resourceDNSZoneImport(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	// if we had used schema.ImportStatePassthrough
-	// we could not have set id to its cannical form
+	// we could not have set id to its canonical form
 	d.SetId(d.Get("ref").(string))
 
 	return []*schema.ResourceData{d}, nil
