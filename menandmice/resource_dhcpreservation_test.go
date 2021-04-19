@@ -9,8 +9,8 @@ import (
 )
 
 func TestAccMenandmiceDHCPReservationBasic(t *testing.T) {
-	name := "terraform-test-resrvation"
-	owner := "mandm.example.net."
+	name := "terraform-test-reservation"
+	owner := "micetro.example.net."
 	clientIdentifier := "44:55:66:77:88:00"
 	addressess := `"192.168.1.8"`
 

@@ -20,37 +20,37 @@ func DataSourceDNSZone() *schema.Resource {
 
 			"ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal references to this DNS zone",
+				Description: "Internal references to this DNS zone.",
 				Computed:    true,
 			},
 
 			"server": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "DNS server where record is stored. DNS server name should with '.' ",
+				Description:  "Fully qualified name of the DNS server where the record is stored, ending with the trailing dot '.'.",
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
 			},
 			"view": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Name of the view this DNS zone is in",
+				Description: "Name of the view this DNS zone is in.",
 				Optional:    true,
 				Default:     "",
 			},
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
-				Description:  "Name of DNS zone. Name must and with '.' ",
+				Description:  "Fully qualified name of DNS zone, ending with the trailing dot '.'.",
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "name must end with '.'"),
 				Required:     true,
 			},
 			"dynamic": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "If DNS zone Dynamic",
+				Description: "If the DNS zone is dynamic.",
 				Computed:    true,
 			},
 			// TODO following nameing convetion it would be ad_intergrated
 			"adintegrated": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "If DNS zone is intergrated with Active Directory.",
+				Description: "If the DNS zone is AD integrated.",
 				Computed:    true,
 			},
 
@@ -69,27 +69,27 @@ func DataSourceDNSZone() *schema.Resource {
 			},
 			"type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "the DNS zone type.For example: Master, Slave, Hint, Stub, Forward.",
+				Description: "The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward.",
 				Computed:    true,
 			},
 			"authority": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "the DNS authoritive server for this zone",
+				Description: "The authoritative DNS server for this zone.",
 				Computed:    true,
 			},
 			"dnssecsigned": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "If DNS signing is enabled",
+				Description: "If DNS signing is enabled.",
 				Computed:    true,
 			},
 			"kskids": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "A comma separated string of IDs of KSKs, starting with active keys, then inactive keys in parenthesis.",
+				Description: "A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.",
 				Computed:    true,
 			},
 			"zskids": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "A comma separated string of IDs of ZSKs, starting with active keys, then inactive keys in parenthesis.",
+				Description: "A comma-separated string of IDs of ZSKs. Starting with active keys, then inactive keys in parenthesis.",
 				Computed:    true,
 			},
 
@@ -104,17 +104,17 @@ func DataSourceDNSZone() *schema.Resource {
 
 			"created": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Date when zone was created in the suite.",
+				Description: "Date when zone was created in Micetro.",
 				Computed:    true,
 			},
 			"lastmodified": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Date when zone was last modified in the suite.",
+				Description: "Date when zone was last modified in Micetro.",
 				Computed:    true,
 			},
 			"displayname": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "A name that can distinguish the zone from other zone instances with the same name.",
+				Description: "A display name to distinguish the zone from other, identically named zone instances.",
 				Computed:    true,
 			},
 		},
@@ -138,9 +138,9 @@ func dataSourceDNSZoneRead(c context.Context, d *schema.ResourceData, m interfac
 
 	if dnszone == nil {
 		if view == "" {
-			return diag.Errorf("dnszone %v does not exist on server %v", name, server)
+			return diag.Errorf("The DNS zone %v does not exist on server %v", name, server)
 		} else {
-			return diag.Errorf("dnszone %v does not exist in view %v on %v", name, view, server)
+			return diag.Errorf("The DNS zone %v does not exist in view %v on %v", name, view, server)
 		}
 	}
 	writeDNSZoneSchema(d, *dnszone)

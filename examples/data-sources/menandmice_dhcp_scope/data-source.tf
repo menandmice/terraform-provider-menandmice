@@ -7,7 +7,8 @@ terraform {
     }
   }
 }
-data menandmice_dns_zone zone1 {
-  name = "zone1.net."
-  server = "micetro.example.net."
+
+data menandmice_dhcp_scope scope1{
+  dhcp_server= "micetro.example.net."
+  cidr = "192.168.2.0/24"
 }

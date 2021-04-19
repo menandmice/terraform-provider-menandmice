@@ -3,7 +3,7 @@
 page_title: "menandmice_dns_record Data Source - terraform-provider-menandmice"
 subcategory: ""
 description: |-
-  
+
 ---
 
 # menandmice_dns_record (Data Source)
@@ -13,15 +13,24 @@ description: |-
 ## Example Usage
 
 ```terraform
+terraform {
+  required_providers {
+    menandmice = {
+      # uncomment for terraform 0.13 and higher
+      version = "~> 0.2",
+      source  = "local/menandmice",
+    }
+  }
+}
 data menandmice_dns_zone zone1 {
   name = "zone1.net."
-  server = "mandm.example.net."
+  server = "micetro.example.net."
 }
 
 data menandmice_dns_record rec1 {
   name = "test"
   zone = data.menandmice_dns_zone.zone1.name  # "zone1.net."
-  server = "mandm.example.net."
+  server = "micetro.example.net."
   type = "A"
 }
 ```
@@ -32,23 +41,21 @@ data menandmice_dns_record rec1 {
 ### Required
 
 - **name** (String) The DNS record name.
-- **server** (String) The DNS server where DNS record is stored
-- **type** (String) The DNS recod type. for example: CNAME
-- **zone** (String) The DNS zone were record is in.
+- **server** (String) The DNS server where the DNS record is stored. Requires FQDN with the trailing dot '.'.
+- **type** (String) The DNS record type. Example: CNAME , A, MX. (Default: A)
+- **zone** (String) The DNS zone where the record is stored. Requires FQDN with the trailing dot '.'.
 
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **view** (String) The view of DNS record. For example internal.
+- **view** (String) The view of the DNS record. Example: internal.
 
 ### Read-Only
 
 - **aging** (Number) The aging timestamp of dynamic records in AD integrated zones. Hours since January 1, 1601, UTC. Providing a non-zero value creates a dynamic record.
-- **comment** (String) Contains the comment string for the record. Note that only records in static DNS zones can have a comment string.
-- **data** (String) The data stored in the record
-- **dns_zone_ref** (String) internal reference to zone where this DNS record is store
-- **enabled** (Boolean) If DNS record is enabled
-- **ref** (String) internal reference to this DNS record
-- **ttl** (Number) The DNS recod Time To Live. How long in seconds the record is allowed to be cached
-
-
+- **comment** (String) Contains the comment string for the record. Only records in static DNS zones can have a comment string. Some cloud DNS provides do not support comments.
+- **data** (String) The data stored in the DNS record.
+- **dns_zone_ref** (String) Internal reference to the zone where this DNS record is stored.
+- **enabled** (Boolean) If the DNS record is enabled. (Default: True)
+- **ref** (String) Internal reference to this DNS record.
+- **ttl** (Number) The DNS record's Time To Live value in seconds, setting how long the record is allowed to be cached.

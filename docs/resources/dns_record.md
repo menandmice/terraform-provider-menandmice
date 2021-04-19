@@ -13,6 +13,16 @@ description: |-
 ## Example Usage
 
 ```terraform
+terraform {
+  required_providers {
+    menandmice = {
+      # uncomment for terraform 0.13 and higher
+      version = "~> 0.2",
+      source  = "local/menandmice",
+    }
+  }
+}
+
 data menandmice_dns_zone zone1 {
   name = "zone1.net."
   server = "mandm.example.net."
@@ -52,4 +62,14 @@ resource menandmice_dns_record rec2 {
 - **dns_zone_ref** (String) Internal ref to zone where record is in
 - **ref** (String) internal reference to this DNS record
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# import with DNS record ref
+terraform import menandmice_dns_record.resourcename DNSRecords/2294
+
+# import with readable name
+terraform import menandmice_dns_record.resourcename mandm.example.net.::www.test.org.:A # <dns server>:<view>:<zone>:<type>
+```

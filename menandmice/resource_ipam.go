@@ -25,12 +25,12 @@ func resourceIPAMRec() *schema.Resource {
 
 			"ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal reference to ipam record",
+				Description: "Internal reference for the IP address.",
 				Computed:    true,
 			},
 			"free_ip": &schema.Schema{
 				Type:         schema.TypeList,
-				Description:  "Find a free IP address to claim",
+				Description:  "Find a free IP address to claim.",
 				Optional:     true,
 				ExactlyOneOf: []string{"free_ip", "address"},
 				MaxItems:     1,
@@ -38,32 +38,32 @@ func resourceIPAMRec() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"range": &schema.Schema{
 							Type:        schema.TypeString,
-							Description: "pick IP address from range with name",
+							Description: "Pick IP address from range with name",
 							Required:    true,
 						},
 						"start_at": &schema.Schema{
 							Type:        schema.TypeString,
-							Description: "Start searching for IP from",
+							Description: "Start searching for IP address from",
 							Default:     "",
 							Optional:    true,
 							// TODO validate that its valide ip in the range of range
 						},
 						"ping": &schema.Schema{
 							Type:        schema.TypeBool,
-							Description: "Verify ip is free with Ping",
+							Description: "Verify IP address is free with ping",
 							Default:     false,
 							Optional:    true,
 						},
 						"exclude_dhcp": &schema.Schema{
 							Type:        schema.TypeBool,
-							Description: "Exclude IP address that are Assigned via DHCP",
+							Description: "Exclude IP addresses that are assigned via DHCP",
 							Default:     false,
 							Optional:    true,
 						},
 
 						"temporary_claim_time": &schema.Schema{
 							Type:         schema.TypeInt,
-							Description:  "Time in seconds to temporary claim IP address. So it won't be claimed by others, when the claim is in progess",
+							Description:  "Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.",
 							Default:      60,
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 300),
@@ -74,7 +74,7 @@ func resourceIPAMRec() *schema.Resource {
 
 			"address": &schema.Schema{
 				Type:         schema.TypeString,
-				Description:  "The IP address to claim",
+				Description:  "The IP address to claim.",
 				ExactlyOneOf: []string{"free_ip", "address"},
 				Optional:     true,
 				ValidateFunc: validation.Any(
@@ -94,7 +94,7 @@ func resourceIPAMRec() *schema.Resource {
 			},
 			"current_address": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Address currently used",
+				Description: "Address currently used.",
 				Computed:    true,
 			},
 			// TODO might not be a good idea to make this configerable.
@@ -113,7 +113,7 @@ func resourceIPAMRec() *schema.Resource {
 			// },
 			"discovery_type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Way IP address use is dicoverd. For example: None, Ping, ARP, Lease, Custom.",
+				Description: "The discovery method of the IP address. Example: None, Ping, ARP, Lease, Custom.",
 				Computed:    true,
 				// Optional: true,
 				// Default:  "None",
@@ -135,34 +135,34 @@ func resourceIPAMRec() *schema.Resource {
 			},
 			"last_known_client_identifier": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The MAC address associated with the IP address discovery info.",
+				Description: "The last known MAC address associated with the IP address discovery information.",
 				Computed:    true,
 			},
 
 			"device": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The device associated with the record.",
+				Description: "The device associated with the object.",
 				Computed:    true,
 			},
 
 			"interface": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The interface associated with the record.",
+				Description: "The interface associated with the object.",
 				Computed:    true,
 			},
 			"ptr_status": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "PTR record status. For example: Unknown, OK, Verify.",
+				Description: "PTR record status. Example: Unknown, OK, Verify.",
 				Computed:    true,
 			},
 			"extraneous_ptr": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "Contains true if there are extraneous PTR records for the record.",
+				Description: "'True' if there are extraneous PTR records for the object.",
 				Computed:    true,
 			},
 			"custom_properties": &schema.Schema{
 				Type:        schema.TypeMap,
-				Description: "Map of custom properties associated with this IP address. You can only assign properties that are already defined via propertie devinition",
+				Description: "Map of custom properties associated with this IP address. You can only assign properties that are already defined in Micetro.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -170,11 +170,11 @@ func resourceIPAMRec() *schema.Resource {
 			},
 			"state": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "state of IP addres. For exampe: Free, Assigned, Claimed, Pending, Held.",
+				Description: "The state of the IP address. Example: Free, Assigned, Claimed, Pending, Held.",
 				Computed:    true,
 			},
-			// Hold info is read only property. but whould be inconvient if it was part of resource definition
-			// because if free_ip is used it's state whould change after creation the moment temporaryClaimTime would exipre
+			// Hold info is read only property. But would be inconvenient if it was part of resource definition
+			// because if free_ip is used its state whould change after creation the moment temporaryClaimTime would expire
 			//
 			// "hold_info": &schema.Schema{
 			// 	Type:     schema.TypeList,
@@ -345,7 +345,7 @@ func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interfac
 	if _, ok := d.GetOk("address"); !ok {
 		freeIPRead, ok := d.GetOk("free_ip")
 		if !ok {
-			return diag.Errorf("could not read address or free_ip")
+			return diag.Errorf("No element ‘address’ or ‘free_ip’ specified")
 		}
 
 		freeIPMap := readFreeIPMap(freeIPRead)
@@ -358,7 +358,7 @@ func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interfac
 		address, err := client.NextFreeAddress(ipRange, startIP, ping, excludeDHCP, temporaryClaimTime)
 
 		if err != nil {
-			return diag.Errorf("could not read Not find a free ipaddress in %s", ipRange)
+			return diag.Errorf("No free IPs available in %s", ipRange)
 		}
 
 		d.Set("address", address)
@@ -415,7 +415,7 @@ func resourceIPAMRecImport(ctx context.Context, d *schema.ResourceData, m interf
 		return nil, err
 	}
 	// if we had used schema.ImportStatePassthrough
-	// we could not have set id to its cannical form
+	// we could not have set id to its canonical form
 	d.SetId(d.Get("ref").(string))
 
 	return []*schema.ResourceData{d}, nil

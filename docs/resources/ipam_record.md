@@ -13,10 +13,26 @@ description: |-
 ## Example Usage
 
 ```terraform
-resource menandmice_ipam_record ipam2 {
+terraform {
+  required_providers {
+    menandmice = {
+      # uncomment for terraform 0.13 and higher
+      version = "~> 0.2",
+      source  = "local/menandmice",
+    }
+  }
+}
+resource menandmice_ipam_record ipam1 {
   address = "192.168.2.3"
   custom_properties = {"location":"here"}
   claimed = true
+}
+
+resource menandmice_ipam_record ipam2 {
+  free_ip {
+    range = "192.168.2.0/24"
+    start_at = "192.168.2.50"
+  }
 }
 ```
 
@@ -33,6 +49,7 @@ resource menandmice_ipam_record ipam2 {
 
 ### Read-Only
 
+- **current_address** (String) Address currently used
 - **device** (String) The device associated with the record.
 - **discovery_type** (String) Way IP address use is dicoverd. For example: None, Ping, ARP, Lease, Custom.
 - **extraneous_ptr** (Boolean) Contains true if there are extraneous PTR records for the record.
@@ -59,4 +76,14 @@ Optional:
 - **start_at** (String) Start searching for IP from
 - **temporary_claim_time** (Number) Time in seconds to temporary claim IP address. So it won't be claimed by others, when the claim is in progess
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# import with ipam ref
+terraform import menandmice_ipam_record.resourcename IPAMRecords/8
+
+# import with IP address
+terraform import menandmice_ipam_record.resourcename 172.16.17.1
+```

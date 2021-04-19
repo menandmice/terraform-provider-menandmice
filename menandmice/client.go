@@ -29,7 +29,7 @@ type Cfg struct {
 }
 
 func init() {
-	// remove date and time stamp from log output as the plugin SDK already adds its own
+	// Remove date and time stamp from log output as the plugin SDK already adds its own
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 }
 
@@ -48,10 +48,10 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	}
 
 	if c.MMUsername == "" {
-		return nil, errors.New("Invalid Username setting")
+		return nil, errors.New("Invalid username")
 	}
 	if c.MMPassword == "" {
-		return nil, errors.New("Invalid Password setting")
+		return nil, errors.New("Invalid password")
 	}
 
 	if c.TLSVerify == false {
@@ -65,7 +65,8 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
 	client.SetHostURL(c.MMEndpoint + "/mmws/api")
 
-	// TODO check if this works well with dns round robin
+	// TODO check if this works well with Round Robin DNS
+	// TODO is this needed
 	client.SetRetryCount(5)
 	client.SetRetryWaitTime(1 * time.Second)
 	client.AddRetryCondition(func(r *resty.Response, e error) bool {
@@ -73,11 +74,12 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 		return r.StatusCode() >= 500 && r.StatusCode() < 600
 	})
 
-	// test if we can make a connection
+	// Test if we can make a connection
 
+	// TODO use request that need authentication
 	_, err := client.R().Get("")
 	if err != nil {
-		return nil, fmt.Errorf("could not connect with endpoint: %s\n\t%s", c.MMEndpoint, err)
+		return nil, fmt.Errorf("Could not connect with endpoint: %s\n\t%s", c.MMEndpoint, err)
 	}
 
 	return &client, err
@@ -142,7 +144,7 @@ func (r *RequestError) Error() string {
 	}
 	resource := url.RequestURI()
 
-	return fmt.Sprintf("failed with %v %v\n\tHTTP code:%v: %v", operation, resource, r.HTTPCode, r.ErrMessage)
+	return fmt.Sprintf("Failed with %v %v\n\tHTTP code:%v: %v", operation, resource, r.HTTPCode, r.ErrMessage)
 }
 
 func ResponseError(response *resty.Response, errorResponse ErrorResponse) error {
@@ -162,7 +164,7 @@ func ResponseError(response *resty.Response, errorResponse ErrorResponse) error 
 
 func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}, filter map[string]string) error {
 
-	//TODO better error Message
+	//TODO better error message
 	var errorResponse ErrorResponse
 	var querystring string
 
@@ -197,7 +199,7 @@ func (c *Mmclient) Get(result interface{}, path string, query map[string]interfa
 
 func (c *Mmclient) Post(data interface{}, result interface{}, path string) error {
 
-	//TODO better error Message
+	//TODO better error message
 	var errorResponse ErrorResponse
 	r, err := c.R().
 		SetBody(data).

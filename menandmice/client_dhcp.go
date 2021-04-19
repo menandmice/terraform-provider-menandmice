@@ -90,3 +90,27 @@ func (c *Mmclient) UpdateDHCPReservation(properties DHCPReservationPropertie, re
 
 	return c.Put(update, "DHCPReservations/"+ref)
 }
+
+type DHCPScope struct {
+	Ref           string `json:"ref"`
+	Name          string `json:"name"`
+	RangeRef      string `json:"rangeRef"`
+	DHCPServerRef string `json:"dhcpServerRef"`
+	Superscope    string `json:"superscope"`
+	Description   string `json:"description"`
+	Available     int    `json:"available"`
+	Enabled       bool   `json:"enabled"`
+}
+
+type FindDHCPScopeResponse struct {
+	Result struct {
+		DHCPScopes   []DHCPScope `json:"dhcpScopes"`
+		TotalResults int         `json:"totalResults"`
+	} `json:"result"`
+}
+
+func (c Mmclient) FindDHCPScope(filter map[string]string) ([]DHCPScope, error) {
+	var re FindDHCPScopeResponse
+	err := c.Get(&re, "DHCPScopes/", nil, filter)
+	return re.Result.DHCPScopes, err
+}

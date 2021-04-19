@@ -16,17 +16,17 @@ func DataSourceDHCPReservation() *schema.Resource {
 
 			"ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal reference to this DHCP reservation",
+				Description: "Internal reference to this DHCP reservation.",
 				Computed:    true,
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The name of DHCP reservation you want to query",
+				Description: "The name of the DHCP reservation you want to query.",
 				Required:    true,
 			},
 			"type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The type of this DHCP reservation. For example: DHCP , BOOTP , BOTH.",
+				Description: "The type of this DHCP reservation. Example: DHCP , BOOTP , BOTH.",
 				Computed:    true,
 			},
 			"description": &schema.Schema{
@@ -42,12 +42,12 @@ func DataSourceDHCPReservation() *schema.Resource {
 
 			"reservation_method": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "DHCP reservation method, For example: HardwareAddress , ClientIdentifier.",
+				Description: "DHCP reservation method, Example: HardwareAddress , ClientIdentifier.",
 				Computed:    true,
 			},
 			"addresses": &schema.Schema{
 				Type:        schema.TypeList,
-				Description: "A list of zero or more IP addresses used for the reservation.",
+				Description: "A list of IP addresses used for the reservation.",
 				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -55,7 +55,7 @@ func DataSourceDHCPReservation() *schema.Resource {
 			},
 			"ddns_hostname": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Dynamic DNS host name for reservation. Only applicable for ISC DHCP servers.",
+				Description: "Dynamic DNS host name for the reservation. Only applicable for ISC DHCP servers.",
 				Computed:    true,
 			},
 
@@ -78,7 +78,7 @@ func DataSourceDHCPReservation() *schema.Resource {
 
 			"owner_ref": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal refference to the DHCP group scope or server where this reservation is made.",
+				Description: "Internal reference to the DHCP group scope or server where this reservation is made.",
 				Computed:    true,
 			},
 		},

@@ -13,7 +13,7 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 	date := "192.168.2.13"
 	rectype := "A"
 	view := ""
-	server := "mandm.example.net."
+	server := "micetro.example.net."
 	zone := "example.net."
 
 	resource.Test(t, resource.TestCase{

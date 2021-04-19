@@ -51,21 +51,21 @@ func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
 	return re.Result.IPAMRecord, err
 }
 
-// TODO because this will only set IPAMProperties. and ignore other. maybe change to :
+// TODO because this will only set IPAMProperties and ignore others. Maybe change to:
 // func (c *Mmclient) CreateIPAMRec(ipamProperites IPAMProperties,rec string) error {
 func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
 
-	// TODO this function will query ipamRecord bassed on ip. But this is not unque
-	//		you have to use SetCurrentAddressSpace in the client initalisation. or here en prevent race conditions
+	// TODO this function will query ipamRecord bassed on IP address. But this is not unique
+	//		you have to use SetCurrentAddressSpace in the client initalisation or here and prevent race conditions
 
-	// we need to check if IPAMRecord not already exist. because creation is done via update/PUT
+	// we need to check if IPAMRecord already exists, because creation is done via update/PUT
 	existingIPAMRecord, err := c.ReadIPAMRec(ipamRecord.Address)
 
 	if err != nil {
 		return err
 	}
 	if existingIPAMRecord.Claimed == true {
-		return fmt.Errorf("There already exist a DHCPReservations for: %v", existingIPAMRecord.Address)
+		return fmt.Errorf("DHCPReservations already exists for: %v", existingIPAMRecord.Address)
 	}
 	return c.UpdateIPAMRec(ipamRecord.IPAMProperties, ipamRecord.Address)
 }
@@ -81,15 +81,15 @@ type UpdateIPAMRecRequest struct {
 	SaveComment       string `json:"saveComment"`
 	DeleteUnspecified bool   `json:"deleteUnspecified"`
 
-	// we cant use IPAMProperties for this because CustomProperties should be flattend first
+	// We can't use IPAMProperties for this because CustomProperties should be flattend first
 	Properties map[string]interface{} `json:"properties"`
 }
 
 func (c *Mmclient) UpdateIPAMRec(ipamProperties IPAMProperties, ref string) error {
 
-	// A work around to create properties with same fields as DNSZoneProperties but with flattend CustomProperties
-	// first mask CustomProperties in DNSZoneProperties
-	// Then convert to map considerting `json:"omitempty"`
+	// A workaround to create properties with same fields as DNSZoneProperties but with flattend CustomProperties
+	// First mask CustomProperties in DNSZoneProperties
+	// Then convert to map considering `json:"omitempty"`
 	// Then add CustomProperties 1 by 1
 
 	customProperties := ipamProperties.CustomProperties

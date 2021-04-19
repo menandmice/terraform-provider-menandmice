@@ -10,7 +10,7 @@ type DNSZone struct {
 	Created      string `json:"created,omitempty"`
 	LastModified string `json:"lastModified,omitempty"`
 
-	// properties that can be updated
+	// Properties that can be updated
 	DNSZoneProperties
 }
 
@@ -34,7 +34,7 @@ type FindDNSZoneResponse struct {
 	} `json:"result"`
 }
 
-// Is no longer used
+// No longer used
 func (c Mmclient) FindDNSZone(filter map[string]string) ([]DNSZone, error) {
 	var re FindDNSZoneResponse
 	err := c.Get(&re, "dnszones/", nil, filter)
@@ -102,9 +102,9 @@ type UpdateDNSZoneRequest struct {
 
 func (c *Mmclient) UpdateDNSZone(dnsZoneProperties DNSZoneProperties, ref string) error {
 
-	// A work around to create properties with same fields as DNSZoneProperties but with flattend CustomProperties
+	// A workaround to create properties with same fields as DNSZoneProperties but with flattend CustomProperties
 	// first mask CustomProperties in DNSZoneProperties
-	// Then convert to map considerting `json:"omitempty"`
+	// Then convert to map considering `json:"omitempty"`
 	// Then add CustomProperties 1 by 1
 
 	customProperties := dnsZoneProperties.CustomProperties

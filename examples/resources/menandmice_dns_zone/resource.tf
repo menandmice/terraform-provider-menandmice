@@ -9,7 +9,7 @@ terraform {
 }
 resource menandmice_dns_zone zone2{
   name    = "zone2.net."
-  authority   = "mandm.example.net."
+  authority   = "micetro.example.net."
   adintegrated = false
   custom_properties = {"place" = "city","owner" = "me"}
 
