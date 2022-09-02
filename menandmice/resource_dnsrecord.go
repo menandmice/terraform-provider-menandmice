@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -22,6 +23,7 @@ func resourceDNSRec() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDNSRecImport,
 		},
+
 		Schema: map[string]*schema.Schema{
 
 			"ref": &schema.Schema{
@@ -186,6 +188,8 @@ func resourceDNSRecRead(c context.Context, d *schema.ResourceData, m interface{}
 	client := m.(*Mmclient)
 
 	dnsrec, err := client.ReadDNSRec(d.Id())
+	tflog.Error(c, "test")
+	// panic(fmt.Sprintf("%v", dnsrec))
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -174,7 +174,11 @@ func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
 	d.Set("dnssecsigned", dnszone.DnssecSigned)
 	d.Set("kskids", dnszone.KskIDs)
 	d.Set("zskids", dnszone.ZskIDs)
-	d.Set("custom_properties", dnszone.CustomProperties)
+
+	var CustomProperties = make(map[string]interface{})
+	for key, value := range dnszone.CustomProperties {
+		CustomProperties[key] = value
+	}
 
 	d.Set("adreplicationtype", dnszone.AdReplicationType)
 	d.Set("adpartition", dnszone.AdPartition)
