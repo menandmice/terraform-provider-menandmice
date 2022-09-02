@@ -17,6 +17,11 @@ func DataSourceDNSRec() *schema.Resource {
 		ReadContext: dataSourceDNSRectRead,
 		Schema: map[string]*schema.Schema{
 
+			"ref": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Internal reference to this DNS record.",
+				Computed:    true,
+			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "The DNS record name.",
@@ -40,15 +45,24 @@ func DataSourceDNSRec() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
 			},
+
 			"type": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "The DNS record type. Example: CNAME.",
 				Required:    true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"A", "AAAA", "CNAME",
+					"DNAME", "DLV", "DNSKEY",
+					"DS", "HINFO", "LOC",
+					"MX", "NAPTR", "NS", "NSEC3PARAM",
+					"PTR", "RP", "SOA",
+					"SPF", "SRV", "SSHFP",
+					"TLSA", "TXT",
+				}, false),
 			},
-
-			"ref": &schema.Schema{
+			"data": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Internal reference to this DNS record.",
+				Description: "The data stored in the DNS record.",
 				Computed:    true,
 			},
 			"ttl": &schema.Schema{
@@ -59,11 +73,6 @@ func DataSourceDNSRec() *schema.Resource {
 			"aging": &schema.Schema{
 				Type:        schema.TypeInt,
 				Description: "The aging timestamp of dynamic records in AD integrated zones. Hours since January 1, 1601, UTC. Providing a non-zero value creates a dynamic record.",
-				Computed:    true,
-			},
-			"data": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "The data stored in the record",
 				Computed:    true,
 			},
 			"comment": &schema.Schema{

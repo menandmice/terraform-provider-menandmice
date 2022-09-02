@@ -34,12 +34,27 @@ func resourceDNSRec() *schema.Resource {
 				Description: "The DNS record name.",
 				Required:    true,
 			},
-			"data": &schema.Schema{
+			"view": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "The view of the DNS record. Example: internal.",
+				Optional:    true,
+				Default:     "",
+				ForceNew:    true,
+			},
+			"zone": &schema.Schema{
 				Type:         schema.TypeString,
-				Description:  "The data stored in the DNS record.",
+				Description:  "The DNS zone where the record is stored. Requires FQDN with the trailing dot '.'.",
 				Required:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
-				// You cannot validate data here, because you dont have access to the record type
+				ForceNew:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
+			},
+
+			"server": &schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "The DNS server where the DNS record is stored. Requires FQDN with the trialing dot '.'.",
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Server name should end with '.'"),
 			},
 			"type": &schema.Schema{
 				Type:        schema.TypeString,
@@ -57,16 +72,12 @@ func resourceDNSRec() *schema.Resource {
 					"TLSA", "TXT",
 				}, false),
 			},
-			"comment": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Contains the comment string for the record. Only records in static DNS zones can have a comment string. Some cloud DNS provides do not support comments.",
-				Optional:    true,
-			},
-			"aging": &schema.Schema{
-				Type:         schema.TypeInt,
-				Description:  "The aging timestamp of dynamic records in AD integrated zones. Hours since January 1, 1601, UTC. Providing a non-zero value creates a dynamic record.",
-				Optional:     true,
-				ValidateFunc: validation.IntAtLeast(0),
+			"data": &schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "The data stored in the DNS record.",
+				Required:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
+				// You cannot validate data here, because you dont have access to the record type
 			},
 			"ttl": &schema.Schema{
 				Type:         schema.TypeInt,
@@ -74,36 +85,23 @@ func resourceDNSRec() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 			},
+			"aging": &schema.Schema{
+				Type:         schema.TypeInt,
+				Description:  "The aging timestamp of dynamic records in AD integrated zones. Hours since January 1, 1601, UTC. Providing a non-zero value creates a dynamic record.",
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(0),
+			},
+			"comment": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Contains the comment string for the record. Only records in static DNS zones can have a comment string. Some cloud DNS provides do not support comments.",
+				Optional:    true,
+			},
 			"enabled": &schema.Schema{
 				Type:        schema.TypeBool,
 				Description: "If the DNS record is enabled. (Default: True)",
 				Optional:    true,
 				Default:     true,
 			},
-
-			"server": &schema.Schema{
-				Type:         schema.TypeString,
-				Description:  "The DNS server where the DNS record is stored. Requires FQDN with the trialing dot '.'.",
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Server name should end with '.'"),
-			},
-			"view": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "The view of the DNS record. Example: internal.",
-				Optional:    true,
-				Default:     "",
-				ForceNew:    true,
-			},
-
-			"zone": &schema.Schema{
-				Type:         schema.TypeString,
-				Description:  "The DNS zone where the record is stored. Requires FQDN with the trailing dot '.'.",
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
-			},
-
 			"dns_zone_ref": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Internal reference to the zone where this DNS record is stored.",
