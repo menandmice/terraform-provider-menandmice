@@ -62,6 +62,7 @@ func Provider() *schema.Provider {
 			"menandmice_ipam_record":      DataSourceIPAMRec(),
 			"menandmice_dhcp_reservation": DataSourceDHCPReservation(),
 			"menandmice_dhcp_scope":       DataSourceDHCPScope(),
+			"menandmice_range":            DataSourceRange(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

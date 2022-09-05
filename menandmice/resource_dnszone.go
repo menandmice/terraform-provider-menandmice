@@ -192,10 +192,10 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		}
 	}
 
-	var CustomProperties = make(map[string]string)
+	var customProperties = make(map[string]string)
 	if customPropertiesRead, ok := d.GetOk("custom_properties"); ok {
 		for key, value := range customPropertiesRead.(map[string]interface{}) {
-			CustomProperties[key] = value.(string)
+			customProperties[key] = value.(string)
 		}
 	}
 	dnszone := DNSZone{
@@ -216,7 +216,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 			ZskIDs:            tryGetString(d, "zskids"),
 			AdReplicationType: tryGetString(d, "adreplicationtype"),
 			AdPartition:       tryGetString(d, "adpartition"),
-			CustomProperties:  CustomProperties,
+			CustomProperties:  customProperties,
 			DisplayName:       tryGetString(d, "displayname"),
 		},
 	}
