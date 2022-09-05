@@ -7,10 +7,10 @@ terraform {
     }
   }
 }
-data menandmice_range rang {
+data "menandmice_range" "rang" {
   name = "0.0.0.0/0"
 }
 
-output range {
- value = data.menandmice_range.rang
+output "range" {
+  value = data.menandmice_range.rang
 }

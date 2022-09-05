@@ -22,15 +22,15 @@ terraform {
     }
   }
 }
-resource menandmice_dns_zone zone2{
-  name    = "zone2.net."
-  authority   = "mandm.example.net."
-  adintegrated = false
-  custom_properties = {"place" = "city","owner" = "me"}
+resource "menandmice_dns_zone" "zone2" {
+  name              = "zone2.net."
+  authority         = "micetro.example.net."
+  adintegrated      = false
+  custom_properties = { "place" = "city", "owner" = "me" }
 
-  view = ""             # default ""
-  type = "Master"       # default "Master"
-  dnssecsigned = false  # default false
+  view         = ""       # default ""
+  type         = "Master" # default "Master"
+  dnssecsigned = false    # default false
 }
 ```
 
@@ -39,41 +39,31 @@ resource menandmice_dns_zone zone2{
 
 ### Required
 
-- **authority** (String) the DNS authoritive server for this zone
-- **name** (String) Name of DNS zone. Name must and with '.'
+- `authority` (String) The authoritative DNS server for this zone. Requires FQDN with the trailing dot '.'.
+- `name` (String) Fully qualified name of DNS zone, ending with the trailing dot '.'.
 
 ### Optional
 
-- **adintegrated** (Boolean) If DNS zone is intergrated with Active Directory. Default: False.
-- **adpartition** (String) The AD partition if the zone is Active Directory integrated.
-- **adreplicationtype** (String) Replication types for an AD integrated zone.
-- **custom_properties** (Map of String) Map of custom properties associated with this DNS zone.
-- **displayname** (String) A name that can distinguish the zone from other zone instances with the same name.
-- **dnssecsigned** (Boolean)
-- **dynamic** (Boolean) If DNS zone Dynamic, default: False
-- **id** (String) The ID of this resource.
-- **kskids** (String) A comma separated string of IDs of KSKs, starting with active keys, then inactive keys in parenthesis.
-- **masters** (List of String) List of all masters IP address, for slave zones.
-- **type** (String) the DNS zone type.For example: Master, Slave, Hint, Stub, Forward.
-- **view** (String) Name of the view this DNS zone is in
-- **zskids** (String) A comma separated string of IDs of ZSKs, starting with active keys, then inactive keys in parenthesis.
+- `adintegrated` (Boolean) If the DNS zone is AD integrated. (Default: False)
+- `adpartition` (String) The AD partition if the zone is AD integrated.
+- `adreplicationtype` (String) Replication type if the zone is AD integrated.
+- `custom_properties` (Map of String) Map of custom properties associated with this DNS zone.
+- `displayname` (String) A display name to distinguish the zone from other, identically named zone instances.
+- `dnssecsigned` (Boolean)
+- `dynamic` (Boolean) If the DNS zone is dynamic. (Default: False)
+- `kskids` (String) A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.
+- `masters` (List of String) List of IP addresses of all master zones, for slave zones.
+- `type` (String) The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward. (Default: Master)
+- `view` (String) Name of the view this DNS zone is in.
+- `zskids` (String) A comma-separated string of IDs of ZSKs. Starting with active keys, then inactive keys in parenthesis.
 
 ### Read-Only
 
-- **created** (String) Date when zone was created in the suite.
-- **dnsviewref** (String) Interal references to views.
-- **dnsviewrefs** (Set of String) Interal references to views. Only used with Active Directory.
-- **lastmodified** (String) Date when zone was last modified in the suite.
-- **ref** (String) Internal references to this DNS zone
+- `created` (String) DDate when zone was created in Micetro.
+- `dnsviewref` (String) Interal references to views.
+- `dnsviewrefs` (Set of String) Interal references to views. Only used with Active Directory.
+- `id` (String) The ID of this resource.
+- `lastmodified` (String) Date when zone was last modified in Micetro.
+- `ref` (String) Internal references to this DNS zone.
 
-## Import
 
-Import is supported using the following syntax:
-
-```shell
-# import with dnszone ref
-terraform import menandmice_dns_zone.resourcename DNSZones/659
-
-# import with readable name
-terraform import menandmice_dns_zone.resourcename mandm.example.net::zone1  #<server>:<view>:<dnzzone name>
-```

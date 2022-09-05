@@ -18,15 +18,15 @@ terraform {
     menandmice = {
       # # uncomment for terraform 0.13 and higher
       #version = "~> 0.2",
-      source  = "local/menandmice",
+      source = "local/menandmice",
     }
   }
 }
-provider menandmice {
-  endpoint = "https://mandm.example.net" # can also be set with MENANDMICE_ENDPOINT environment variable
-  username = "apiuser"           # can also be set with MENANDMICE_USERNAME environment variable
-  password = "secret"           # can also be set with MENANDMICE_PASSWORD environment variable
-  tls_verify= false              # can also be set with MENANDMICE_TLS_VERIFY environment variable
+provider "menandmice" {
+  endpoint   = "https://micetro.example.net" # can also be set with MENANDMICE_ENDPOINT environment variable
+  username   = "apiuser"                     # can also be set with MENANDMICE_USERNAME environment variable
+  password   = "secret"                      # can also be set with MENANDMICE_PASSWORD environment variable
+  tls_verify = false                         # can also be set with MENANDMICE_TLS_VERIFY environment variable
 }
 ```
 
@@ -35,8 +35,8 @@ provider menandmice {
 
 ### Optional
 
-- **endpoint** (String) Men&Mice Web API endpoint
-- **password** (String, Sensitive) Men&Mice password
-- **timeout** (Number) Men&Mice Request timeout
-- **tls_verify** (Boolean) Men&Mice SSL validation
-- **username** (String) Men&Mice username
+- `endpoint` (String) Micetro API endpoint
+- `password` (String, Sensitive) Micetro password
+- `timeout` (Number) Micetro Request timeout
+- `tls_verify` (Boolean) Micetro SSL validation
+- `username` (String) Micetro username

@@ -22,15 +22,15 @@ terraform {
     }
   }
 }
-resource menandmice_ipam_record ipam1 {
-  address = "192.168.2.3"
-  custom_properties = {"location":"here"}
-  claimed = true
+resource "menandmice_ipam_record" "ipam1" {
+  address           = "192.168.2.3"
+  custom_properties = { "location" : "here" }
+  claimed           = true
 }
 
-resource menandmice_ipam_record ipam2 {
+resource "menandmice_ipam_record" "ipam2" {
   free_ip {
-    range = "192.168.2.0/24"
+    range    = "192.168.2.0/24"
     start_at = "192.168.2.50"
   }
 }
@@ -41,40 +41,40 @@ resource menandmice_ipam_record ipam2 {
 
 ### Optional
 
-- **address** (String) The IP address to claim
-- **claimed** (Boolean) If address should be claimed. Default: true
-- **custom_properties** (Map of String) Map of custom properties associated with this IP address. You can only assign properties that are already defined via propertie devinition
-- **free_ip** (Block List, Max: 1) Find a free IP address to claim (see [below for nested schema](#nestedblock--free_ip))
-- **id** (String) The ID of this resource.
+- `address` (String) The IP address to claim.
+- `claimed` (Boolean) If address should be claimed. Default: true
+- `custom_properties` (Map of String) Map of custom properties associated with this IP address. You can only assign properties that are already defined in Micetro.
+- `free_ip` (Block List, Max: 1) Find a free IP address to claim. (see [below for nested schema](#nestedblock--free_ip))
 
 ### Read-Only
 
-- **current_address** (String) Address currently used
-- **device** (String) The device associated with the record.
-- **discovery_type** (String) Way IP address use is dicoverd. For example: None, Ping, ARP, Lease, Custom.
-- **extraneous_ptr** (Boolean) Contains true if there are extraneous PTR records for the record.
-- **interface** (String) The interface associated with the record.
-- **last_discovery_date** (String) The date when the system last performed IP address discovery for this IP address.
-- **last_known_client_identifier** (String) The MAC address associated with the IP address discovery info.
-- **last_seen_date** (String) The date when the address was last seen during IP address discovery.
-- **ptr_status** (String) PTR record status. For example: Unknown, OK, Verify.
-- **ref** (String) Internal reference to ipam record
-- **state** (String) state of IP addres. For exampe: Free, Assigned, Claimed, Pending, Held.
-- **usage** (Number) IP address usage bitmask.
+- `current_address` (String) Address currently used.
+- `device` (String) The device associated with the object.
+- `discovery_type` (String) The discovery method of the IP address. Example: None, Ping, ARP, Lease, Custom.
+- `extraneous_ptr` (Boolean) 'True' if there are extraneous PTR records for the object.
+- `id` (String) The ID of this resource.
+- `interface` (String) The interface associated with the object.
+- `last_discovery_date` (String) The date when the system last performed IP address discovery for this IP address.
+- `last_known_client_identifier` (String) The last known MAC address associated with the IP address discovery information.
+- `last_seen_date` (String) The date when the address was last seen during IP address discovery.
+- `ptr_status` (String) PTR record status. Example: Unknown, OK, Verify.
+- `ref` (String) Internal reference for the IP address.
+- `state` (String) The state of the IP address. Example: Free, Assigned, Claimed, Pending, Held.
+- `usage` (Number) IP address usage bitmask.
 
 <a id="nestedblock--free_ip"></a>
 ### Nested Schema for `free_ip`
 
 Required:
 
-- **range** (String) pick IP address from range with name
+- `range` (String) Pick IP address from range with name
 
 Optional:
 
-- **exclude_dhcp** (Boolean) Exclude IP address that are Assigned via DHCP
-- **ping** (Boolean) Verify ip is free with Ping
-- **start_at** (String) Start searching for IP from
-- **temporary_claim_time** (Number) Time in seconds to temporary claim IP address. So it won't be claimed by others, when the claim is in progess
+- `exclude_dhcp` (Boolean) Exclude IP addresses that are assigned via DHCP
+- `ping` (Boolean) Verify IP address is free with ping
+- `start_at` (String) Start searching for IP address from
+- `temporary_claim_time` (Number) Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.
 
 ## Import
 
