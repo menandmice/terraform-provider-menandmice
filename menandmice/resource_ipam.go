@@ -36,6 +36,7 @@ func resourceIPAMRec() *schema.Resource {
 				MaxItems:     1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						// TODO user range_ref here
 						"range": &schema.Schema{
 							Type:        schema.TypeString,
 							Description: "Pick IP address from range with name",
@@ -77,6 +78,7 @@ func resourceIPAMRec() *schema.Resource {
 				Description:  "The IP address to claim.",
 				ExactlyOneOf: []string{"free_ip", "address"},
 				Optional:     true,
+				// TODO validation.IsIPAddress does this to
 				ValidateFunc: validation.Any(
 					validation.IsIPv4Address,
 					validation.IsIPv6Address),
