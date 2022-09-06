@@ -11,7 +11,7 @@ type Range struct {
 	// IsLeaf            bool       `json:"isLeaf"`
 	// NumChildren int        `json:"numchildren"`
 	DhcpScopes  []NamedRef `json:"dhcpScopes"`
-	Authority   Authority  `json:"authority"`
+	Authority   *Authority `json:"authority,omitempty"`
 	Subnet      bool       `json:"subnet"`
 	Locked      bool       `json:"locked"`
 	HasSchedule bool       `json:"hasSchedule"`
@@ -20,14 +20,14 @@ type Range struct {
 	IsContainer           bool                  `json:"isContainer"`
 	UtilizationPercentage int                   `json:"utilizationPercentage"`
 	HasRogueAddresses     bool                  `json:"hasRogueAddresses"`
-	CloudNetworkRef       string                `json:"cloudNetworkRef"`
-	CloudAllocationPools  []CloudAllocationPool `json:"cloudAllocationPools"`
+	CloudNetworkRef       string                `json:"cloudNetworkRef,omitempty"`
+	CloudAllocationPools  []CloudAllocationPool `json:"cloudAllocationPools,omitempty"`
 
 	InheritAccess        bool                  `json:"inheritAccess"`
-	DiscoveredProperties []DiscoveryProperties `json:"discoveryProperties"`
+	DiscoveredProperties []DiscoveryProperties `json:"discoveredProperties"`
 	Created              string                `json:"created,omitempty"`
 	LastModified         string                `json:"lastModified,omitempty"`
-	FolderRef            string                `json:"FolderRef"`
+	FolderRef            string                `json:"folderRef,omitempty"`
 	RangeProperties
 }
 
@@ -40,10 +40,10 @@ type RangeProperties struct {
 	CustomProperties map[string]string `json:"customProperties,omitempty"`
 }
 type Authority struct {
-	Name    string   `json:"name"`
-	Type    string   `json:"type"`
-	SubType string   `json:"subType"`
-	Sources []Source `json:"source"`
+	Name    string   `json:"name,omitempty"`
+	Type    string   `json:"type,omitempty"`
+	SubType string   `json:"subType,omitempty"`
+	Sources []Source `json:"source,omitempty"`
 }
 
 type Source struct {

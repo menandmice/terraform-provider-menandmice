@@ -310,6 +310,12 @@ func readDiscoverySchema(discovery_schemas interface{}) Discovery {
 
 func readRangeSchema(d *schema.ResourceData) Range {
 
+	var name string
+	if cidr, ok := d.GetOk("cidr"); ok {
+		name = cidr.(string)
+	} else {
+		name = tryGetString(d, "from") + "-" + tryGetString(d, "to")
+	}
 	var customProperties = make(map[string]string)
 	if customPropertiesRead, ok := d.GetOk("custom_properties"); ok {
 		for key, value := range customPropertiesRead.(map[string]interface{}) {
@@ -327,7 +333,7 @@ func readRangeSchema(d *schema.ResourceData) Range {
 
 	iprange := Range{
 		Ref:  tryGetString(d, "ref"),
-		Name: tryGetString(d, "name"),
+		Name: name,
 
 		// you should not set this yourself
 		// Created:      d.Get("created").(string),
@@ -343,7 +349,6 @@ func readRangeSchema(d *schema.ResourceData) Range {
 			CustomProperties: customProperties,
 		},
 	}
-
 	return iprange
 }
 
