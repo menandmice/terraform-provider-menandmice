@@ -22,6 +22,7 @@ terraform {
     }
   }
 }
+
 data "menandmice_range" "rang" {
   name = "0.0.0.0/0"
 }
