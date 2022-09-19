@@ -24,7 +24,7 @@ type Range struct {
 	CloudAllocationPools  []CloudAllocationPool `json:"cloudAllocationPools,omitempty"`
 
 	InheritAccess        bool                  `json:"inheritAccess"`
-	DiscoveredProperties []DiscoveryProperties `json:"discoveredProperties"`
+	DiscoveredProperties []DiscoveryProperties `json:"discoveredProperties,omitempty"`
 	Created              string                `json:"created,omitempty"`
 	LastModified         string                `json:"lastModified,omitempty"`
 	FolderRef            string                `json:"folderRef,omitempty"`

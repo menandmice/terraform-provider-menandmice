@@ -2,6 +2,7 @@ package menandmice
 
 import (
 	"context"
+	"net"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -310,11 +311,17 @@ func readDiscoverySchema(discovery_schemas interface{}) Discovery {
 
 func readRangeSchema(d *schema.ResourceData) Range {
 
-	var name string
+	var name, from, to string
 	if cidr, ok := d.GetOk("cidr"); ok {
 		name = cidr.(string)
+		_, net, _ := net.ParseCIDR(name) // TODO check error, first ip
+		fromIP, toIP := AddressRange(net)
+		from = fromIP.String()
+		to = toIP.String()
 	} else {
 		name = tryGetString(d, "from") + "-" + tryGetString(d, "to")
+		from = tryGetString(d, "from")
+		to = tryGetString(d, "to")
 	}
 	var customProperties = make(map[string]string)
 	if customPropertiesRead, ok := d.GetOk("custom_properties"); ok {
@@ -342,8 +349,8 @@ func readRangeSchema(d *schema.ResourceData) Range {
 		InheritAccess: d.Get("inherit_access").(bool),
 		RangeProperties: RangeProperties{
 
-			From:             tryGetString(d, "from"),
-			To:               tryGetString(d, "to"),
+			From:             from,
+			To:               to,
 			Locked:           d.Get("locked").(bool),
 			AutoAssign:       d.Get("auto_assign").(bool),
 			CustomProperties: customProperties,

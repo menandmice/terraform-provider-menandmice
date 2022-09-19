@@ -198,7 +198,6 @@ func dataSourceRangeRead(c context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 
-	// panic(fmt.Sprintf("%v", iprange))
 	if iprange == nil {
 		return diag.Errorf("range_%v does not exist", name)
 	}
