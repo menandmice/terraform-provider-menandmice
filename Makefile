@@ -60,7 +60,7 @@ else
 	mkdir -p ~/.terraform.d/plugins/${OS_ARCH}
 	cp ${BINARY} ~/.terraform.d/plugins/${OS_ARCH}
 endif
-	rm examples/.terraform.lock.hcl || true
+	rm examples/.terraform.lock.hcl 2> /dev/null|| true
 
 generate_doc:
 	tfplugindocs  generate # https://github.com/hashicorp/terraform-plugin-docs

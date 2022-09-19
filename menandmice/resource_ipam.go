@@ -29,6 +29,8 @@ func resourceIPAMRec() *schema.Resource {
 				Computed:    true,
 			},
 			"free_ip": &schema.Schema{
+
+				// TODO add ForceNew, do we ignore changes?
 				Type:         schema.TypeList,
 				Description:  "Find a free IP address to claim.",
 				Optional:     true,
@@ -86,14 +88,17 @@ func resourceIPAMRec() *schema.Resource {
 					if ipv6AddressDiffSuppress(key, old, new, d) {
 						return true
 					}
-					if freeIPRead, ok := d.GetOk("free_ip"); ok {
+					if _, ok := d.GetOk("free_ip"); ok {
 
-						return inFreeIPRange(readFreeIPMap(freeIPRead), old)
+						return true
+						// FIXME can we still check if address is in freeIPRange. Do we want to check that?
+						// return inFreeIPRange(readFreeIPMap(freeIPRead), old)
 					}
 					return false
 				},
 				ForceNew: true,
 			},
+			// FIXME Think this can be removed
 			"current_address": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Address currently used.",
@@ -333,10 +338,18 @@ func resourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interface{
 	return diags
 }
 
-func readFreeIPMap(freeIPRead interface{}) map[string]interface{} {
+func readNextFreeIPRequest(freeIPRead interface{}) NextFreeAddressRequest {
 
-	freeIPReadList := freeIPRead.([]interface{})[0]
-	return freeIPReadList.(map[string]interface{})
+	freeIPReadIntface := freeIPRead.([]interface{})[0].(map[string]interface{})
+	nextFreeIPRequest := NextFreeAddressRequest{
+
+		RangeRef:           freeIPReadIntface["range"].(string),
+		StartAddress:       freeIPReadIntface["start_at"].(string),
+		Ping:               freeIPReadIntface["ping"].(bool),
+		ExcludeDHCP:        freeIPReadIntface["exclude_dhcp"].(bool),
+		TemporaryClaimTime: freeIPReadIntface["temporary_claim_time"].(int),
+	}
+	return nextFreeIPRequest
 }
 func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
@@ -344,23 +357,13 @@ func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interfac
 
 	client := m.(*Mmclient)
 
-	if _, ok := d.GetOk("address"); !ok {
-		freeIPRead, ok := d.GetOk("free_ip")
-		if !ok {
-			return diag.Errorf("No element ‘address’ or ‘free_ip’ specified")
-		}
+	if freeIPMap, ok := d.GetOk("free_ip"); ok {
 
-		freeIPMap := readFreeIPMap(freeIPRead)
-		ipRange := freeIPMap["range"].(string)
-		startIP := freeIPMap["start_at"].(string)
-		ping := freeIPMap["ping"].(bool)
-		excludeDHCP := freeIPMap["exclude_dhcp"].(bool)
-		temporaryClaimTime := freeIPMap["temporary_claim_time"].(int)
-
-		address, err := client.NextFreeAddress(ipRange, startIP, ping, excludeDHCP, temporaryClaimTime)
+		nextFreeIPRequest := readNextFreeIPRequest(freeIPMap)
+		address, err := client.NextFreeAddress(nextFreeIPRequest)
 
 		if err != nil {
-			return diag.Errorf("No free IPs available in %s", ipRange)
+			return diag.Errorf("No free IPs available in %s", nextFreeIPRequest.RangeRef)
 		}
 
 		d.Set("address", address)

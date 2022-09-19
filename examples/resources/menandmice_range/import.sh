@@ -1,4 +1,4 @@
-# import with dnszone ref
+# import with range ref
 terraform import menandmice_range.resourcename Range/0
 
 # import with readable name

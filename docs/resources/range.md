@@ -27,6 +27,7 @@ resource "menandmice_range" "example1" {
   cidr  = "192.168.5.0/24"
   title = "Test Terraform example1"
 }
+
 resource "menandmice_range" "example2" {
   from        = "192.168.2.0"
   to          = "192.168.2.255"
@@ -34,6 +35,18 @@ resource "menandmice_range" "example2" {
   description = "Test"
   auto_assign = true
   locked      = true
+}
+
+data "menandmice_range" "super_range" {
+  name = "192.168.0.0/16"
+}
+
+resource "menandmice_range" "example3" {
+  free_range {
+    range = data.menandmice_range.super_range.name
+  }
+  title       = "Test Terraform example3"
+  description = "Test"
 }
 ```
 
@@ -51,6 +64,7 @@ resource "menandmice_range" "example2" {
 - `custom_properties` (Map of String) Map of custom properties associated with this range. You can only assign properties that are already defined in Micetro.
 - `description` (String) Description of the range
 - `discovery` (Block List, Max: 1) Used for discovery of ranges or scopes. (see [below for nested schema](#nestedblock--discovery))
+- `free_range` (Block List, Max: 1) Find a free IP address to claim. (see [below for nested schema](#nestedblock--free_range))
 - `from` (String) The starting IP address of the range.
 - `locked` (Boolean) Determines if the range is defined as a subnet.
 - `to` (String) The ending IP address of the range.
@@ -83,12 +97,27 @@ Optional:
 - `interval` (Number) The interval between runs for the schedule.
 - `unit` (String) Unit of time for interval. One of: Minutes, Hours, Days, Weeks, Months
 
+
+<a id="nestedblock--free_range"></a>
+### Nested Schema for `free_range`
+
+Required:
+
+- `range` (String) Pick IP address from range with name
+
+Optional:
+
+- `ignore_subnet_flag` (Boolean) Exclude IP addresses that are assigned via DHCP
+- `size` (Number) The minimum size of the address blocks, specified as the number of addresses
+- `start_at` (String) Start searching for IP address from
+- `temporary_claim_time` (Number) Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.
+
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-# import with dnszone ref
+# import with range ref
 terraform import menandmice_range.resourcename Range/0
 
 # import with readable name

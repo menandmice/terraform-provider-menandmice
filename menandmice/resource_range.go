@@ -9,26 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-type NextFreeAddressRespons struct {
-	Result struct {
-		Address string `json:"address"`
-	} `json:"result"`
-}
-
-func (c Mmclient) NextFreeAddress(addressRange, startAddress string, ping, excludeDHCP bool, temporaryClaimTime int) (string, error) {
-	var re NextFreeAddressRespons
-	query := map[string]interface{}{
-		"ping":               ping,
-		"excludeDHCP":        excludeDHCP,
-		"temporaryClaimTime": temporaryClaimTime,
-	}
-	if startAddress != "" {
-		query["startAddress"] = startAddress
-	}
-	err := c.Get(&re, "Ranges/"+addressRange+"/NextFreeAddress", query, nil)
-	return re.Result.Address, err
-}
-
 func resourceRange() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceRangeCreate,
@@ -54,23 +34,90 @@ func resourceRange() *schema.Resource {
 			"cidr": {
 				Type:         schema.TypeString,
 				Description:  "The CIDR of the range",
-				ExactlyOneOf: []string{"cidr", "from"},
+				ExactlyOneOf: []string{"cidr", "from", "free_range"},
 				Optional:     true,
+			},
+			"free_range": &schema.Schema{
+				Type:         schema.TypeList,
+				Description:  "Find a free IP address to claim.",
+				Optional:     true,
+				ExactlyOneOf: []string{"cidr", "from", "free_range"},
+				MaxItems:     1,
+				// TODO add ForceNew, do we ignore changes?
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// TODO user range_ref here
+						"range": &schema.Schema{
+							Type:        schema.TypeString,
+							Description: "Pick IP address from range with name",
+							Required:    true,
+						},
+						"start_at": &schema.Schema{
+							Type:        schema.TypeString,
+							Description: "Start searching for IP address from",
+							Default:     "",
+							Optional:    true,
+							// TODO validate that its valide ip in the range of range
+						},
+						"size": &schema.Schema{
+							Type:        schema.TypeInt,
+							Description: "The minimum size of the address blocks, specified as the number of addresses",
+							Default:     false,
+							Optional:    true,
+						},
+
+						"ignore_subnet_flag": &schema.Schema{
+							Type:        schema.TypeBool,
+							Description: "Exclude IP addresses that are assigned via DHCP",
+							Default:     false,
+							Optional:    true,
+						},
+						"temporary_claim_time": &schema.Schema{
+							Type:         schema.TypeInt,
+							Description:  "Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.",
+							Default:      60,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(0, 300),
+						},
+					},
+				},
 			},
 			"from": {
 				Type:         schema.TypeString,
 				Description:  "The starting IP address of the range.",
 				RequiredWith: []string{"to"},
-				ExactlyOneOf: []string{"cidr", "from"},
+				ExactlyOneOf: []string{"cidr", "from", "free_range"},
 				Optional:     true,
 				ValidateFunc: validation.IsIPAddress,
+				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
+					// suppress diff in from/to if free_range or cidr is used
+					if _, ok := d.GetOk("cidr"); ok {
+						return true
+					}
+					if _, ok := d.GetOk("free_range"); ok {
+						return true
+					}
+					return false
+				},
 			},
+
 			"to": {
 				Type:         schema.TypeString,
 				Description:  "The ending IP address of the range.",
 				RequiredWith: []string{"from"},
 				Optional:     true,
 				ValidateFunc: validation.IsIPAddress,
+				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
+
+					// suppress diff in from/to if free_range or cidr is used
+					if _, ok := d.GetOk("cidr"); ok {
+						return true
+					}
+					if _, ok := d.GetOk("free_range"); ok {
+						return true
+					}
+					return false
+				},
 			},
 			"parent_ref": {
 				Type:        schema.TypeString,
@@ -295,6 +342,22 @@ func writeRangeSchema(d *schema.ResourceData, iprange Range) {
 	// TODO	 discovery, discoveredProperties,cloudAllocationPools
 	return
 }
+
+func readAvailableAddressBlocksRequest(freeRange interface{}) AvailableAddressBlocksRequest {
+
+	freeRangeInterface := freeRange.([]interface{})[0].(map[string]interface{})
+	availableAddressBlocksRequest := AvailableAddressBlocksRequest{
+		RangeRef:           freeRangeInterface["range"].(string),
+		StartAddress:       freeRangeInterface["start_at"].(string),
+		Size:               freeRangeInterface["size"].(int),
+		Limit:              1,
+		IgnoreSubnetFlag:   freeRangeInterface["ignore_subnet_flag"].(bool),
+		TemporaryClaimTime: freeRangeInterface["temporary_claim_time"].(int),
+	}
+
+	return availableAddressBlocksRequest
+
+}
 func readDiscoverySchema(discovery_schemas interface{}) Discovery {
 
 	schemas := discovery_schemas.([]interface{})
@@ -362,6 +425,22 @@ func readRangeSchema(d *schema.ResourceData) Range {
 func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Mmclient)
 
+	if freeRangeMap, ok := d.GetOk("free_range"); ok {
+		availableAddressBlocksRequest := readAvailableAddressBlocksRequest(freeRangeMap)
+		AvailableAddressBlocks, err := client.AvailableAddressBlocks(availableAddressBlocksRequest)
+
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if len(AvailableAddressBlocks) <= 0 {
+			// TODO better messages
+			return diag.Errorf("No available address blocks found")
+		}
+		d.Set("from", AvailableAddressBlocks[0].From)
+		d.Set("to", AvailableAddressBlocks[0].To)
+
+	}
+
 	discovery_schemas, ok := d.GetOk("discovery")
 	var discovery Discovery
 	if ok {
@@ -377,7 +456,6 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 	d.SetId(objRef)
-
 	return resourceRangeRead(c, d, m)
 
 }
@@ -404,13 +482,7 @@ func resourceRangeRead(c context.Context, d *schema.ResourceData, m interface{})
 
 func resourceRangeUpdate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	//can't change read only property
-	// if d.HasChange("ref") || d.HasChange("adintegrated") ||
-	// 	d.HasChange("dnsviewref") || d.HasChange("dnsviewrefs") ||
-	// 	d.HasChange("authority") {
-	// 	// this can't never error can never happen because of "ForceNew: true," for these properties
-	// 	return diag.Errorf("can't change read-only property of DNS zone")
-	// }
+	//TODO maybe check if readonly properties are changed
 	client := m.(*Mmclient)
 	ref := d.Id()
 
