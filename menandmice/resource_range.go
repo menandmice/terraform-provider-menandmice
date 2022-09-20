@@ -378,10 +378,8 @@ func readRangeSchema(d *schema.ResourceData) Range {
 	var name, from, to string
 	if cidr, ok := d.GetOk("cidr"); ok {
 		name = cidr.(string)
-		_, net, _ := net.ParseCIDR(name) // TODO check error, first ip
-		fromIP, toIP := AddressRange(net)
-		from = fromIP.String()
-		to = toIP.String()
+		to = ""
+		from = ""
 	} else {
 		name = tryGetString(d, "from") + "-" + tryGetString(d, "to")
 		from = tryGetString(d, "from")

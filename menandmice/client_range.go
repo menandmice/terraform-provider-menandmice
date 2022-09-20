@@ -13,13 +13,12 @@ type Range struct {
 	DhcpScopes  []NamedRef `json:"dhcpScopes"`
 	Authority   *Authority `json:"authority,omitempty"`
 	Subnet      bool       `json:"subnet"`
-	Locked      bool       `json:"locked"`
 	HasSchedule bool       `json:"hasSchedule"`
 	HasMonitor  bool       `json:"hasMonitor"`
 
 	IsContainer           bool                  `json:"isContainer"`
-	UtilizationPercentage int                   `json:"utilizationPercentage"`
-	HasRogueAddresses     bool                  `json:"hasRogueAddresses"`
+	UtilizationPercentage int                   `json:"utilizationPercentage,omitempty"`
+	HasRogueAddresses     bool                  `json:"hasRogueAddresses,omitempty"`
 	CloudNetworkRef       string                `json:"cloudNetworkRef,omitempty"`
 	CloudAllocationPools  []CloudAllocationPool `json:"cloudAllocationPools,omitempty"`
 
@@ -32,8 +31,8 @@ type Range struct {
 }
 
 type RangeProperties struct {
-	From       string `json:"from"`
-	To         string `json:"to"`
+	From       string `json:"from"omitempty"`
+	To         string `json:"to"omitempty"`
 	Locked     bool   `json:"locked"`
 	AutoAssign bool   `json:"autoAssign"`
 	// TODO should be CustomProperties map[string]interface{} `json:"customProperties"`
