@@ -31,6 +31,7 @@ func resourceDNSZone() *schema.Resource {
 				Description:  "Fully qualified name of DNS zone, ending with the trailing dot '.'.",
 				Required:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Name must end with '.'"),
+				ForceNew:     true,
 			},
 			"dynamic": &schema.Schema{
 				Type:        schema.TypeBool,
@@ -51,6 +52,7 @@ func resourceDNSZone() *schema.Resource {
 				Description: "Name of the view this DNS zone is in.",
 				Optional:    true,
 				Default:     "",
+				ForceNew:    true,
 			},
 			"dnsviewref": &schema.Schema{
 				Type:        schema.TypeString,
@@ -164,8 +166,10 @@ func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
 	d.Set("dynamic", dnszone.Dynamic)
 	d.Set("adintegrated", dnszone.AdIntegrated)
 
+	// TODO abstract over this ?
 	d.Set("dnsviewref", dnszone.DNSViewRef)
 	d.Set("dnsviewrefs", dnszone.DNSViewRefs)
+
 	d.Set("authority", dnszone.Authority)
 	d.Set("type", dnszone.ZoneType)
 	d.Set("dnssecsigned", dnszone.DnssecSigned)
@@ -202,13 +206,12 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		Ref:          tryGetString(d, "ref"),
 		AdIntegrated: d.Get("adintegrated").(bool),
 		Authority:    tryGetString(d, "authority"),
-
+		Name:         d.Get("name").(string),
 		// you should not set this yourself
 		// Created:      d.Get("created").(string),
 		// LastModified: tryGetString(d, "lastmodified"),
 
 		DNSZoneProperties: DNSZoneProperties{
-			Name:              d.Get("name").(string),
 			Dynamic:           d.Get("dynamic").(bool),
 			ZoneType:          tryGetString(d, "type"),
 			DnssecSigned:      d.Get("dnssecsigned").(bool),

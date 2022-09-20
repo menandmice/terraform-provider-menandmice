@@ -2,6 +2,7 @@ package menandmice
 
 type DNSZone struct {
 	Ref          string   `json:"ref,omitempty"`
+	Name         string   `json:"name"`
 	AdIntegrated bool     `json:"adIntegrated"`
 	DNSViewRef   string   `json:"dnsViewRef,omitempty"`
 	DNSViewRefs  []string `json:"dnsViewRefs,omitempty"`
@@ -15,7 +16,6 @@ type DNSZone struct {
 }
 
 type DNSZoneProperties struct {
-	Name              string            `json:"name"`
 	Dynamic           bool              `json:"dynamic,omitempty"`
 	ZoneType          string            `json:"type,omitempty"`
 	DnssecSigned      bool              `json:"dnssecSigned,omitempty"`
