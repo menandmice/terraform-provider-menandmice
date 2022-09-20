@@ -169,3 +169,68 @@ func (c *Mmclient) UpdateRange(rangeProperties RangeProperties, ref string) erro
 
 	return c.Put(update, "DNSZones/"+ref)
 }
+
+type NextFreeAddressRespons struct {
+	Result struct {
+		Address string `json:"address"`
+	} `json:"result"`
+}
+
+type NextFreeAddressRequest struct {
+	RangeRef           string
+	StartAddress       string
+	Ping               bool
+	ExcludeDHCP        bool
+	TemporaryClaimTime int
+}
+
+func (c Mmclient) NextFreeAddress(request NextFreeAddressRequest) (string, error) {
+	var re NextFreeAddressRespons
+	query := map[string]interface{}{
+		"ping":               request.Ping,
+		"excludeDHCP":        request.ExcludeDHCP,
+		"temporaryClaimTime": request.TemporaryClaimTime,
+	}
+	if request.StartAddress != "" {
+		query["startAddress"] = request.StartAddress
+	}
+	err := c.Get(&re, "Ranges/"+request.RangeRef+"/NextFreeAddress", query, nil)
+	return re.Result.Address, err
+}
+
+type AvailableAddressBlocksRespons struct {
+	Result struct {
+		AddressBlocks []AddressBlock `json:"addressBlocks"`
+	} `json:"result"`
+}
+
+type AddressBlock struct {
+	From string `json:"from"`
+	To   string `json:"to"`
+}
+
+type AvailableAddressBlocksRequest struct {
+	RangeRef           string
+	StartAddress       string
+	Size               int
+	Limit              int
+	IgnoreSubnetFlag   bool
+	TemporaryClaimTime int
+}
+
+func (c Mmclient) AvailableAddressBlocks(request AvailableAddressBlocksRequest) ([]AddressBlock, error) {
+
+	var re AvailableAddressBlocksRespons
+	query := map[string]interface{}{
+		"limit":              request.Limit,
+		"ignoreSubnetFlag":   request.IgnoreSubnetFlag,
+		"size":               request.Size,
+		"temporaryClaimTime": request.TemporaryClaimTime,
+	}
+	if request.StartAddress != "" {
+		query["startAddress"] = request.StartAddress
+	}
+	err := c.Get(&re, "Ranges/"+request.RangeRef+"/AvailableAddressBlocks", query, nil)
+	return re.Result.AddressBlocks, err
+
+}
