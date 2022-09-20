@@ -3,8 +3,10 @@ package menandmice
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -360,6 +362,8 @@ func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interfac
 	if freeIPMap, ok := d.GetOk("free_ip"); ok {
 
 		nextFreeIPRequest := readNextFreeIPRequest(freeIPMap)
+
+		tflog.Debug(c, fmt.Sprintf("Request next fee address"))
 		address, err := client.NextFreeAddress(nextFreeIPRequest)
 
 		if err != nil {

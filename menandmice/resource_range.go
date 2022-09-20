@@ -2,8 +2,9 @@ package menandmice
 
 import (
 	"context"
-	"net"
+	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -272,7 +273,7 @@ func resourceRange() *schema.Resource {
 				Description: "Used for discovery of ranges or scopes.",
 				Optional:    true,
 				MaxItems:    1,
-				ForceNew:    true, //FIXME
+				ForceNew:    true, //TODO can we make this update
 				// default does not work for list
 				// Default:     [1]map[string]interface{}{{"enabled": false}},
 				Elem: &schema.Resource{
@@ -427,6 +428,8 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 
 	if freeRangeMap, ok := d.GetOk("free_range"); ok {
 		availableAddressBlocksRequest := readAvailableAddressBlocksRequest(freeRangeMap)
+
+		tflog.Debug(c, fmt.Sprintf("Request a available AddressBlock"))
 		AvailableAddressBlocks, err := client.AvailableAddressBlocks(availableAddressBlocksRequest)
 
 		if err != nil {
@@ -449,6 +452,7 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 		// default is defined here. because can't be done in schema
 		discovery = Discovery{Enabled: false}
 	}
+
 	iprange := readRangeSchema(d)
 	objRef, err := client.CreateRange(iprange, discovery)
 
