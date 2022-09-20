@@ -26,6 +26,7 @@ type Cfg struct {
 	MMPassword string
 	TLSVerify  bool
 	Timeout    int
+	Debug      bool
 }
 
 func init() {
@@ -36,7 +37,7 @@ func init() {
 // ClientInit establishes default settings on the REST client
 func ClientInit(c *Cfg) (*Mmclient, error) {
 	client := Mmclient{Client: *resty.New()}
-
+	client.SetDebug(c.Debug)
 	if c.MMEndpoint == "" {
 		return nil, errors.New("REST API endpoint must be configured")
 		//TODO check if it resolaves
