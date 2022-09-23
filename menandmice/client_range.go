@@ -3,6 +3,8 @@ package menandmice
 type Range struct {
 	Ref               string     `json:"ref,omitempty"`
 	Name              string     `json:"name"`
+	From              string     `json:"from,omitempty"`
+	To                string     `json:"to,omitempty"`
 	ParentRef         string     `json:"parentRef,omitempty"`
 	AdSiteRef         string     `json:"adSiteRef,omitempty"`
 	AdSiteDisplayName string     `json:"adSiteDisplayName,omitempty"`
@@ -31,10 +33,8 @@ type Range struct {
 }
 
 type RangeProperties struct {
-	From       string `json:"from,omitempty"`
-	To         string `json:"to,omitempty"`
-	Locked     bool   `json:"locked"`
-	AutoAssign bool   `json:"autoAssign"`
+	Locked     bool `json:"locked"`
+	AutoAssign bool `json:"autoAssign"`
 	// TODO should be CustomProperties map[string]interface{} `json:"customProperties"`
 	CustomProperties map[string]string `json:"customProperties,omitempty"`
 }

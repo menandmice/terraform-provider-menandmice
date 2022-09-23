@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -259,7 +258,6 @@ func resourceDNSRecImport(ctx context.Context, d *schema.ResourceData, m interfa
 
 	ref := d.Get("ref").(string)
 	if ref == "" {
-		tflog.Debug(ctx, fmt.Sprintf("%v", d))
 		return nil, errors.New("Import failed")
 	}
 	d.SetId(ref)

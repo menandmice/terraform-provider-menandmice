@@ -90,10 +90,9 @@ func resourceIPAMRec() *schema.Resource {
 					if ipv6AddressDiffSuppress(key, old, new, d) {
 						return true
 					}
-					// FIXME
-					// if _, ok := d.GetOk("free_ip"); ok {
-					// 	return true
-					// }
+					if _, ok := d.GetOk("free_ip"); ok {
+						return true
+					}
 					return false
 				},
 				ForceNew: true,
