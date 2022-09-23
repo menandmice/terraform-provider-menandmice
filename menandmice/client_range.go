@@ -31,8 +31,8 @@ type Range struct {
 }
 
 type RangeProperties struct {
-	From       string `json:"from"omitempty"`
-	To         string `json:"to"omitempty"`
+	From       string `json:"from,omitempty"`
+	To         string `json:"to,omitempty"`
 	Locked     bool   `json:"locked"`
 	AutoAssign bool   `json:"autoAssign"`
 	// TODO should be CustomProperties map[string]interface{} `json:"customProperties"`
