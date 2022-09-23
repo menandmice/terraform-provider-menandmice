@@ -77,7 +77,7 @@ func providerConfigure(c context.Context, d *schema.ResourceData) (interface{}, 
 		MMPassword: d.Get("password").(string),
 		TLSVerify:  d.Get("tls_verify").(bool),
 		Timeout:    d.Get("timeout").(int),
-		Debug:      true, // FIXME
+		// Debug:      true,
 	}
 
 	if params.MMEndpoint == "" {

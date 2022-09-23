@@ -15,47 +15,41 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 
 	name := "terraform-test-rec1"
 	date1 := "192.168.2.13"
-	// date2 := "192.168.2.14"
+	date2 := "192.168.2.14"
 	rectype := "A"
-	// view := ""
+	view := ""
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckMenandmiceDNSRecDestroy,
 		Steps: []resource.TestStep{
-			{ // Setup dnszone
-				Config: testAccCheckMenandmiceDNSZoneConfigBasic(zone, authority),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
-				),
-			},
 			{
 				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date1, rectype, authority, zone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
 			},
-			// FIXME
-			// {
-			// 	Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date2, rectype, authority, zone),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckResourceExists("menandmice_dns_record.testrec"),
-			// 	),
-			// },
-			// {
-			// 	ResourceName:      "menandmice_dns_record.testrec",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// 	//TODO avoid ImportStateVerifyIgnore: "server", "zone"
-			// 	ImportStateVerifyIgnore: []string{"server", "zone", "view"},
-			// },
-			// {
-			// 	ResourceName:      "menandmice_dns_record.testrec",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// 	ImportStateId:     authority + ":" + view + ":" + name + "." + zone + ":" + "A",
-			// },
+			{
+				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date2, rectype, authority, zone),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_dns_record.testrec"),
+				),
+			},
+			{
+				ResourceName:      "menandmice_dns_record.testrec",
+				ImportState:       true,
+				ImportStateVerify: true,
+				//TODO avoid ImportStateVerifyIgnore: "server", "zone"
+				ImportStateVerifyIgnore: []string{"server", "zone", "view"},
+			},
+			{
+				ResourceName:            "menandmice_dns_record.testrec",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateId:           authority + ":" + view + ":" + name + "." + zone + ":" + "A",
+				ImportStateVerifyIgnore: []string{"view"},
+			},
 		},
 	})
 }
@@ -81,12 +75,18 @@ func testAccCheckMenandmiceDNSRecDestroy(s *terraform.State) error {
 
 func testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, server, zone string) string {
 	return fmt.Sprintf(`
+
+	resource menandmice_dns_zone testzone{
+		name    = "%s"
+		authority   = "%s"
+	}
+
 	resource menandmice_dns_record testrec{
 		name    = "%s"
 		data    = "%s"
 		type    = "%s"
 		server  = "%s"
-		zone    = "%s"
+		zone    = menandmice_dns_zone.testzone.name
 	}
-	`, name, date, rectype, server, zone)
+	`, zone, server, name, date, rectype, server)
 }

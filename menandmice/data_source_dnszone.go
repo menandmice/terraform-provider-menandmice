@@ -54,11 +54,15 @@ func DataSourceDNSZone() *schema.Resource {
 				Computed:    true,
 			},
 
+			// TODO unify dnsviewref dnsviewrefs
+			// TODO following nameing convetion it would be dns_view_ref
 			"dnsviewref": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Interal references to views.",
 				Computed:    true,
 			},
+
+			// TODO following nameing convetion it would be dns_view_refs
 			"dnsviewrefs": &schema.Schema{
 				Type:        schema.TypeSet,
 				Description: "Interal references to views. Only used with Active Directory.",

@@ -43,7 +43,7 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 				ResourceName:      "menandmice_dns_zone.testzone",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateId:     "micetro.example.com." + ":" + view + ":" + name,
+				ImportStateId:     authority1 + ":" + view + ":" + name,
 			},
 		},
 	})

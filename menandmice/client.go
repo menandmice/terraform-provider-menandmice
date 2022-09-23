@@ -66,8 +66,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
 	client.SetHostURL(c.MMEndpoint + "/mmws/api")
 
-	// TODO check if this works well with Round Robin DNS
-	// TODO is this needed
+	// TODO remove retry. does not help
 	client.SetRetryCount(5)
 	client.SetRetryWaitTime(1 * time.Second)
 	client.AddRetryCondition(func(r *resty.Response, e error) bool {

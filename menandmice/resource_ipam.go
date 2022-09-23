@@ -90,17 +90,15 @@ func resourceIPAMRec() *schema.Resource {
 					if ipv6AddressDiffSuppress(key, old, new, d) {
 						return true
 					}
-					if _, ok := d.GetOk("free_ip"); ok {
-
-						return true
-						// FIXME can we still check if address is in freeIPRange. Do we want to check that?
-						// return inFreeIPRange(readFreeIPMap(freeIPRead), old)
-					}
+					// FIXME
+					// if _, ok := d.GetOk("free_ip"); ok {
+					// 	return true
+					// }
 					return false
 				},
 				ForceNew: true,
 			},
-			// FIXME Think this can be removed
+			// TODO Think this can be removed/deprecated
 			"current_address": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Address currently used.",
