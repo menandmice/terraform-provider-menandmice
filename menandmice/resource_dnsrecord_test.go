@@ -20,9 +20,9 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 	view := ""
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMenandmiceDNSRecDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckMenandmiceDNSRecDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date1, rectype, authority, zone),
