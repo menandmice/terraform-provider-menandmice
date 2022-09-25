@@ -163,7 +163,8 @@ func resourceRange() *schema.Resource {
 			"subnet": {
 				Type:        schema.TypeBool,
 				Description: "Determines if the range is defined as a subnet.",
-				Computed:    true,
+				Default:     false,
+				Optional:    true,
 			},
 
 			"locked": {
@@ -415,6 +416,7 @@ func readRangeSchema(d *schema.ResourceData) Range {
 			To:               to,
 			Locked:           d.Get("locked").(bool),
 			AutoAssign:       d.Get("auto_assign").(bool),
+			Subnet:           d.Get("subnet").(bool),
 			CustomProperties: customProperties,
 		},
 	}

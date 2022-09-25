@@ -12,7 +12,6 @@ type Range struct {
 	// NumChildren int        `json:"numchildren"`
 	DhcpScopes  []NamedRef `json:"dhcpScopes"`
 	Authority   *Authority `json:"authority,omitempty"`
-	Subnet      bool       `json:"subnet"`
 	HasSchedule bool       `json:"hasSchedule"`
 	HasMonitor  bool       `json:"hasMonitor"`
 
@@ -35,6 +34,7 @@ type RangeProperties struct {
 	To         string `json:"to,omitempty"`
 	Locked     bool   `json:"locked"`
 	AutoAssign bool   `json:"autoAssign"`
+	Subnet     bool   `json:"subnet"`
 	// TODO should be CustomProperties map[string]interface{} `json:"customProperties"`
 	CustomProperties map[string]string `json:"customProperties,omitempty"`
 }

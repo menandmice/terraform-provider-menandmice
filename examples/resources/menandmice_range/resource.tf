@@ -11,6 +11,7 @@ terraform {
 resource "menandmice_range" "example1" {
   cidr  = "192.168.5.0/24"
   title = "Test Terraform example1"
+  subnet = true
 }
 
 resource "menandmice_range" "example2" {
