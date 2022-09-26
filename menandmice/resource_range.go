@@ -60,11 +60,12 @@ func resourceRange() *schema.Resource {
 							Required:    true,
 						},
 						"start_at": &schema.Schema{
-							Type:        schema.TypeString,
-							Description: "Start searching for IP address from",
-							Default:     "",
-							Optional:    true,
-							ForceNew:    true,
+							Type:          schema.TypeString,
+							Description:   "Start searching for IP address from",
+							ConflictsWith: []string{"free_range.0.mask"},
+							Default:       "",
+							Optional:      true,
+							ForceNew:      true,
 							// TODO validate that its valide ip in the range of range
 						},
 						"size": &schema.Schema{
