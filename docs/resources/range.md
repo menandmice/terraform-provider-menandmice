@@ -13,16 +13,6 @@ description: |-
 ## Example Usage
 
 ```terraform
-terraform {
-  required_providers {
-    menandmice = {
-      # uncomment for terraform 0.13 and higher
-      version = "~> 0.2.1",
-      source  = "local/menandmice",
-    }
-  }
-}
-
 resource "menandmice_range" "example1" {
   cidr   = "192.168.5.0/24"
   title  = "Test Terraform example1"
