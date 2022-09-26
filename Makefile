@@ -3,7 +3,7 @@ HOSTNAME	:=registry.terraform.io
 NAMESPACE	:=local
 NAME		:=menandmice
 BINARY		:=terraform-provider-${NAME}
-VERSION		:=0.2.1
+VERSION		:=0.3.0
 OS		:=$(shell uname|tr A-Z a-z)
 
 ifeq ($(shell uname -m),x86_64)
