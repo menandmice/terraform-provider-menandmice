@@ -24,8 +24,9 @@ terraform {
 }
 
 resource "menandmice_range" "example1" {
-  cidr  = "192.168.5.0/24"
-  title = "Test Terraform example1"
+  cidr   = "192.168.5.0/24"
+  title  = "Test Terraform example1"
+  subnet = true
 }
 
 resource "menandmice_range" "example2" {
@@ -44,6 +45,7 @@ data "menandmice_range" "super_range" {
 resource "menandmice_range" "example3" {
   free_range {
     range = data.menandmice_range.super_range.name
+    mask  = 24
   }
   title       = "Test Terraform example3"
   description = "Test"
@@ -67,6 +69,7 @@ resource "menandmice_range" "example3" {
 - `free_range` (Block List, Max: 1) Find a free IP address to claim. (see [below for nested schema](#nestedblock--free_range))
 - `from` (String) The starting IP address of the range.
 - `locked` (Boolean) Determines if the range is defined as a subnet.
+- `subnet` (Boolean) Determines if the range is defined as a subnet.
 - `to` (String) The ending IP address of the range.
 
 ### Read-Only
@@ -85,7 +88,6 @@ resource "menandmice_range" "example3" {
 - `name` (String) The CIDR of the range, or from-to address range.
 - `parent_ref` (String) A reference to the range that contains the subranges
 - `ref` (String) Internal references to this range.
-- `subnet` (Boolean) Determines if the range is defined as a subnet.
 - `utilization_percentage` (Number) Utilization percentage for range.
 
 <a id="nestedblock--discovery"></a>
@@ -108,6 +110,7 @@ Required:
 Optional:
 
 - `ignore_subnet_flag` (Boolean) Exclude IP addresses that are assigned via DHCP
+- `mask` (Number) The minimum size of the address blocks, specified as a subnet mask.
 - `size` (Number) The minimum size of the address blocks, specified as the number of addresses
 - `start_at` (String) Start searching for IP address from
 - `temporary_claim_time` (Number) Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.
