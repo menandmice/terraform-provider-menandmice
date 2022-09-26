@@ -30,8 +30,8 @@ data "menandmice_range" "super_range" {
 resource "menandmice_range" "example3" {
   free_range {
     range = data.menandmice_range.super_range.name
+    mask = 24
   }
   title       = "Test Terraform example3"
   description = "Test"
 }
-

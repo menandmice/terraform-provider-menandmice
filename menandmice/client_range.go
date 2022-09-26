@@ -212,6 +212,7 @@ type AvailableAddressBlocksRequest struct {
 	RangeRef           string
 	StartAddress       string
 	Size               int
+	Mask               int
 	Limit              int
 	IgnoreSubnetFlag   bool
 	TemporaryClaimTime int
@@ -223,9 +224,16 @@ func (c Mmclient) AvailableAddressBlocks(request AvailableAddressBlocksRequest) 
 	query := map[string]interface{}{
 		"limit":              request.Limit,
 		"ignoreSubnetFlag":   request.IgnoreSubnetFlag,
-		"size":               request.Size,
 		"temporaryClaimTime": request.TemporaryClaimTime,
 	}
+	if request.Mask != 0 {
+		query["mask"] = request.Mask
+	}
+
+	if request.Size != 0 {
+		query["size"] = request.Size
+	}
+
 	if request.StartAddress != "" {
 		query["startAddress"] = request.StartAddress
 	}

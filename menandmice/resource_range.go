@@ -44,7 +44,7 @@ func resourceRange() *schema.Resource {
 				Optional:     true,
 				ExactlyOneOf: []string{"cidr", "from", "free_range"},
 				MaxItems:     1,
-				// TODO add ForceNew, do we ignore changes?
+				ForceNew:     true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						// TODO user range_ref here
@@ -58,13 +58,24 @@ func resourceRange() *schema.Resource {
 							Description: "Start searching for IP address from",
 							Default:     "",
 							Optional:    true,
+							ForceNew:    true,
 							// TODO validate that its valide ip in the range of range
 						},
 						"size": &schema.Schema{
-							Type:        schema.TypeInt,
-							Description: "The minimum size of the address blocks, specified as the number of addresses",
-							Default:     false,
-							Optional:    true,
+							Type:         schema.TypeInt,
+							ExactlyOneOf: []string{"free_range.0.mask"},
+							Description:  "The minimum size of the address blocks, specified as the number of addresses",
+							Optional:     true,
+							ForceNew:     true,
+						},
+
+						"mask": &schema.Schema{
+							Type:         schema.TypeInt,
+							ExactlyOneOf: []string{"free_range.0.mask", "free_range.0.size"},
+							Description:  "The minimum size of the address blocks, specified as a subnet mask.",
+							// Default:     24, // setting default here gives problem if user also set size
+							Optional: true,
+							ForceNew: true,
 						},
 
 						"ignore_subnet_flag": &schema.Schema{
@@ -348,10 +359,12 @@ func writeRangeSchema(d *schema.ResourceData, iprange Range) {
 func readAvailableAddressBlocksRequest(freeRange interface{}) AvailableAddressBlocksRequest {
 
 	freeRangeInterface := freeRange.([]interface{})[0].(map[string]interface{})
+
 	availableAddressBlocksRequest := AvailableAddressBlocksRequest{
 		RangeRef:           freeRangeInterface["range"].(string),
 		StartAddress:       freeRangeInterface["start_at"].(string),
 		Size:               freeRangeInterface["size"].(int),
+		Mask:               freeRangeInterface["mask"].(int),
 		Limit:              1,
 		IgnoreSubnetFlag:   freeRangeInterface["ignore_subnet_flag"].(bool),
 		TemporaryClaimTime: freeRangeInterface["temporary_claim_time"].(int),
