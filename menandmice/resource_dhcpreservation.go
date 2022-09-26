@@ -27,7 +27,7 @@ func resourceDHCPReservation() *schema.Resource {
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "The name of DHCP reservation you want to query.",
+				Description: "The name of the DHCP reservation you want to query.",
 				Required:    true,
 			},
 			"type": &schema.Schema{

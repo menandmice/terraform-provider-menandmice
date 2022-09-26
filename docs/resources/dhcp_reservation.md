@@ -59,7 +59,7 @@ resource "menandmice_dhcp_reservation" "reservation2" {
 
 - `addresses` (List of String) A list of IP addresses used for the reservation.
 - `client_identifier` (String) The client_identifier of this reservation.
-- `name` (String) The name of DHCP reservation you want to query.
+- `name` (String) The name of the DHCP reservation you want to query.
 - `owner` (String) DHCP group scope or server where this reservation is made.
 
 ### Optional
