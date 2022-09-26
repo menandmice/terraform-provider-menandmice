@@ -203,14 +203,12 @@ func resourceRange() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The title of the Range",
 				Required:    true,
-				// Default:      false,
 			},
 
 			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of the range",
 				Optional:    true,
-				// Default:      false,
 			},
 
 			"custom_properties": &schema.Schema{
@@ -230,7 +228,8 @@ func resourceRange() *schema.Resource {
 			"is_container": {
 				Type:        schema.TypeBool,
 				Description: "Set to true to create a container instead of a range.",
-				Computed:    true, // TODO
+				Optional:    true,
+				Default:     false,
 			},
 
 			"utilization_percentage": {
@@ -434,6 +433,7 @@ func readRangeSchema(d *schema.ResourceData) Range {
 			Locked:           d.Get("locked").(bool),
 			AutoAssign:       d.Get("auto_assign").(bool),
 			Subnet:           d.Get("subnet").(bool),
+			IsContainer:      d.Get("is_container").(bool),
 			CustomProperties: customProperties,
 		},
 	}

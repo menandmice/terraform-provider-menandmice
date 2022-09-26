@@ -17,7 +17,6 @@ type Range struct {
 	HasSchedule bool       `json:"hasSchedule"`
 	HasMonitor  bool       `json:"hasMonitor"`
 
-	IsContainer           bool                  `json:"isContainer"`
 	UtilizationPercentage int                   `json:"utilizationPercentage,omitempty"`
 	HasRogueAddresses     bool                  `json:"hasRogueAddresses,omitempty"`
 	CloudNetworkRef       string                `json:"cloudNetworkRef,omitempty"`
@@ -32,9 +31,10 @@ type Range struct {
 }
 
 type RangeProperties struct {
-	Locked     bool   `json:"locked"`
-	AutoAssign bool   `json:"autoAssign"`
-	Subnet     bool   `json:"subnet"`
+	IsContainer bool `json:"isContainer"`
+	Locked      bool `json:"locked"`
+	AutoAssign  bool `json:"autoAssign"`
+	Subnet      bool `json:"subnet"`
 	// TODO should be CustomProperties map[string]interface{} `json:"customProperties"`
 	CustomProperties map[string]string `json:"customProperties,omitempty"`
 }
