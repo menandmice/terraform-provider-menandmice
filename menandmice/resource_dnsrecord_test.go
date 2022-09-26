@@ -9,12 +9,15 @@ import (
 )
 
 func TestAccMenandmiceDNSRecBasic(t *testing.T) {
+
+	zone := "terraform-test-zone.net."
+	authority := "ext-master.mmdemo.net."
+
 	name := "terraform-test-rec1"
-	date := "192.168.2.13"
+	date1 := "192.168.2.13"
+	date2 := "192.168.2.14"
 	rectype := "A"
 	view := ""
-	server := "micetro.example.net."
-	zone := "example.net."
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -22,13 +25,13 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 		CheckDestroy: testAccCheckMenandmiceDNSRecDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, server, zone),
+				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date1, rectype, authority, zone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
 			},
 			{
-				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, "192.168.2.14", rectype, server, zone),
+				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date2, rectype, authority, zone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
@@ -41,10 +44,11 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"server", "zone", "view"},
 			},
 			{
-				ResourceName:      "menandmice_dns_record.testrec",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateId:     server + ":" + view + ":" + name + "." + zone + ":" + "A",
+				ResourceName:            "menandmice_dns_record.testrec",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateId:           authority + ":" + view + ":" + name + "." + zone + ":" + "A",
+				ImportStateVerifyIgnore: []string{"view"},
 			},
 		},
 	})
@@ -71,12 +75,18 @@ func testAccCheckMenandmiceDNSRecDestroy(s *terraform.State) error {
 
 func testAccCheckMenandmiceDNSRecConfigBasic(name, date, rectype, server, zone string) string {
 	return fmt.Sprintf(`
+
+	resource menandmice_dns_zone testzone{
+		name    = "%s"
+		authority   = "%s"
+	}
+
 	resource menandmice_dns_record testrec{
 		name    = "%s"
 		data    = "%s"
 		type    = "%s"
 		server  = "%s"
-		zone    = "%s"
+		zone    = menandmice_dns_zone.testzone.name
 	}
-	`, name, date, rectype, server, zone)
+	`, zone, server, name, date, rectype, server)
 }

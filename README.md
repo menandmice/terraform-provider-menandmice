@@ -27,8 +27,8 @@ terraform.exe init
 # run Acceptation test
 
 You need a working Micetro server with:
-  - dnsserver: micetro.example.net. micetro.example.com.
-  - dhcpserver: micetro.example.net.
+  - dnsserver: ext-master.mmdemo.net.
+  - dhcpserver: DHCPScopes/192.168.2.128/25"
   - ipam-properties: location
 
 

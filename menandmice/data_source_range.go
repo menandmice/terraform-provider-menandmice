@@ -60,7 +60,7 @@ func DataSourceRange() *schema.Resource {
 			// "childRanges": {
 			// 	Type:        schema.TypeList,
 			// 	Description: "An list of child ranges of the range.",
-			// 	Computed:    true, //TODO
+			// 	Computed:    true,
 
 			// redundant
 			// IsLeaf            bool       `json:"isLeaf"`
@@ -70,13 +70,13 @@ func DataSourceRange() *schema.Resource {
 			// "dhcpScopes": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
-			// 	Computed:    true, //TODO
+			// 	Computed:    true,
 			// 	// Default:      false,
 			// },
 			// "authority": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
-			// 	Computed:    true, //TODO
+			// 	Computed:    true,
 			// },
 
 			"subnet": {

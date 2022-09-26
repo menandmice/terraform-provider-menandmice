@@ -3,6 +3,8 @@ package menandmice
 type Range struct {
 	Ref               string     `json:"ref,omitempty"`
 	Name              string     `json:"name"`
+	From              string     `json:"from,omitempty"`
+	To                string     `json:"to,omitempty"`
 	ParentRef         string     `json:"parentRef,omitempty"`
 	AdSiteRef         string     `json:"adSiteRef,omitempty"`
 	AdSiteDisplayName string     `json:"adSiteDisplayName,omitempty"`
@@ -30,8 +32,6 @@ type Range struct {
 }
 
 type RangeProperties struct {
-	From       string `json:"from,omitempty"`
-	To         string `json:"to,omitempty"`
 	Locked     bool   `json:"locked"`
 	AutoAssign bool   `json:"autoAssign"`
 	Subnet     bool   `json:"subnet"`
@@ -224,6 +224,7 @@ func (c Mmclient) AvailableAddressBlocks(request AvailableAddressBlocksRequest) 
 	query := map[string]interface{}{
 		"limit":              request.Limit,
 		"ignoreSubnetFlag":   request.IgnoreSubnetFlag,
+		"size":               request.Size,
 		"temporaryClaimTime": request.TemporaryClaimTime,
 	}
 	if request.Mask != 0 {

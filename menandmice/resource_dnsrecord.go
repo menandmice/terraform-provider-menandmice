@@ -2,6 +2,7 @@ package menandmice
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -230,9 +231,10 @@ func resourceDNSRecImport(ctx context.Context, d *schema.ResourceData, m interfa
 
 	arg := d.Id()
 
+	var diags diag.Diagnostics
 	if parts := strings.Split(arg, ":"); len(parts) == 4 {
 
-		// format is authority:view:fqdn
+		// format is authority:view:fqdn:type
 		d.Set("server", parts[0])
 		d.Set("view", parts[1])
 		fqdn := strings.SplitN(parts[2], ".", 2)
@@ -240,25 +242,25 @@ func resourceDNSRecImport(ctx context.Context, d *schema.ResourceData, m interfa
 		if len(fqdn) != 2 {
 			return nil, fmt.Errorf("Could not parse FQDN %s", parts[2])
 		}
-		d.Set("name", fqdn[0])
+		d.Set("name", fqdn[0]) // TODO this not always true
 		d.Set("zone", fqdn[1])
 		d.Set("type", parts[3])
 
-		diags := dataSourceDNSRectRead(ctx, d, m)
-		if err := toError(diags); err != nil {
-			return nil, err
-		}
-		d.SetId(d.Get("ref").(string))
-
+		// TODO this fragile. call client directly
+		diags = dataSourceDNSRectRead(ctx, d, m)
 	} else {
-		// otherwise format is dnsrecords/<id> which would work for read to
 
-		diags := resourceDNSRecRead(ctx, d, m)
-		if err := toError(diags); err != nil {
-			return nil, err
-		}
-		d.SetId(d.Get("ref").(string))
+		diags = resourceDNSRecRead(ctx, d, m)
 	}
+	if err := toError(diags); err != nil {
+		return nil, err
+	}
+
+	ref := d.Get("ref").(string)
+	if ref == "" {
+		return nil, errors.New("Import failed")
+	}
+	d.SetId(ref)
 
 	return []*schema.ResourceData{d}, nil
 }

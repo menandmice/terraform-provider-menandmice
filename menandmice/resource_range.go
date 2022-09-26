@@ -2,7 +2,9 @@ package menandmice
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -36,7 +38,11 @@ func resourceRange() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The CIDR of the range",
 				ExactlyOneOf: []string{"cidr", "from", "free_range"},
-				Optional:     true,
+				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
+					return new == ""
+				},
+				ForceNew: true,
+				Optional: true,
 			},
 			"free_range": &schema.Schema{
 				Type:         schema.TypeList,
@@ -99,17 +105,12 @@ func resourceRange() *schema.Resource {
 				Description:  "The starting IP address of the range.",
 				RequiredWith: []string{"to"},
 				ExactlyOneOf: []string{"cidr", "from", "free_range"},
+				ForceNew:     true,
 				Optional:     true,
 				ValidateFunc: validation.IsIPAddress,
 				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
-					// suppress diff in from/to if free_range or cidr is used
-					if _, ok := d.GetOk("cidr"); ok {
-						return true
-					}
-					if _, ok := d.GetOk("free_range"); ok {
-						return true
-					}
-					return false
+					// ignore if it is not set in config but know
+					return new == ""
 				},
 			},
 
@@ -118,17 +119,13 @@ func resourceRange() *schema.Resource {
 				Description:  "The ending IP address of the range.",
 				RequiredWith: []string{"from"},
 				Optional:     true,
+				ForceNew:     true,
+				// TODO validate ip is higher then from
 				ValidateFunc: validation.IsIPAddress,
 				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
 
-					// suppress diff in from/to if free_range or cidr is used
-					if _, ok := d.GetOk("cidr"); ok {
-						return true
-					}
-					if _, ok := d.GetOk("free_range"); ok {
-						return true
-					}
-					return false
+					// ignore if It is not set in config but know
+					return new == ""
 				},
 			},
 			"parent_ref": {
@@ -323,6 +320,13 @@ func writeRangeSchema(d *schema.ResourceData, iprange Range) {
 
 	d.Set("ref", iprange.Ref)
 	d.Set("name", iprange.Name)
+
+	if _, _, err := net.ParseCIDR(iprange.Name); err == nil {
+		d.Set("cidr", iprange.Name)
+	} else {
+		d.Set("cidr", "")
+	}
+
 	d.Set("from", iprange.From)
 	d.Set("to", iprange.To)
 	d.Set("parent_ref", iprange.ParentRef)
@@ -417,6 +421,8 @@ func readRangeSchema(d *schema.ResourceData) Range {
 	iprange := Range{
 		Ref:  tryGetString(d, "ref"),
 		Name: name,
+		From: from,
+		To:   to,
 
 		// you should not set this yourself
 		// Created:      d.Get("created").(string),
@@ -425,8 +431,6 @@ func readRangeSchema(d *schema.ResourceData) Range {
 		InheritAccess: d.Get("inherit_access").(bool),
 		RangeProperties: RangeProperties{
 
-			From:             from,
-			To:               to,
 			Locked:           d.Get("locked").(bool),
 			AutoAssign:       d.Get("auto_assign").(bool),
 			Subnet:           d.Get("subnet").(bool),
@@ -499,7 +503,10 @@ func resourceRangeRead(c context.Context, d *schema.ResourceData, m interface{})
 
 func resourceRangeUpdate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	//TODO maybe check if readonly properties are changed
+	//TODO maybe check more
+	if d.HasChange("discovery") {
+		return diag.Errorf("can't change read-only property of DNS zone")
+	}
 	client := m.(*Mmclient)
 	ref := d.Id()
 
@@ -536,7 +543,12 @@ func resourceRangeImport(ctx context.Context, d *schema.ResourceData, m interfac
 
 	// if we had used schema.ImportStatePassthrough
 	// we could not have set id to its canonical form
-	d.SetId(d.Get("ref").(string))
+
+	ref := d.Get("ref").(string)
+	if ref == "" {
+		return nil, errors.New("Import failed")
+	}
+	d.SetId(ref)
 
 	return []*schema.ResourceData{d}, nil
 }

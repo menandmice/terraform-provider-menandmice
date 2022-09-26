@@ -26,6 +26,7 @@ type Cfg struct {
 	MMPassword string
 	TLSVerify  bool
 	Timeout    int
+	Debug      bool
 }
 
 func init() {
@@ -36,7 +37,7 @@ func init() {
 // ClientInit establishes default settings on the REST client
 func ClientInit(c *Cfg) (*Mmclient, error) {
 	client := Mmclient{Client: *resty.New()}
-
+	client.SetDebug(c.Debug)
 	if c.MMEndpoint == "" {
 		return nil, errors.New("REST API endpoint must be configured")
 		//TODO check if it resolaves
@@ -65,8 +66,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
 	client.SetHostURL(c.MMEndpoint + "/mmws/api")
 
-	// TODO check if this works well with Round Robin DNS
-	// TODO is this needed
+	// TODO remove retry. does not help
 	client.SetRetryCount(5)
 	client.SetRetryWaitTime(1 * time.Second)
 	client.AddRetryCondition(func(r *resty.Response, e error) bool {
