@@ -185,9 +185,8 @@ func resourceRange() *schema.Resource {
 			"auto_assign": {
 				Type:        schema.TypeBool,
 				Description: "Determines if it should be possible to automatically assign IP addresses from the range.",
-				// Computed:    true, // TODO
-				Default:  true,
-				Optional: true,
+				Default:     false,
+				Optional:    true,
 			},
 			"has_schedule": {
 				Type:        schema.TypeBool,
