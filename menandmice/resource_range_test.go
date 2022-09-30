@@ -12,7 +12,7 @@ func TestAccMenandmiceRangeCIDR(t *testing.T) {
 
 	cidr1 := "192.168.2.0/24"
 	cidr2 := "192.168.2.0/25"
-	title1 := "Terraform acceptionat testrange #1"
+	title1 := "Terraform acceptance testrange #1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -64,8 +64,8 @@ func TestAccMenandmiceRangeToFrom(t *testing.T) {
 	locked2 := true
 	autoAssign1 := false
 	autoAssign2 := true
-	title1 := "Terraform acceptionat testrange #1"
-	title2 := "Terraform acceptionat testrange #2"
+	title1 := "Terraform acceptance testrange #1"
+	title2 := "Terraform acceptance testrange #2"
 	description1 := ""
 	description2 := title2
 
@@ -133,7 +133,7 @@ func TestAccMenandmiceRangeToFrom(t *testing.T) {
 	})
 }
 
-func testAccCheckMenandmiceRangeConfigToFrom(from, to, title, description string, locked, auto_assign bool) string {
+func testAccCheckMenandmiceRangeConfigToFrom(from, to, title, description string, locked, autoAssign bool) string {
 	return fmt.Sprintf(`
 	resource menandmice_range testrange{
 		to = "%s"
@@ -143,15 +143,20 @@ func testAccCheckMenandmiceRangeConfigToFrom(from, to, title, description string
 		locked = "%t"
 		auto_assign = "%t"
 	}
-	`, to, from, title, description, locked, auto_assign)
+	`, to, from, title, description, locked, autoAssign)
 }
 
 func TestAccMenandmiceRangeFreeRange(t *testing.T) {
 
 	parentRange1 := "192.168.2.0/24"
 	startAt1 := "192.168.2.0"
-	startAt2 := "192.168.2.100"
+	startAt2 := "192.168.2.30"
 	size1 := 40
+	size2 := 20
+	subnet1 := true
+	subnet2 := true
+	mask1 := 28
+	mask2 := 27
 	title := "Terraform acceptionat testrange #1"
 
 	resource.Test(t, resource.TestCase{
@@ -160,13 +165,37 @@ func TestAccMenandmiceRangeFreeRange(t *testing.T) {
 		CheckDestroy: testAccCheckMenandmiceRangeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckMenandmiceRangeConfigFreeRange(parentRange1, startAt1, size1, title),
+				Config: testAccCheckMenandmiceRangeConfigFreeRangeSize(parentRange1, startAt1, size1, title),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_range.testrange"),
 				),
 			},
 			{
-				Config: testAccCheckMenandmiceRangeConfigFreeRange(parentRange1, startAt2, size1, title),
+				Config: testAccCheckMenandmiceRangeConfigFreeRangeSize(parentRange1, startAt2, size1, title),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_range.testrange"),
+				),
+			},
+			{
+				Config: testAccCheckMenandmiceRangeConfigFreeRangeSize(parentRange1, startAt2, size2, title),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_range.testrange"),
+				),
+			},
+			{
+				Config: testAccCheckMenandmiceRangeConfigFreeRangeMask(parentRange1, mask1, subnet1, title),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_range.testrange"),
+				),
+			},
+			{
+				Config: testAccCheckMenandmiceRangeConfigFreeRangeMask(parentRange1, mask1, subnet1, title),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_range.testrange"),
+				),
+			},
+			{
+				Config: testAccCheckMenandmiceRangeConfigFreeRangeMask(parentRange1, mask2, subnet2, title),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_range.testrange"),
 				),
@@ -175,12 +204,12 @@ func TestAccMenandmiceRangeFreeRange(t *testing.T) {
 	})
 }
 
-func testAccCheckMenandmiceRangeConfigFreeRange(parentRange, startAt string, size int, title string) string {
+func testAccCheckMenandmiceRangeConfigFreeRangeSize(parentRange, startAt string, size int, title string) string {
 	return fmt.Sprintf(`
 
 resource "menandmice_range" "super_range" {
   cidr = "%s"
-  title = "terraform acception test parentRange"
+  title = "terraform acceptance test parentRange"
 }
 
 resource "menandmice_range" "testrange" {
@@ -188,10 +217,33 @@ resource "menandmice_range" "testrange" {
     range = menandmice_range.super_range.name
 	start_at = "%s"
     size = %v
+    temporary_claim_time = 1
   }
+
   title       = "%s"
 }
 	`, parentRange, startAt, size, title)
+}
+
+func testAccCheckMenandmiceRangeConfigFreeRangeMask(parentRange string, mask int, subnet bool, title string) string {
+	return fmt.Sprintf(`
+
+resource "menandmice_range" "super_range" {
+  cidr = "%s"
+  title = "terraform acceptance test parentRange"
+}
+
+resource "menandmice_range" "testrange" {
+  free_range {
+    range = menandmice_range.super_range.name
+    mask = %v
+    temporary_claim_time = 1
+  }
+
+  subnet = %t
+  title       = "%s"
+}
+	`, parentRange, mask, subnet, title)
 }
 
 func testAccCheckMenandmiceRangeDestroy(s *terraform.State) error {

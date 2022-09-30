@@ -69,11 +69,12 @@ func resourceRange() *schema.Resource {
 							// TODO validate that its valide ip in the range of range
 						},
 						"size": &schema.Schema{
-							Type:         schema.TypeInt,
-							ExactlyOneOf: []string{"free_range.0.mask"},
-							Description:  "The minimum size of the address blocks, specified as the number of addresses",
-							Optional:     true,
-							ForceNew:     true,
+							Type:          schema.TypeInt,
+							ExactlyOneOf:  []string{"free_range.0.mask"},
+							Description:   "The minimum size of the address blocks, specified as the number of addresses",
+							ConflictsWith: []string{"subnet"},
+							Optional:      true,
+							ForceNew:      true,
 						},
 
 						"mask": &schema.Schema{
@@ -168,10 +169,11 @@ func resourceRange() *schema.Resource {
 			// },
 
 			"subnet": {
-				Type:        schema.TypeBool,
-				Description: "Determines if the range is defined as a subnet.",
-				Default:     false,
-				Optional:    true,
+				Type:          schema.TypeBool,
+				Description:   "Determines if the range is defined as a subnet.",
+				Default:       false,
+				Optional:      true,
+				ConflictsWith: []string{"from", "to"},
 			},
 
 			"locked": {
