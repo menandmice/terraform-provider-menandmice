@@ -166,6 +166,7 @@ func resourceIPAMRec() *schema.Resource {
 				Description: "'True' if there are extraneous PTR records for the object.",
 				Computed:    true,
 			},
+			// TODO make custom_properties case insensitive
 			"custom_properties": &schema.Schema{
 				Type:        schema.TypeMap,
 				Description: "Map of custom properties associated with this IP address. You can only assign properties that are already defined in Micetro.",

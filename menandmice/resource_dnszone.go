@@ -117,7 +117,7 @@ func resourceDNSZone() *schema.Resource {
 				Description: "A comma-separated string of IDs of ZSKs. Starting with active keys, then inactive keys in parenthesis.",
 				Optional:    true,
 			},
-
+			// TODO make custom_properties case insensitive
 			"custom_properties": &schema.Schema{
 				Type:        schema.TypeMap,
 				Description: "Map of custom properties associated with this DNS zone.",
@@ -136,6 +136,7 @@ func resourceDNSZone() *schema.Resource {
 					"To_All_Domain_Controllers_In_Specified_Partition", "Unavailable",
 				}, false),
 			},
+			// TODO rename ad_partition
 			"adpartition": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "The AD partition if the zone is AD integrated.",

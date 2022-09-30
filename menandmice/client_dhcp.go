@@ -109,6 +109,7 @@ type FindDHCPScopeResponse struct {
 	} `json:"result"`
 }
 
+// TODO add find by ref
 func (c Mmclient) FindDHCPScope(filter map[string]string) ([]DHCPScope, error) {
 	var re FindDHCPScopeResponse
 	err := c.Get(&re, "DHCPScopes/", nil, filter)
