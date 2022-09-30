@@ -10,7 +10,8 @@ import (
 
 func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 
-	name := "terraform-test-zone.net."
+	name1 := "terraform-test-zone1.net."
+	name2 := "terraform-test-zone2.net."
 	authority1 := "ext-master.mmdemo.net."
 	authority2 := "dc16.mmdemo.net."
 	view := ""
@@ -21,13 +22,19 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 		CheckDestroy: testAccCheckMenandmiceDNSZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, authority1),
+				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name1, authority1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
 				),
 			},
 			{
-				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name, authority2),
+				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name2, authority1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
+				),
+			},
+			{
+				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name2, authority2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_zone.testzone"),
 				),
@@ -43,7 +50,7 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 				ResourceName:      "menandmice_dns_zone.testzone",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateId:     authority1 + ":" + view + ":" + name,
+				ImportStateId:     authority1 + ":" + view + ":" + name2,
 			},
 		},
 	})

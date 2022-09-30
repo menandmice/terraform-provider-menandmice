@@ -33,6 +33,7 @@ func resourceDNSZone() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Fully qualified name of DNS zone, ending with the trailing dot '.'.",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Name must end with '.'"),
 			},
 			"dynamic": {
@@ -202,6 +203,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 	}
 	dnszone := DNSZone{
 		Ref:          tryGetString(d, "ref"),
+		Name:         d.Get("name").(string),
 		AdIntegrated: d.Get("adintegrated").(bool),
 		Authority:    tryGetString(d, "authority"),
 
@@ -210,7 +212,6 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		// LastModified: tryGetString(d, "lastmodified"),
 
 		DNSZoneProperties: DNSZoneProperties{
-			Name:              d.Get("name").(string),
 			Dynamic:           d.Get("dynamic").(bool),
 			ZoneType:          tryGetString(d, "type"),
 			DnssecSigned:      d.Get("dnssecsigned").(bool),
