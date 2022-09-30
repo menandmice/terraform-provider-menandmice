@@ -2,8 +2,6 @@ package menandmice
 
 import (
 	"context"
-	"strconv"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -102,7 +100,7 @@ func dataSourceDHCPScopeRead(c context.Context, d *schema.ResourceData, m interf
 	}
 
 	writeDHCPScopeSchema(d, dhcpScopes[0])
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(dhcpScopes[0].Ref)
 
 	return diags
 

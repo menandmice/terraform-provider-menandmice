@@ -3,8 +3,6 @@ package menandmice
 import (
 	"context"
 	"regexp"
-	"strconv"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -109,7 +107,7 @@ func dataSourceDNSRectRead(c context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("Found %v DNS records matching you criteria, but should be only 1", len(dnsrecs))
 	}
 	writeDNSRecSchema(d, dnsrecs[0])
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(dnsrecs[0].Ref)
 
 	return diags
 

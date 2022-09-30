@@ -2,8 +2,6 @@ package menandmice
 
 import (
 	"context"
-	"strconv"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -141,7 +139,7 @@ func dataSourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 	writeIPAMRecSchema(d, ipam)
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(ipam.Ref)
 
 	return diags
 

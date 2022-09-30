@@ -3,8 +3,6 @@ package menandmice
 import (
 	"context"
 	"regexp"
-	"strconv"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -148,7 +146,7 @@ func dataSourceDNSZoneRead(c context.Context, d *schema.ResourceData, m interfac
 		}
 	}
 	writeDNSZoneSchema(d, *dnszone)
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(dnszone.Ref)
 
 	return diags
 
