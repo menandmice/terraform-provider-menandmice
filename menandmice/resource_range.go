@@ -53,7 +53,7 @@ func resourceRange() *schema.Resource {
 				ForceNew:     true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						// TODO user range_ref here
+						// TODO user range_ref here?
 						"range": &schema.Schema{
 							Type:        schema.TypeString,
 							Description: "Pick IP address from range with name",
@@ -146,27 +146,25 @@ func resourceRange() *schema.Resource {
 				Description: "The display name of the AD site to which the range belongs.",
 				Computed:    true,
 			},
-			// TODO
+			// TODO childRanges
 			// "childRanges": {
 			// 	Type:        schema.TypeList,
 			// 	Description: "An list of child ranges of the range.",
-			// 	Computed:    true, //TODO
 
 			// redundant
 			// IsLeaf            bool       `json:"isLeaf"`
 			// NumChildren int        `json:"numchildren"`
 
-			// TODO
+			// TODO dhcpScopes
 			// "dhcpScopes": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
-			// 	Computed:    true, //TODO
 			// 	// Default:      false,
 			// },
+			// TODO authority
 			// "authority": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
-			// 	Computed:    true, //TODO
 			// },
 
 			"subnet": {
@@ -250,7 +248,7 @@ func resourceRange() *schema.Resource {
 				Computed:    true,
 			},
 
-			// TODO
+			// TODO cloudAllocationPools
 			// "cloudAllocationPools": {
 			// Type:        schema.TypeList,
 			// Optional:    true,
@@ -258,7 +256,7 @@ func resourceRange() *schema.Resource {
 			// 	Schema: map[string]*schema.Schema{
 			// },
 
-			// TODO
+			// TODO discoveredProperties
 			// "discoveredProperties": {
 			// Type:        schema.TypeList,
 			// Optional:    true,
