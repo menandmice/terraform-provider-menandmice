@@ -274,41 +274,43 @@ func resourceRange() *schema.Resource {
 				Description: "Date when zone was last modified in Micetro.",
 				Computed:    true,
 			},
-			"discovery": &schema.Schema{
-				Type:        schema.TypeList,
-				Description: "Used for discovery of ranges or scopes.",
-				Optional:    true,
-				MaxItems:    1,
-				ForceNew:    true, //TODO can we make this update
-				// default does not work for list
-				// Default:     [1]map[string]interface{}{{"enabled": false}},
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"interval": &schema.Schema{
-							Type:        schema.TypeInt,
-							Description: "The interval between runs for the schedule.",
-							Optional:    true,
-							// TODO Default
-						},
-						"unit": &schema.Schema{
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Unit of time for interval. One of: Minutes, Hours, Days, Weeks, Months",
-							ValidateFunc: validation.StringInSlice([]string{
-								"Minutes", "Hours", "Days", "Weeks", "Months",
-							}, false),
-						},
-						"enabled": &schema.Schema{
-							Type:        schema.TypeBool,
-							Description: "Pick IP address from range with name",
-							Optional:    true,
-							Default:     false,
-						},
-						// TODO "start_time" : &schema.Schema{
-						// },
-					},
-				},
-			},
+			// TODO discovery
+			// "discovery": &schema.Schema{
+			// 	Type:        schema.TypeList,
+			// 	Description: "Used for discovery of ranges or scopes.",
+			// 	Computed:    true, // TODO make this configerable
+			// 	// Optional:    true,
+			// 	// ForceNew:    true, // TODO can we make this update
+			// 	// MaxItems: 1,
+			// 	// default does not work for list
+			// 	// Default:     [1]map[string]interface{}{{"enabled": false}},
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"interval": &schema.Schema{
+			// 				Type:        schema.TypeInt,
+			// 				Description: "The interval between runs for the schedule.",
+			// 				Optional:    true,
+			// 				// TODO Default
+			// 			},
+			// 			"unit": &schema.Schema{
+			// 				Type:        schema.TypeString,
+			// 				Optional:    true,
+			// 				Description: "Unit of time for interval. One of: Minutes, Hours, Days, Weeks, Months",
+			// 				ValidateFunc: validation.StringInSlice([]string{
+			// 					"Minutes", "Hours", "Days", "Weeks", "Months",
+			// 				}, false),
+			// 			},
+			// 			"enabled": &schema.Schema{
+			// 				Type:        schema.TypeBool,
+			// 				Description: "Pick IP address from range with name",
+			// 				Optional:    true,
+			// 				Default:     false,
+			// 			},
+			// 			// TODO "start_time" : &schema.Schema{
+			// 			// },
+			// 		},
+			// 	},
+			// },
 		},
 	}
 }
@@ -459,14 +461,15 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 
 	}
 
-	discovery_schemas, ok := d.GetOk("discovery")
-	var discovery Discovery
-	if ok {
-		discovery = readDiscoverySchema(discovery_schemas)
-	} else {
-		// default is defined here. because can't be done in schema
-		discovery = Discovery{Enabled: false}
-	}
+	// TODO discovery
+	// discovery_schemas, ok := d.GetOk("discovery")
+	// var discovery Discovery
+	// if ok {
+	// 	discovery = readDiscoverySchema(discovery_schemas)
+	// } else {
+	// 	// default is defined here. because can't be done in schema
+	discovery := Discovery{Enabled: false}
+	// }
 
 	iprange := readRangeSchema(d)
 	objRef, err := client.CreateRange(iprange, discovery)
