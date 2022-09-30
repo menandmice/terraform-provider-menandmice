@@ -58,6 +58,7 @@ resource "menandmice_range" "example3" {
 - `discovery` (Block List, Max: 1) Used for discovery of ranges or scopes. (see [below for nested schema](#nestedblock--discovery))
 - `free_range` (Block List, Max: 1) Find a free IP address to claim. (see [below for nested schema](#nestedblock--free_range))
 - `from` (String) The starting IP address of the range.
+- `is_container` (Boolean) Set to true to create a container instead of a range.
 - `locked` (Boolean) Determines if the range is defined as a subnet.
 - `subnet` (Boolean) Determines if the range is defined as a subnet.
 - `to` (String) The ending IP address of the range.
@@ -73,7 +74,6 @@ resource "menandmice_range" "example3" {
 - `has_schedule` (Boolean) Determines if a discovery schedule has been set for the range.
 - `id` (String) The ID of this resource.
 - `inherit_access` (Boolean) If this range should inherit its access bits from its parent range.
-- `is_container` (Boolean) Set to true to create a container instead of a range.
 - `lastmodified` (String) Date when zone was last modified in Micetro.
 - `name` (String) The CIDR of the range, or from-to address range.
 - `parent_ref` (String) A reference to the range that contains the subranges
