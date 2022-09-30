@@ -118,7 +118,7 @@ func DataSourceRange() *schema.Resource {
 				Computed:    true,
 			},
 
-			"custom_properties": &schema.Schema{
+			"custom_properties": {
 				Type:        schema.TypeMap,
 				Description: "Map of custom properties associated with this range. You can only assign properties that are already defined in Micetro.",
 
@@ -173,12 +173,12 @@ func DataSourceRange() *schema.Resource {
 			// 	Schema: map[string]*schema.Schema{
 			// },
 
-			"created": &schema.Schema{
+			"created": {
 				Type:        schema.TypeString,
 				Description: "DDate when zone was created in Micetro.",
 				Computed:    true,
 			},
-			"lastmodified": &schema.Schema{
+			"lastmodified": {
 				Type:        schema.TypeString,
 				Description: "Date when zone was last modified in Micetro.",
 				Computed:    true,

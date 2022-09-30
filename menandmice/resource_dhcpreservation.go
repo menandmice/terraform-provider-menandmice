@@ -132,7 +132,6 @@ func writeDHCPReservationSchema(d *schema.ResourceData, dhcpReservation DHCPRese
 	d.Set("next_server", dhcpReservation.NextServer)
 	d.Set("owner_ref", dhcpReservation.OwnerRef)
 	// you can't read owner for the api, owner is not set
-	return
 }
 
 func readDHCPReservationSchema(d *schema.ResourceData) DHCPReservation {

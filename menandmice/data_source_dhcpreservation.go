@@ -12,38 +12,38 @@ func DataSourceDHCPReservation() *schema.Resource {
 		ReadContext: dataSourceDHCPResvationRead,
 		Schema: map[string]*schema.Schema{
 
-			"ref": &schema.Schema{
+			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal reference to this DHCP reservation.",
 				Computed:    true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the DHCP reservation you want to query.",
 				Required:    true,
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:        schema.TypeString,
 				Description: "The type of this DHCP reservation. Example: DHCP , BOOTP , BOTH.",
 				Computed:    true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description for the reservation. Only applicable for MS DHCP servers.",
 				Computed:    true,
 			},
-			"client_identifier": &schema.Schema{
+			"client_identifier": {
 				Type:        schema.TypeString,
 				Description: "The client_identifier of this reservation.",
 				Computed:    true,
 			},
 
-			"reservation_method": &schema.Schema{
+			"reservation_method": {
 				Type:        schema.TypeString,
 				Description: "DHCP reservation method, Example: HardwareAddress , ClientIdentifier.",
 				Computed:    true,
 			},
-			"addresses": &schema.Schema{
+			"addresses": {
 				Type:        schema.TypeList,
 				Description: "A list of IP addresses used for the reservation.",
 				Computed:    true,
@@ -51,30 +51,30 @@ func DataSourceDHCPReservation() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"ddns_hostname": &schema.Schema{
+			"ddns_hostname": {
 				Type:        schema.TypeString,
 				Description: "Dynamic DNS host name for the reservation. Only applicable for ISC DHCP servers.",
 				Computed:    true,
 			},
 
-			"filename": &schema.Schema{
+			"filename": {
 				Type:        schema.TypeString,
 				Description: "The filename DHCP option. Only applicable for ISC DHCP servers.",
 				Computed:    true,
 			},
-			"servername": &schema.Schema{
+			"servername": {
 				Type:        schema.TypeString,
 				Description: "The server-name DHCP option. Only applicable for ISC DHCP servers.",
 				Computed:    true,
 			},
-			"next_server": &schema.Schema{
+			"next_server": {
 				Type:        schema.TypeString,
 				Description: "The next-server ISC DHCP option. Only applicable for ISC DHCP servers.",
 				Computed:    true,
 			},
 			// TODO one off dhcpserver,dhcpgroup,dhcpscope
 
-			"owner_ref": &schema.Schema{
+			"owner_ref": {
 				Type:        schema.TypeString,
 				Description: "Internal reference to the DHCP group scope or server where this reservation is made.",
 				Computed:    true,

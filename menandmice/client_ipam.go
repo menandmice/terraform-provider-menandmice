@@ -64,7 +64,7 @@ func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
 	if err != nil {
 		return err
 	}
-	if existingIPAMRecord.Claimed == true {
+	if existingIPAMRecord.Claimed {
 		return fmt.Errorf("DHCPReservations already exists for: %v", existingIPAMRecord.Address)
 	}
 	return c.UpdateIPAMRec(ipamRecord.IPAMProperties, ipamRecord.Address)

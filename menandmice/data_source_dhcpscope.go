@@ -12,50 +12,51 @@ func DataSourceDHCPScope() *schema.Resource {
 		ReadContext: dataSourceDHCPScopeRead,
 		Schema: map[string]*schema.Schema{
 
-			"ref": &schema.Schema{
+			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal reference to this DHCP reservation.",
 				Computed:    true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the DHCP scope you want to query.",
 				Computed:    true,
 			},
 
-			"cidr": &schema.Schema{
+			// TODO rename cidr to range
+			"cidr": {
 				Type:        schema.TypeString,
 				Description: "The cidr of DHCPScope.",
 				// TODO validate
 				Required: true,
 			},
 
-			"dhcp_server": &schema.Schema{
+			"dhcp_server": {
 				Type:        schema.TypeString,
 				Description: "The DHCP server of this scope.",
 				// TODO validate
 				Optional: true,
 			},
 
-			"superscope": &schema.Schema{
+			"superscope": {
 				Type:        schema.TypeString,
 				Description: "The name of the superscope for the DHCP scope. Only applicable for MS DHCP servers.",
 				Computed:    true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "A description for the DHCP scope.",
 				Computed:    true,
 			},
 
-			"available": &schema.Schema{
+			"available": {
 				Type:        schema.TypeInt,
 				Description: "Number of available addresses in the address pool(s) of the scope.",
 				Computed:    true,
 			},
 
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:        schema.TypeBool,
 				Description: "If this scope is enabled",
 				Computed:    true,
@@ -74,7 +75,6 @@ func writeDHCPScopeSchema(d *schema.ResourceData, dhcpScope DHCPScope) {
 	d.Set("description", dhcpScope.Description)
 	d.Set("available", dhcpScope.Available)
 	d.Set("enabled", dhcpScope.Enabled)
-	return
 }
 func dataSourceDHCPScopeRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 

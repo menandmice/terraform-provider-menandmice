@@ -215,10 +215,10 @@ resource "menandmice_range" "super_range" {
 resource "menandmice_range" "testrange" {
   free_range {
     range = menandmice_range.super_range.name
-	start_at = "%s"
+    start_at = "%s"
     size = %v
     temporary_claim_time = 1
-  }
+}
 
   title       = "%s"
 }

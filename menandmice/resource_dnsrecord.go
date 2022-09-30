@@ -25,24 +25,24 @@ func resourceDNSRec() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 
-			"ref": &schema.Schema{
+			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal reference to this DNS record.",
 				Computed:    true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:        schema.TypeString,
 				Description: "The DNS record name.",
 				Required:    true,
 			},
-			"data": &schema.Schema{
+			"data": {
 				Type:         schema.TypeString,
 				Description:  "The data stored in the DNS record.",
 				Required:     true,
 				ValidateFunc: validation.StringIsNotEmpty,
 				// You cannot validate data here, because you dont have access to the record type
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:        schema.TypeString,
 				Description: "The DNS recod type. Accepted types: A, AAAA, CNAME, DNAME, DLV, DNSKEY, DS, HINFO, LOC, MX, NAPTR, NS, NSEC3PARAM, PTR, RP, SOA, SPF, SRV, SSHFP, TLSA, TXT. (Default: A)",
 				ForceNew:    true,
@@ -58,38 +58,38 @@ func resourceDNSRec() *schema.Resource {
 					"TLSA", "TXT",
 				}, false),
 			},
-			"comment": &schema.Schema{
+			"comment": {
 				Type:        schema.TypeString,
 				Description: "Contains the comment string for the record. Only records in static DNS zones can have a comment string. Some cloud DNS provides do not support comments.",
 				Optional:    true,
 			},
-			"aging": &schema.Schema{
+			"aging": {
 				Type:         schema.TypeInt,
 				Description:  "The aging timestamp of dynamic records in AD integrated zones. Hours since January 1, 1601, UTC. Providing a non-zero value creates a dynamic record.",
 				Optional:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 			},
-			"ttl": &schema.Schema{
+			"ttl": {
 				Type:         schema.TypeInt,
 				Description:  "The DNS record's Time To Live value in seconds, setting how long the record is allowed to be cached.",
 				Optional:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 			},
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:        schema.TypeBool,
 				Description: "If the DNS record is enabled. (Default: True)",
 				Optional:    true,
 				Default:     true,
 			},
 
-			"server": &schema.Schema{
+			"server": {
 				Type:         schema.TypeString,
 				Description:  "The DNS server where the DNS record is stored. Requires FQDN with the trialing dot '.'.",
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Server name should end with '.'"),
 			},
-			"view": &schema.Schema{
+			"view": {
 				Type:        schema.TypeString,
 				Description: "The view of the DNS record. Example: internal.",
 				Optional:    true,
@@ -97,7 +97,7 @@ func resourceDNSRec() *schema.Resource {
 				ForceNew:    true,
 			},
 
-			"zone": &schema.Schema{
+			"zone": {
 				Type:         schema.TypeString,
 				Description:  "The DNS zone where the record is stored. Requires FQDN with the trailing dot '.'.",
 				Required:     true,
@@ -105,7 +105,7 @@ func resourceDNSRec() *schema.Resource {
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
 			},
 
-			"dns_zone_ref": &schema.Schema{
+			"dns_zone_ref": {
 				Type:        schema.TypeString,
 				Description: "Internal reference to the zone where this DNS record is stored.",
 				Computed:    true,
@@ -121,8 +121,8 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 	d.Set("name", dnsrec.Name)
 	d.Set("type", dnsrec.Rectype)
 	d.Set("data", dnsrec.Data)
-	if dnsrec.Ttl != "" {
-		ttl, err := strconv.Atoi(dnsrec.Ttl)
+	if dnsrec.TTL != "" {
+		ttl, err := strconv.Atoi(dnsrec.TTL)
 		if err == nil {
 			d.Set("ttl", ttl)
 		}
@@ -137,8 +137,6 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 	}
 	d.Set("enabled", dnsrec.Enabled)
 	d.Set("comment", dnsrec.Comment) // comment is always given, but sometimes ""
-	return
-
 }
 
 func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
@@ -155,7 +153,7 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 		Rectype: d.Get("type").(string),
 		DNSProperties: DNSProperties{
 			Name:    d.Get("name").(string),
-			Ttl:     ttlString,
+			TTL:     ttlString,
 			Data:    d.Get("data").(string),
 			Comment: d.Get("comment").(string),
 			Aging:   d.Get("aging").(int), // when not specified it's 0 which will be ignored

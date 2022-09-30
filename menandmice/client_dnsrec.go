@@ -13,7 +13,7 @@ type DNSRecord struct {
 
 type DNSProperties struct {
 	Name    string `json:"name"`
-	Ttl     string `json:"ttl,omitempty"`
+	TTL     string `json:"ttl,omitempty"`
 	Data    string `json:"data"`
 	Comment string `json:"comment,omitempty"`
 	Aging   int    `json:"aging,omitempty"`

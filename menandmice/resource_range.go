@@ -3,7 +3,6 @@ package menandmice
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -44,7 +43,7 @@ func resourceRange() *schema.Resource {
 				ForceNew: true,
 				Optional: true,
 			},
-			"free_range": &schema.Schema{
+			"free_range": {
 				Type:         schema.TypeList,
 				Description:  "Find a free IP address to claim.",
 				Optional:     true,
@@ -54,12 +53,12 @@ func resourceRange() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						// TODO user range_ref here?
-						"range": &schema.Schema{
+						"range": {
 							Type:        schema.TypeString,
 							Description: "Pick IP address from range with name",
 							Required:    true,
 						},
-						"start_at": &schema.Schema{
+						"start_at": {
 							Type:          schema.TypeString,
 							Description:   "Start searching for IP address from",
 							ConflictsWith: []string{"free_range.0.mask"},
@@ -68,7 +67,7 @@ func resourceRange() *schema.Resource {
 							ForceNew:      true,
 							// TODO validate that its valide ip in the range of range
 						},
-						"size": &schema.Schema{
+						"size": {
 							Type:          schema.TypeInt,
 							ExactlyOneOf:  []string{"free_range.0.mask"},
 							Description:   "The minimum size of the address blocks, specified as the number of addresses",
@@ -77,7 +76,7 @@ func resourceRange() *schema.Resource {
 							ForceNew:      true,
 						},
 
-						"mask": &schema.Schema{
+						"mask": {
 							Type:         schema.TypeInt,
 							ExactlyOneOf: []string{"free_range.0.mask", "free_range.0.size"},
 							Description:  "The minimum size of the address blocks, specified as a subnet mask.",
@@ -86,13 +85,13 @@ func resourceRange() *schema.Resource {
 							ForceNew: true,
 						},
 
-						"ignore_subnet_flag": &schema.Schema{
+						"ignore_subnet_flag": {
 							Type:        schema.TypeBool,
 							Description: "Exclude IP addresses that are assigned via DHCP",
 							Default:     false,
 							Optional:    true,
 						},
-						"temporary_claim_time": &schema.Schema{
+						"temporary_claim_time": {
 							Type:         schema.TypeInt,
 							Description:  "Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.",
 							Default:      60,
@@ -212,7 +211,7 @@ func resourceRange() *schema.Resource {
 			},
 
 			// TODO make custom_properties case insensitive
-			"custom_properties": &schema.Schema{
+			"custom_properties": {
 				Type:        schema.TypeMap,
 				Description: "Map of custom properties associated with this range. You can only assign properties that are already defined in Micetro.",
 
@@ -267,12 +266,12 @@ func resourceRange() *schema.Resource {
 			// 	Schema: map[string]*schema.Schema{
 			// },
 
-			"created": &schema.Schema{
+			"created": {
 				Type:        schema.TypeString,
 				Description: "DDate when zone was created in Micetro.",
 				Computed:    true,
 			},
-			"lastmodified": &schema.Schema{
+			"lastmodified": {
 				Type:        schema.TypeString,
 				Description: "Date when zone was last modified in Micetro.",
 				Computed:    true,
@@ -359,7 +358,6 @@ func writeRangeSchema(d *schema.ResourceData, iprange Range) {
 	d.Set("lastmodified", iprange.LastModified) // TODO convert to timeformat RFC 3339
 
 	// TODO	 discovery, discoveredProperties,cloudAllocationPools
-	return
 }
 
 func readAvailableAddressBlocksRequest(freeRange interface{}) AvailableAddressBlocksRequest {
@@ -379,9 +377,9 @@ func readAvailableAddressBlocksRequest(freeRange interface{}) AvailableAddressBl
 	return availableAddressBlocksRequest
 
 }
-func readDiscoverySchema(discovery_schemas interface{}) Discovery {
+func readDiscoverySchema(discoverySchemas interface{}) Discovery {
 
-	schemas := discovery_schemas.([]interface{})
+	schemas := discoverySchemas.([]interface{})
 	discoveryMap := schemas[0].(map[string]interface{})
 	discovery := Discovery{
 
@@ -449,7 +447,7 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 	if freeRangeMap, ok := d.GetOk("free_range"); ok {
 		availableAddressBlocksRequest := readAvailableAddressBlocksRequest(freeRangeMap)
 
-		tflog.Debug(c, fmt.Sprintf("Request a available AddressBlock"))
+		tflog.Debug(c, "Request a available AddressBlock")
 		AvailableAddressBlocks, err := client.AvailableAddressBlocks(availableAddressBlocksRequest)
 
 		if err != nil {

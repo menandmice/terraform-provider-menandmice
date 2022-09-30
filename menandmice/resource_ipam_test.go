@@ -77,15 +77,10 @@ func testAccCheckMenandmiceIPAMRecDestroy(s *terraform.State) error {
 
 func testAccCheckMenandmiceIPAMRecConfigBasic(address, location string, claimed bool) string {
 	return fmt.Sprintf(`
-	// TODO
-	// resource "menandmice_range" "example1" {
-    //   cidr  = "%s/24"
-	//   title = "Acceptation test terraform example1"
-	// }
 	resource menandmice_ipam_record testipam {
 		address= "%s"
 		custom_properties = {"Location":"%s"}
 		claimed = %t
 	}
-	`, address, address, location, claimed)
+	`, address, location, claimed)
 }
