@@ -14,8 +14,8 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 	authority := "ext-master.mmdemo.net."
 
 	name := "terraform-test-rec1"
-	date1 := "192.168.2.13"
-	date2 := "192.168.2.14"
+	data1 := "192.168.2.13"
+	data2 := "192.168.2.14"
 	rectype := "A"
 	view := ""
 
@@ -25,13 +25,13 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 		CheckDestroy: testAccCheckMenandmiceDNSRecDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date1, rectype, authority, zone),
+				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, data1, rectype, authority, zone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),
 			},
 			{
-				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, date2, rectype, authority, zone),
+				Config: testAccCheckMenandmiceDNSRecConfigBasic(name, data2, rectype, authority, zone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckResourceExists("menandmice_dns_record.testrec"),
 				),

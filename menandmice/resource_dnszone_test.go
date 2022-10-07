@@ -57,7 +57,7 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 }
 
 func testAccCheckMenandmiceDNSZoneDestroy(s *terraform.State) error {
-	c := testAccProvider.Meta().(*Mmclient)
+	client := testAccProvider.Meta().(*Mmclient)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "menandmice_dns_zone" {
@@ -66,7 +66,7 @@ func testAccCheckMenandmiceDNSZoneDestroy(s *terraform.State) error {
 
 		ref := rs.Primary.ID
 
-		err := c.DeleteDNSZone(ref)
+		err := client.DeleteDNSZone(ref)
 		if err != nil {
 			return err
 		}
