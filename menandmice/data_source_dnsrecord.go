@@ -42,6 +42,15 @@ func DataSourceDNSRec() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The DNS record type. Example: CNAME.",
 				Required:    true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"A", "AAAA", "CNAME",
+					"DNAME", "DLV", "DNSKEY",
+					"DS", "HINFO", "LOC",
+					"MX", "NAPTR", "NS", "NSEC3PARAM",
+					"PTR", "RP", "SOA",
+					"SPF", "SRV", "SSHFP",
+					"TLSA", "TXT",
+				}, false),
 			},
 
 			"ref": {
