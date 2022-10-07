@@ -7,6 +7,7 @@ bin
 # .tfstate files
 *.tfstate
 *.tfstate.*
+*.terraform.lock.hcl
 # Crash log files
 crash.log
 
@@ -36,6 +37,6 @@ terraform.rc
 terraform
 
 vendor
-terraform-provider-menandmice 
+terraform-provider-menandmice
 
 */.terraform.lock.hcl

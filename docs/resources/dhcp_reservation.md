@@ -13,41 +13,32 @@ description: |-
 ## Example Usage
 
 ```terraform
-terraform {
-  required_providers {
-    menandmice = {
-      # uncomment for terraform 0.13 and higher
-      version = "~> 0.2",
-      source  = "local/menandmice",
-    }
-  }
-}
-resource menandmice_dhcp_reservation reservation1 {
-  owner = "mandm.example.net."
-  name    = "test1"
-  client_identifier = "44:55:66:77:88:01"
-  servername = "testname"
-  next_server = "server1"
+resource "menandmice_dhcp_reservation" "reservation1" {
+  owner              = "micetro.example.net."
+  name               = "test1"
+  client_identifier  = "44:55:66:77:88:01"
+  servername         = "testname"
+  next_server        = "server1"
   reservation_method = "ClientIdentifier"
-  # description = "test description" # only valid for some dhcp servers
-  addresses = ["192.168.2.10"]
+  # description = "test description" # only valid for some DHCP servers
+  addresses     = ["192.168.2.10"]
   ddns_hostname = "test"
 }
 
-data menandmice_dhcp_scope scope2{
-  dhcp_server= "mandm.example.net."
-  cidr = "192.168.2.0/24"
+data "menandmice_dhcp_scope" "scope2" {
+  dhcp_server = "micetro.example.net."
+  cidr        = "192.168.2.0/24"
 }
 
-resource menandmice_dhcp_reservation reservation2 {
-  owner = "mandm.example.net."
-  name    = "test3"
-  client_identifier = "44:55:66:77:88:01"
-  servername = "testname"
-  next_server = "server1"
+resource "menandmice_dhcp_reservation" "reservation2" {
+  owner              = "micetro.example.net."
+  name               = "test3"
+  client_identifier  = "44:55:66:77:88:01"
+  servername         = "testname"
+  next_server        = "server1"
   reservation_method = "ClientIdentifier"
-  # description = "test description" # only valid for some dhcp servers
-  addresses = ["192.168.2.11"]
+  # description = "test description" # only valid for some DHCP servers
+  addresses     = ["192.168.2.11"]
   ddns_hostname = "test"
 }
 ```
@@ -57,26 +48,26 @@ resource menandmice_dhcp_reservation reservation2 {
 
 ### Required
 
-- **addresses** (List of String) A list of zero or more IP addresses used for the reservation.
-- **client_identifier** (String) The client_identifier of this reservation.
-- **name** (String) The name of DHCP reservation you want to query
-- **owner** (String) DHCP group scope or server where this reservation is made.
+- `addresses` (List of String) A list of IP addresses used for the reservation.
+- `client_identifier` (String) The client_identifier of this reservation.
+- `name` (String) The name of the DHCP reservation you want to query.
+- `owner` (String) DHCP group scope or server where this reservation is made.
 
 ### Optional
 
-- **ddns_hostname** (String) Dynamic DNS host name for reservation. Only applicable for ISC DHCP servers.
-- **description** (String) Description for the reservation. Only applicable for MS DHCP servers.
-- **filename** (String) The filename DHCP option. Only applicable for ISC DHCP servers.
-- **id** (String) The ID of this resource.
-- **next_server** (String) The next-server ISC DHCP option. Only applicable for ISC DHCP servers.
-- **reservation_method** (String) DHCP reservation method, For example: HardwareAddress , ClientIdentifier. Default: HardwareAddress.
-- **servername** (String) The server-name DHCP option. Only applicable for ISC DHCP servers.
-- **type** (String) The type of this DHCP reservation. For example: DHCP , BOOTP , BOTH.
+- `ddns_hostname` (String) Dynamic DNS hostname for the reservation. Only applicable for ISC DHCP servers.
+- `description` (String) Description for the reservation. Only applicable for MS DHCP servers.
+- `filename` (String) The filename DHCP option. Only applicable for ISC DHCP servers.
+- `next_server` (String) The next-server ISC DHCP option. Only applicable for ISC DHCP servers.
+- `reservation_method` (String) DHCP reservation method. Example: HardwareAddress , ClientIdentifier. (Default: HardwareAddress)
+- `servername` (String) The server-name DHCP option. Only applicable for ISC DHCP servers.
+- `type` (String) The type of this DHCP reservation. Example: DHCP , BOOTP , BOTH.
 
 ### Read-Only
 
-- **owner_ref** (String) Internal refference to the DHCP group scope or server where this reservation is made.
-- **ref** (String) Internal reference to this DHCP reservation
+- `id` (String) The ID of this resource.
+- `owner_ref` (String) Internal reference to the DHCP group scope or server where this reservation is made.
+- `ref` (String) Internal reference to this DHCP reservation
 
 ## Import
 

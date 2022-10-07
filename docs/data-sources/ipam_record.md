@@ -3,7 +3,7 @@
 page_title: "menandmice_ipam_record Data Source - terraform-provider-menandmice"
 subcategory: ""
 description: |-
-
+  
 ---
 
 # menandmice_ipam_record (Data Source)
@@ -13,16 +13,7 @@ description: |-
 ## Example Usage
 
 ```terraform
-terraform {
-  required_providers {
-    menandmice = {
-      # uncomment for terraform 0.13 and higher
-      version = "~> 0.2",
-      source  = "local/menandmice",
-    }
-  }
-}
-data menandmice_ipam_record ipam1 {
+data "menandmice_ipam_record" "ipam1" {
   address = "192.168.2.2"
 }
 ```
@@ -32,33 +23,32 @@ data menandmice_ipam_record ipam1 {
 
 ### Required
 
-- **address** (String) The IP address.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `address` (String) The IP address.
 
 ### Read-Only
 
-- **claimed** (Boolean) If the IP address is claimed.
-- **custom_properties** (Map of String) Map of custom properties associated with this IP address. You can only assign properties that are already defined in Micetro.
-- **device** (String) The device associated with the object.
-- **discovery_type** (String) The discovery method of the IP address. Example: None, Ping, ARP, Lease, Custom.
-- **extraneous_ptr** (Boolean) 'True' if there are extraneous PTR records for the object.
-- **hold_info** (List of Object) Contains information about who holds the otherwise free IP, and for how long. (See [below for nested schema](#nestedatt--hold_info))
-- **interface** (String) The interface associated with the object.
-- **last_discovery_date** (String) The date when the system last performed IP address discovery for this IP address.
-- **last_known_client_identifier** (String) The last known MAC address associated with the IP address discovery information.
-- **last_seen_date** (String) The date when the address was last seen during IP address discovery.
-- **ptr_status** (String) PTR record status. Example: Unknown, OK, Verify.
-- **ref** (String) Internal reference for the IP address.
-- **state** (String) The state of the IP address. Example: Free, Assigned, Claimed, Pending, Held.
-- **usage** (Number) IP address usage bitmask.
+- `claimed` (Boolean) If the IP address is claimed.
+- `custom_properties` (Map of String) Map of custom properties associated with this IP address.
+- `device` (String) The device associated with the object.
+- `discovery_type` (String) The discovery method of the IP address. Example: None, Ping, ARP, Lease, Custom.
+- `extraneous_ptr` (Boolean) 'True' if there are extraneous PTR records for the object.
+- `hold_info` (List of Object) Contains information about who holds the otherwise free IP, and for how long. (see [below for nested schema](#nestedatt--hold_info))
+- `id` (String) The ID of this resource.
+- `interface` (String) The interface associated with the object.
+- `last_discovery_date` (String) The date when the system last performed IP address discovery for this IP address.
+- `last_known_client_identifier` (String) The last known MAC address associated with the IP address discovery information.
+- `last_seen_date` (String) The date when the address was last seen during IP address discovery.
+- `ptr_status` (String) PTR record status. Example: Unknown, OK, Verify.
+- `ref` (String) Internal reference for the IP address.
+- `state` (String) The state of the IP address. Example: Free, Assigned, Claimed, Pending, Held.
+- `usage` (Number) IP address usage bitmask.
 
 <a id="nestedatt--hold_info"></a>
 ### Nested Schema for `hold_info`
 
 Read-Only:
 
-- **expiry_time** (String)
-- **username** (String)
+- `expiry_time` (String)
+- `username` (String)
+
+

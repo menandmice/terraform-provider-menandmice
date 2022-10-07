@@ -59,7 +59,6 @@ func ipv6AddressDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 
 	return oldIP.Equal(newIP)
 }
-
 func toError(diags diag.Diagnostics) error {
 
 	if diags.HasError() {

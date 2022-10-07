@@ -2,8 +2,11 @@ package menandmice
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,43 +24,44 @@ func resourceDNSZone() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 
-			"ref": &schema.Schema{
+			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal references to this DNS zone.",
 				Computed:    true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Description:  "Fully qualified name of DNS zone, ending with the trailing dot '.'.",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Name must end with '.'"),
 			},
-			"dynamic": &schema.Schema{
+			"dynamic": {
 				Type:        schema.TypeBool,
 				Description: "If the DNS zone is dynamic. (Default: False)",
 				Optional:    true,
 				Default:     false,
 			},
 			// TODO following nameing convetion it would be ad_intergrated
-			"adintegrated": &schema.Schema{
+			"adintegrated": {
 				Type:        schema.TypeBool,
 				Description: "If the DNS zone is AD integrated. (Default: False)",
 				Optional:    true,
 				Default:     false,
 				ForceNew:    true,
 			},
-			"view": &schema.Schema{
+			"view": {
 				Type:        schema.TypeString,
 				Description: "Name of the view this DNS zone is in.",
 				Optional:    true,
 				Default:     "",
 			},
-			"dnsviewref": &schema.Schema{
+			"dnsviewref": {
 				Type:        schema.TypeString,
 				Description: "Interal references to views.",
 				Computed:    true,
 			},
-			"dnsviewrefs": &schema.Schema{
+			"dnsviewrefs": {
 				Type:        schema.TypeSet,
 				Description: "Interal references to views. Only used with Active Directory.",
 				Computed:    true,
@@ -65,7 +69,7 @@ func resourceDNSZone() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:        schema.TypeString,
 				Description: "The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward. (Default: Master)",
 				Optional:    true,
@@ -74,7 +78,7 @@ func resourceDNSZone() *schema.Resource {
 					"Master", "Slave", "Hint", "Stub", "Forward",
 				}, false),
 			},
-			"masters": &schema.Schema{
+			"masters": {
 				Type:        schema.TypeList,
 				Description: "List of IP addresses of all master zones, for slave zones.",
 				Elem: &schema.Schema{
@@ -87,7 +91,7 @@ func resourceDNSZone() *schema.Resource {
 				Optional: true,
 			},
 
-			"authority": &schema.Schema{
+			"authority": {
 				Type:        schema.TypeString,
 				Description: "The authoritative DNS server for this zone. Requires FQDN with the trailing dot '.'.",
 				ForceNew:    true,
@@ -97,25 +101,25 @@ func resourceDNSZone() *schema.Resource {
 			},
 
 			// TODO  following naming convention whould be dnssec_signed
-			"dnssecsigned": &schema.Schema{
+			"dnssecsigned": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
 
-			"kskids": &schema.Schema{
+			"kskids": {
 				Type:        schema.TypeString,
 				Description: "A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.",
 				Optional:    true,
 			},
 
-			"zskids": &schema.Schema{
+			"zskids": {
 				Type:        schema.TypeString,
 				Description: "A comma-separated string of IDs of ZSKs. Starting with active keys, then inactive keys in parenthesis.",
 				Optional:    true,
 			},
-
-			"custom_properties": &schema.Schema{
+			// TODO make custom_properties case insensitive
+			"custom_properties": {
 				Type:        schema.TypeMap,
 				Description: "Map of custom properties associated with this DNS zone.",
 				Elem: &schema.Schema{
@@ -123,7 +127,7 @@ func resourceDNSZone() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"adreplicationtype": &schema.Schema{
+			"adreplicationtype": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Replication type if the zone is AD integrated.",
@@ -133,22 +137,23 @@ func resourceDNSZone() *schema.Resource {
 					"To_All_Domain_Controllers_In_Specified_Partition", "Unavailable",
 				}, false),
 			},
-			"adpartition": &schema.Schema{
+			// TODO rename ad_partition
+			"adpartition": {
 				Type:        schema.TypeString,
 				Description: "The AD partition if the zone is AD integrated.",
 				Optional:    true,
 			},
-			"created": &schema.Schema{
+			"created": {
 				Type:        schema.TypeString,
 				Description: "DDate when zone was created in Micetro.",
 				Computed:    true,
 			},
-			"lastmodified": &schema.Schema{
+			"lastmodified": {
 				Type:        schema.TypeString,
 				Description: "Date when zone was last modified in Micetro.",
 				Computed:    true,
 			},
-			"displayname": &schema.Schema{
+			"displayname": {
 				Type:        schema.TypeString,
 				Description: "A display name to distinguish the zone from other, identically named zone instances.",
 				Optional:    true,
@@ -178,8 +183,6 @@ func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
 	d.Set("created", dnszone.Created)           // TODO convert to timeformat RFC 3339
 	d.Set("lastmodified", dnszone.LastModified) // TODO convert to timeformat RFC 3339
 	d.Set("displayname", dnszone.DisplayName)
-	return
-
 }
 
 func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
@@ -192,14 +195,15 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		}
 	}
 
-	var CustomProperties = make(map[string]string)
+	var customProperties = make(map[string]string)
 	if customPropertiesRead, ok := d.GetOk("custom_properties"); ok {
 		for key, value := range customPropertiesRead.(map[string]interface{}) {
-			CustomProperties[key] = value.(string)
+			customProperties[key] = value.(string)
 		}
 	}
 	dnszone := DNSZone{
 		Ref:          tryGetString(d, "ref"),
+		Name:         d.Get("name").(string),
 		AdIntegrated: d.Get("adintegrated").(bool),
 		Authority:    tryGetString(d, "authority"),
 
@@ -208,7 +212,6 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		// LastModified: tryGetString(d, "lastmodified"),
 
 		DNSZoneProperties: DNSZoneProperties{
-			Name:              d.Get("name").(string),
 			Dynamic:           d.Get("dynamic").(bool),
 			ZoneType:          tryGetString(d, "type"),
 			DnssecSigned:      d.Get("dnssecsigned").(bool),
@@ -216,7 +219,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 			ZskIDs:            tryGetString(d, "zskids"),
 			AdReplicationType: tryGetString(d, "adreplicationtype"),
 			AdPartition:       tryGetString(d, "adpartition"),
-			CustomProperties:  CustomProperties,
+			CustomProperties:  customProperties,
 			DisplayName:       tryGetString(d, "displayname"),
 		},
 	}
@@ -260,7 +263,7 @@ func resourceDNSZoneCreate(c context.Context, d *schema.ResourceData, m interfac
 
 }
 
-func resourceDNSZoneRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSZoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
@@ -323,7 +326,12 @@ func resourceDNSZoneImport(ctx context.Context, d *schema.ResourceData, m interf
 
 	// if we had used schema.ImportStatePassthrough
 	// we could not have set id to its canonical form
-	d.SetId(d.Get("ref").(string))
+	ref := d.Get("ref").(string)
+	if ref == "" {
+		tflog.Debug(ctx, fmt.Sprintf("%v", d))
+		return nil, errors.New("Import failed")
+	}
+	d.SetId(ref)
 
 	return []*schema.ResourceData{d}, nil
 }

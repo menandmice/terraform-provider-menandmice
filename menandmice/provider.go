@@ -54,6 +54,7 @@ func Provider() *schema.Provider {
 			"menandmice_dns_zone":         resourceDNSZone(),
 			"menandmice_ipam_record":      resourceIPAMRec(),
 			"menandmice_dhcp_reservation": resourceDHCPReservation(),
+			"menandmice_range":            resourceRange(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"menandmice_dns_record":       DataSourceDNSRec(),
@@ -61,6 +62,7 @@ func Provider() *schema.Provider {
 			"menandmice_ipam_record":      DataSourceIPAMRec(),
 			"menandmice_dhcp_reservation": DataSourceDHCPReservation(),
 			"menandmice_dhcp_scope":       DataSourceDHCPScope(),
+			"menandmice_range":            DataSourceRange(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -75,6 +77,7 @@ func providerConfigure(c context.Context, d *schema.ResourceData) (interface{}, 
 		MMPassword: d.Get("password").(string),
 		TLSVerify:  d.Get("tls_verify").(bool),
 		Timeout:    d.Get("timeout").(int),
+		// Debug:      true,
 	}
 
 	if params.MMEndpoint == "" {

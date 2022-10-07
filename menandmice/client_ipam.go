@@ -64,7 +64,7 @@ func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
 	if err != nil {
 		return err
 	}
-	if existingIPAMRecord.Claimed == true {
+	if existingIPAMRecord.Claimed {
 		return fmt.Errorf("DHCPReservations already exists for: %v", existingIPAMRecord.Address)
 	}
 	return c.UpdateIPAMRec(ipamRecord.IPAMProperties, ipamRecord.Address)
@@ -87,8 +87,8 @@ type UpdateIPAMRecRequest struct {
 
 func (c *Mmclient) UpdateIPAMRec(ipamProperties IPAMProperties, ref string) error {
 
-	// A workaround to create properties with same fields as DNSZoneProperties but with flattend CustomProperties
-	// First mask CustomProperties in DNSZoneProperties
+	// A workaround to create IPAMproperties with same fields as IPAMPropertiesproperties but with flattend CustomProperties
+	// First mask CustomProperties in IPAMProperties
 	// Then convert to map considering `json:"omitempty"`
 	// Then add CustomProperties 1 by 1
 

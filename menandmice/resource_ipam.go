@@ -1,10 +1,9 @@
 package menandmice
 
 import (
-	"bytes"
 	"context"
-	"net"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -23,12 +22,14 @@ func resourceIPAMRec() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 
-			"ref": &schema.Schema{
+			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal reference for the IP address.",
 				Computed:    true,
 			},
-			"free_ip": &schema.Schema{
+			"free_ip": {
+
+				// TODO add ForceNew, do we ignore changes?
 				Type:         schema.TypeList,
 				Description:  "Find a free IP address to claim.",
 				Optional:     true,
@@ -36,32 +37,33 @@ func resourceIPAMRec() *schema.Resource {
 				MaxItems:     1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"range": &schema.Schema{
+						// TODO user range_ref here
+						"range": {
 							Type:        schema.TypeString,
 							Description: "Pick IP address from range with name",
 							Required:    true,
 						},
-						"start_at": &schema.Schema{
+						"start_at": {
 							Type:        schema.TypeString,
 							Description: "Start searching for IP address from",
 							Default:     "",
 							Optional:    true,
 							// TODO validate that its valide ip in the range of range
 						},
-						"ping": &schema.Schema{
+						"ping": {
 							Type:        schema.TypeBool,
 							Description: "Verify IP address is free with ping",
 							Default:     false,
 							Optional:    true,
 						},
-						"exclude_dhcp": &schema.Schema{
+						"exclude_dhcp": {
 							Type:        schema.TypeBool,
 							Description: "Exclude IP addresses that are assigned via DHCP",
 							Default:     false,
 							Optional:    true,
 						},
 
-						"temporary_claim_time": &schema.Schema{
+						"temporary_claim_time": {
 							Type:         schema.TypeInt,
 							Description:  "Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.",
 							Default:      60,
@@ -72,11 +74,12 @@ func resourceIPAMRec() *schema.Resource {
 				},
 			},
 
-			"address": &schema.Schema{
+			"address": {
 				Type:         schema.TypeString,
 				Description:  "The IP address to claim.",
 				ExactlyOneOf: []string{"free_ip", "address"},
 				Optional:     true,
+				// TODO validation.IsIPAddress does this to
 				ValidateFunc: validation.Any(
 					validation.IsIPv4Address,
 					validation.IsIPv6Address),
@@ -84,22 +87,22 @@ func resourceIPAMRec() *schema.Resource {
 					if ipv6AddressDiffSuppress(key, old, new, d) {
 						return true
 					}
-					if freeIPRead, ok := d.GetOk("free_ip"); ok {
-
-						return inFreeIPRange(readFreeIPMap(freeIPRead), old)
+					if _, ok := d.GetOk("free_ip"); ok {
+						return true
 					}
 					return false
 				},
 				ForceNew: true,
 			},
-			"current_address": &schema.Schema{
+			// TODO Think this can be removed/deprecated
+			"current_address": {
 				Type:        schema.TypeString,
 				Description: "Address currently used.",
 				Computed:    true,
 			},
 			// TODO might not be a good idea to make this configerable.
 			// What does it mean to delete unclaimed iprecord
-			"claimed": &schema.Schema{
+			"claimed": {
 				Type:        schema.TypeBool,
 				Description: "If address should be claimed. Default: true",
 				Optional:    true,
@@ -111,7 +114,7 @@ func resourceIPAMRec() *schema.Resource {
 			// },
 			// "dhcp_leases": &schema.Schema{
 			// },
-			"discovery_type": &schema.Schema{
+			"discovery_type": {
 				Type:        schema.TypeString,
 				Description: "The discovery method of the IP address. Example: None, Ping, ARP, Lease, Custom.",
 				Computed:    true,
@@ -122,45 +125,46 @@ func resourceIPAMRec() *schema.Resource {
 				// 	"None", "Ping", "ARP", "Lease", "Custom",
 				// }, false),
 			},
-			"last_seen_date": &schema.Schema{
+			"last_seen_date": {
 				Type:        schema.TypeString,
 				Description: "The date when the address was last seen during IP address discovery.",
 				Computed:    true,
 			},
 
-			"last_discovery_date": &schema.Schema{
+			"last_discovery_date": {
 				Type:        schema.TypeString,
 				Description: "The date when the system last performed IP address discovery for this IP address.",
 				Computed:    true,
 			},
-			"last_known_client_identifier": &schema.Schema{
+			"last_known_client_identifier": {
 				Type:        schema.TypeString,
 				Description: "The last known MAC address associated with the IP address discovery information.",
 				Computed:    true,
 			},
 
-			"device": &schema.Schema{
+			"device": {
 				Type:        schema.TypeString,
 				Description: "The device associated with the object.",
 				Computed:    true,
 			},
 
-			"interface": &schema.Schema{
+			"interface": {
 				Type:        schema.TypeString,
 				Description: "The interface associated with the object.",
 				Computed:    true,
 			},
-			"ptr_status": &schema.Schema{
+			"ptr_status": {
 				Type:        schema.TypeString,
 				Description: "PTR record status. Example: Unknown, OK, Verify.",
 				Computed:    true,
 			},
-			"extraneous_ptr": &schema.Schema{
+			"extraneous_ptr": {
 				Type:        schema.TypeBool,
 				Description: "'True' if there are extraneous PTR records for the object.",
 				Computed:    true,
 			},
-			"custom_properties": &schema.Schema{
+			// TODO make custom_properties case insensitive
+			"custom_properties": {
 				Type:        schema.TypeMap,
 				Description: "Map of custom properties associated with this IP address. You can only assign properties that are already defined in Micetro.",
 				Elem: &schema.Schema{
@@ -168,7 +172,7 @@ func resourceIPAMRec() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"state": &schema.Schema{
+			"state": {
 				Type:        schema.TypeString,
 				Description: "The state of the IP address. Example: Free, Assigned, Claimed, Pending, Held.",
 				Computed:    true,
@@ -197,7 +201,7 @@ func resourceIPAMRec() *schema.Resource {
 			// 	},
 			// },
 
-			"usage": &schema.Schema{
+			"usage": {
 				Type:        schema.TypeInt,
 				Description: "IP address usage bitmask.",
 				Computed:    true,
@@ -209,30 +213,6 @@ func resourceIPAMRec() *schema.Resource {
 	}
 }
 
-// TODO write test for this
-func inFreeIPRange(freeIPMap map[string]interface{}, ipStr string) bool {
-	_, ipnet, err := net.ParseCIDR(freeIPMap["range"].(string))
-	if err != nil {
-		return false
-	}
-	ip := net.ParseIP(ipStr)
-	if ip == nil || ipnet.Contains(ip) == false {
-		return false
-	}
-	if minimumIPStr := freeIPMap["start_at"].(string); minimumIPStr != "" {
-
-		minimumIP := net.ParseIP(minimumIPStr)
-		if minimumIP == nil {
-			return false
-		}
-
-		return bytes.Compare(ip, minimumIP) >= 0
-
-	}
-
-	return true
-
-}
 func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 
 	d.Set("ref", ipamrec.Ref)
@@ -267,7 +247,6 @@ func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 	// }
 	d.Set("usage", ipamrec.Usage)
 	// d.Set("cloud_device_info", ipamrec.CloudDeviceInfo)
-	return
 }
 
 func readIPAMRecSchema(d *schema.ResourceData) IPAMRecord {
@@ -331,10 +310,18 @@ func resourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interface{
 	return diags
 }
 
-func readFreeIPMap(freeIPRead interface{}) map[string]interface{} {
+func readNextFreeIPRequest(freeIPRead interface{}) NextFreeAddressRequest {
 
-	freeIPReadList := freeIPRead.([]interface{})[0]
-	return freeIPReadList.(map[string]interface{})
+	freeIPReadIntface := freeIPRead.([]interface{})[0].(map[string]interface{})
+	nextFreeIPRequest := NextFreeAddressRequest{
+
+		RangeRef:           freeIPReadIntface["range"].(string),
+		StartAddress:       freeIPReadIntface["start_at"].(string),
+		Ping:               freeIPReadIntface["ping"].(bool),
+		ExcludeDHCP:        freeIPReadIntface["exclude_dhcp"].(bool),
+		TemporaryClaimTime: freeIPReadIntface["temporary_claim_time"].(int),
+	}
+	return nextFreeIPRequest
 }
 func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
@@ -342,23 +329,15 @@ func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interfac
 
 	client := m.(*Mmclient)
 
-	if _, ok := d.GetOk("address"); !ok {
-		freeIPRead, ok := d.GetOk("free_ip")
-		if !ok {
-			return diag.Errorf("No element ‘address’ or ‘free_ip’ specified")
-		}
+	if freeIPMap, ok := d.GetOk("free_ip"); ok {
 
-		freeIPMap := readFreeIPMap(freeIPRead)
-		ipRange := freeIPMap["range"].(string)
-		startIP := freeIPMap["start_at"].(string)
-		ping := freeIPMap["ping"].(bool)
-		excludeDHCP := freeIPMap["exclude_dhcp"].(bool)
-		temporaryClaimTime := freeIPMap["temporary_claim_time"].(int)
+		nextFreeIPRequest := readNextFreeIPRequest(freeIPMap)
 
-		address, err := client.NextFreeAddress(ipRange, startIP, ping, excludeDHCP, temporaryClaimTime)
+		tflog.Debug(c, "Request next fee address")
+		address, err := client.NextFreeAddress(nextFreeIPRequest)
 
 		if err != nil {
-			return diag.Errorf("No free IPs available in %s", ipRange)
+			return diag.Errorf("No free IPs available in %s", nextFreeIPRequest.RangeRef)
 		}
 
 		d.Set("address", address)

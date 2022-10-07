@@ -3,8 +3,6 @@ package menandmice
 import (
 	"context"
 	"regexp"
-	"strconv"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -12,54 +10,57 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// schema for DNSZone resource
 func DataSourceDNSZone() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceDNSZoneRead,
 		Schema: map[string]*schema.Schema{
 
-			"ref": &schema.Schema{
+			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal references to this DNS zone.",
 				Computed:    true,
 			},
 
-			"server": &schema.Schema{
+			"server": {
 				Type:         schema.TypeString,
 				Required:     true,
 				Description:  "Fully qualified name of the DNS server where the record is stored, ending with the trailing dot '.'.",
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
 			},
-			"view": &schema.Schema{
+			"view": {
 				Type:        schema.TypeString,
 				Description: "Name of the view this DNS zone is in.",
 				Optional:    true,
 				Default:     "",
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Description:  "Fully qualified name of DNS zone, ending with the trailing dot '.'.",
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "name must end with '.'"),
 				Required:     true,
 			},
-			"dynamic": &schema.Schema{
+			"dynamic": {
 				Type:        schema.TypeBool,
 				Description: "If the DNS zone is dynamic.",
 				Computed:    true,
 			},
 			// TODO following nameing convetion it would be ad_intergrated
-			"adintegrated": &schema.Schema{
+			"adintegrated": {
 				Type:        schema.TypeBool,
 				Description: "If the DNS zone is AD integrated.",
 				Computed:    true,
 			},
 
-			"dnsviewref": &schema.Schema{
+			// TODO unify dnsviewref dnsviewrefs
+			// TODO following nameing convetion it would be dns_view_ref
+			"dnsviewref": {
 				Type:        schema.TypeString,
 				Description: "Interal references to views.",
 				Computed:    true,
 			},
-			"dnsviewrefs": &schema.Schema{
+
+			// TODO following nameing convetion it would be dns_view_refs
+			"dnsviewrefs": {
 				Type:        schema.TypeSet,
 				Description: "Interal references to views. Only used with Active Directory.",
 				Elem: &schema.Schema{
@@ -67,33 +68,33 @@ func DataSourceDNSZone() *schema.Resource {
 				},
 				Computed: true,
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:        schema.TypeString,
 				Description: "The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward.",
 				Computed:    true,
 			},
-			"authority": &schema.Schema{
+			"authority": {
 				Type:        schema.TypeString,
 				Description: "The authoritative DNS server for this zone.",
 				Computed:    true,
 			},
-			"dnssecsigned": &schema.Schema{
+			"dnssecsigned": {
 				Type:        schema.TypeBool,
 				Description: "If DNS signing is enabled.",
 				Computed:    true,
 			},
-			"kskids": &schema.Schema{
+			"kskids": {
 				Type:        schema.TypeString,
 				Description: "A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.",
 				Computed:    true,
 			},
-			"zskids": &schema.Schema{
+			"zskids": {
 				Type:        schema.TypeString,
 				Description: "A comma-separated string of IDs of ZSKs. Starting with active keys, then inactive keys in parenthesis.",
 				Computed:    true,
 			},
 
-			"customp_properties": &schema.Schema{
+			"customp_properties": {
 				Type:        schema.TypeMap,
 				Description: "Map of custom properties associated with this DNS zone.",
 				Elem: &schema.Schema{
@@ -102,17 +103,17 @@ func DataSourceDNSZone() *schema.Resource {
 				Computed: true,
 			},
 
-			"created": &schema.Schema{
+			"created": {
 				Type:        schema.TypeString,
 				Description: "Date when zone was created in Micetro.",
 				Computed:    true,
 			},
-			"lastmodified": &schema.Schema{
+			"lastmodified": {
 				Type:        schema.TypeString,
 				Description: "Date when zone was last modified in Micetro.",
 				Computed:    true,
 			},
-			"displayname": &schema.Schema{
+			"displayname": {
 				Type:        schema.TypeString,
 				Description: "A display name to distinguish the zone from other, identically named zone instances.",
 				Computed:    true,
@@ -139,12 +140,11 @@ func dataSourceDNSZoneRead(c context.Context, d *schema.ResourceData, m interfac
 	if dnszone == nil {
 		if view == "" {
 			return diag.Errorf("The DNS zone %v does not exist on server %v", name, server)
-		} else {
-			return diag.Errorf("The DNS zone %v does not exist in view %v on %v", name, view, server)
 		}
+		return diag.Errorf("The DNS zone %v does not exist in view %v on %v", name, view, server)
 	}
 	writeDNSZoneSchema(d, *dnszone)
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(dnszone.Ref)
 
 	return diags
 

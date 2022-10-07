@@ -19,13 +19,14 @@ const (
 
 type Mmclient struct{ resty.Client }
 
-// Cfg config to construct client
+// Cfg config to construct client.
 type Cfg struct {
 	MMEndpoint string
 	MMUsername string
 	MMPassword string
-	TLSVerify  bool
 	Timeout    int
+	TLSVerify  bool
+	Debug      bool
 }
 
 func init() {
@@ -33,17 +34,16 @@ func init() {
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 }
 
-// ClientInit establishes default settings on the REST client
+// ClientInit establishes default settings on the REST client.
 func ClientInit(c *Cfg) (*Mmclient, error) {
 	client := Mmclient{Client: *resty.New()}
-
+	client.SetDebug(c.Debug)
 	if c.MMEndpoint == "" {
 		return nil, errors.New("REST API endpoint must be configured")
-		//TODO check if it resolaves
+		// TODO check if it resolaves
 	}
 
 	if match, _ := regexp.MatchString("^(http|https)://", c.MMEndpoint); !match {
-
 		return nil, fmt.Errorf("REST API endpoint: %s must start with \"http://\" or \"https://\"", c.MMEndpoint)
 	}
 
@@ -54,7 +54,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 		return nil, errors.New("Invalid password")
 	}
 
-	if c.TLSVerify == false {
+	if !c.TLSVerify {
 		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	} else {
 		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: false})
@@ -65,8 +65,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
 	client.SetHostURL(c.MMEndpoint + "/mmws/api")
 
-	// TODO check if this works well with Round Robin DNS
-	// TODO is this needed
+	// TODO remove retry. does not help
 	client.SetRetryCount(5)
 	client.SetRetryWaitTime(1 * time.Second)
 	client.AddRetryCondition(func(r *resty.Response, e error) bool {
@@ -172,11 +171,9 @@ func (c *Mmclient) Get(result interface{}, path string, query map[string]interfa
 		SetError(&errorResponse).
 		SetResult(&result)
 
-	if query != nil {
-		for key, val := range query {
+	for key, val := range query {
 
-			request = request.SetQueryParam(key, fmt.Sprintf("%v", val))
-		}
+		request = request.SetQueryParam(key, fmt.Sprintf("%v", val))
 	}
 	if filter != nil {
 
@@ -232,7 +229,7 @@ func (c *Mmclient) Delete(data interface{}, path string) error {
 
 func (c *Mmclient) Put(data interface{}, path string) error {
 	var errorResponse ErrorResponse
-	r, err := c.R().
+	response, err := c.R().
 		SetBody(data).
 		SetError(&errorResponse).
 		Put(path)
@@ -240,5 +237,5 @@ func (c *Mmclient) Put(data interface{}, path string) error {
 	if err != nil {
 		return err
 	}
-	return ResponseError(r, errorResponse)
+	return ResponseError(response, errorResponse)
 }
