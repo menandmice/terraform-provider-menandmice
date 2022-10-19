@@ -31,9 +31,10 @@ func resourceDNSRec() *schema.Resource {
 				Computed:    true,
 			},
 			"name": {
-				Type:        schema.TypeString,
-				Description: "The DNS record name.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The DNS record name.",
+				Required:     true,
+				ValidateFunc: validation.StringDoesNotMatch(regexp.MustCompile(`\.$`), "Hostname should not end with '.'"),
 			},
 			"data": {
 				Type:         schema.TypeString,
@@ -99,7 +100,7 @@ func resourceDNSRec() *schema.Resource {
 
 			"zone": {
 				Type:         schema.TypeString,
-				Description:  "The DNS zone where the record is stored. Requires FQDN with the trailing dot '.'.",
+				Description:  "The DNS zone where the record is stored. Requires a trailing dot '.'.",
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
@@ -110,6 +111,12 @@ func resourceDNSRec() *schema.Resource {
 				Description: "Internal reference to the zone where this DNS record is stored.",
 				Computed:    true,
 			},
+			"fqdn": {
+				Type:        schema.TypeString,
+				Description: "Fully qualified domain name of this DNS record.",
+				Computed:    true,
+			},
+
 			// TODO add force overwrite
 		},
 	}
@@ -137,6 +144,11 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 	}
 	d.Set("enabled", dnsrec.Enabled)
 	d.Set("comment", dnsrec.Comment) // comment is always given, but sometimes ""
+
+	// set fqdn for user convience. this not information from the api
+	if zone, ok := d.Get("zone").(string); ok && zone != "" {
+		d.Set("fqdn", dnsrec.Name+"."+zone) // FIXME
+	}
 }
 
 func readDNSRecSchema(d *schema.ResourceData) DNSRecord {

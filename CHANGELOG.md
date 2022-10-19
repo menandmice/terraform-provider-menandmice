@@ -1,5 +1,16 @@
+
 # bet practice from https://www.terraform.io/plugin/sdkv2/best-practices/versioning
-## 0.3.0 (Unreleased)
+## 0.3.1 (Unreleased)
+
+BREAKING CHANGES:
+
+* data_source/dnsrecord name attribute can't end with a "." anymore
+
+FEATURES:
+
+* data_source/dnsrecord attribute fqdn is added
+
+## 0.3.0
 
 FEATURES:
 
