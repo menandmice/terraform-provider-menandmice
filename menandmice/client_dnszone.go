@@ -34,10 +34,29 @@ type FindDNSZoneResponse struct {
 	} `json:"result"`
 }
 
-// No longer used
-func (c Mmclient) FindDNSZone(filter map[string]string) ([]DNSZone, error) {
+func (c Mmclient) FindDNSZones(limit int, filter map[string]string) ([]DNSZone, error) {
 	var re FindDNSZoneResponse
-	err := c.Get(&re, "dnszones/", nil, filter)
+	query := map[string]interface{}{
+		"limit": limit,
+	}
+
+	if folderRef, ok := filter["folderRef"]; ok {
+		query["folderRef"] = folderRef
+		delete(filter, "folderRef")
+	}
+
+	if dnsViewRef, ok := filter["dnsViewRef"]; ok {
+		query["dnsViewRef"] = dnsViewRef
+		delete(filter, "dnsViewRef")
+	}
+
+	if dnsServerRef, ok := filter["dnsServerRef"]; ok {
+		query["dnsServerRef"] = dnsServerRef
+		delete(filter, "dnsServerRef")
+	}
+
+	err := c.Get(&re, "dnszones/", query, filter)
+	// TODO return empyt list if you get error view server etz does not exist
 	return re.Result.DNSZones, err
 }
 
