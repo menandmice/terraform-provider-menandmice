@@ -55,7 +55,6 @@ resource "menandmice_range" "example3" {
 - `cidr` (String) The CIDR of the range
 - `custom_properties` (Map of String) Map of custom properties associated with this range. You can only assign properties that are already defined in Micetro.
 - `description` (String) Description of the range
-- `discovery` (Block List, Max: 1) Used for discovery of ranges or scopes. (see [below for nested schema](#nestedblock--discovery))
 - `free_range` (Block List, Max: 1) Find a free IP address to claim. (see [below for nested schema](#nestedblock--free_range))
 - `from` (String) The starting IP address of the range.
 - `is_container` (Boolean) Set to true to create a container instead of a range.
@@ -79,16 +78,6 @@ resource "menandmice_range" "example3" {
 - `parent_ref` (String) A reference to the range that contains the subranges
 - `ref` (String) Internal references to this range.
 - `utilization_percentage` (Number) Utilization percentage for range.
-
-<a id="nestedblock--discovery"></a>
-### Nested Schema for `discovery`
-
-Optional:
-
-- `enabled` (Boolean) Pick IP address from range with name
-- `interval` (Number) The interval between runs for the schedule.
-- `unit` (String) Unit of time for interval. One of: Minutes, Hours, Days, Weeks, Months
-
 
 <a id="nestedblock--free_range"></a>
 ### Nested Schema for `free_range`

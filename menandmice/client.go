@@ -161,6 +161,8 @@ func ResponseError(response *resty.Response, errorResponse ErrorResponse) error 
 	return nil
 }
 
+// TODO think its better to make filter just a string. and a key of query.
+// and create a helper function query (filter map[string]string, raw_filter) String
 func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}, filter map[string]string) error {
 
 	//TODO better error message
@@ -177,9 +179,15 @@ func (c *Mmclient) Get(result interface{}, path string, query map[string]interfa
 	}
 	if filter != nil {
 
+		var condition string
 		conditions := make([]string, 0, len(filter))
 		for key, val := range filter {
-			conditions = append(conditions, fmt.Sprintf("%s=%s", key, val))
+			if key == "_raw_filter" {
+				condition = val
+			} else {
+				condition = fmt.Sprintf("%s=%s", key, val)
+			}
+			conditions = append(conditions, condition)
 		}
 		querystring = strings.Join(conditions, "&")
 		request = request.SetQueryParam("filter", querystring)

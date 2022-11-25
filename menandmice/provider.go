@@ -59,6 +59,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"menandmice_dns_record":       DataSourceDNSRec(),
 			"menandmice_dns_zone":         DataSourceDNSZone(),
+			"menandmice_dns_zones":        DataSourceDNSZones(),
 			"menandmice_ipam_record":      DataSourceIPAMRec(),
 			"menandmice_dhcp_reservation": DataSourceDHCPReservation(),
 			"menandmice_dhcp_scope":       DataSourceDHCPScope(),

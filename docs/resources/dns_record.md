@@ -35,7 +35,7 @@ resource "menandmice_dns_record" "rec2" {
 - `data` (String) The data stored in the DNS record.
 - `name` (String) The DNS record name.
 - `server` (String) The DNS server where the DNS record is stored. Requires FQDN with the trialing dot '.'.
-- `zone` (String) The DNS zone where the record is stored. Requires FQDN with the trailing dot '.'.
+- `zone` (String) The DNS zone where the record is stored. Requires a trailing dot '.'.
 
 ### Optional
 
@@ -49,6 +49,7 @@ resource "menandmice_dns_record" "rec2" {
 ### Read-Only
 
 - `dns_zone_ref` (String) Internal reference to the zone where this DNS record is stored.
+- `fqdn` (String) Fully qualified domain name of this DNS record.
 - `id` (String) The ID of this resource.
 - `ref` (String) Internal reference to this DNS record.
 
