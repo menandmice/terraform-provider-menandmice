@@ -40,8 +40,8 @@ func TestAccMenandmiceDNSRecBasic(t *testing.T) {
 				ResourceName:      "menandmice_dns_record.testrec",
 				ImportState:       true,
 				ImportStateVerify: true,
-				//TODO avoid ImportStateVerifyIgnore: "server", "zone"
-				ImportStateVerifyIgnore: []string{"server", "zone", "view"},
+				//TODO avoid ImportStateVerifyIgnore: "server", "zone", "fqdn"
+				ImportStateVerifyIgnore: []string{"server", "zone", "view", "fqdn"},
 			},
 			{
 				ResourceName:            "menandmice_dns_record.testrec",
