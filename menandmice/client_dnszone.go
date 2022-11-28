@@ -47,6 +47,7 @@ func (c Mmclient) FindDNSZones(limit int, filter map[string]string) ([]DNSZone, 
 
 	if dnsViewRef, ok := filter["dnsViewRef"]; ok {
 		query["dnsViewRef"] = dnsViewRef
+
 		delete(filter, "dnsViewRef")
 	}
 
@@ -55,8 +56,17 @@ func (c Mmclient) FindDNSZones(limit int, filter map[string]string) ([]DNSZone, 
 		delete(filter, "dnsServerRef")
 	}
 
-	err := c.Get(&re, "dnszones/", query, filter)
-	// TODO return empyt list if you get error view server etz does not exist
+	if rawFilter, ok := filter["filter"]; ok {
+		// TODO does this work
+		query["filter"] = rawFilter + "&" + map2filter(filter)
+	} else {
+		query["filter"] = map2filter(filter)
+	}
+	err := c.Get(&re, "dnszones/", query)
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ObjectNotFoundForReference {
+		// folder, view, or server where not found, is not error but return empty list
+		return []DNSZone{}, nil
+	}
 	return re.Result.DNSZones, err
 }
 
@@ -68,7 +78,7 @@ type ReadDNSZoneResponse struct {
 
 func (c Mmclient) ReadDNSZone(ref string) (*DNSZone, error) {
 	var re ReadDNSZoneResponse
-	err := c.Get(&re, "DNSZones/"+ref, nil, nil)
+	err := c.Get(&re, "DNSZones/"+ref, nil)
 	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		return nil, nil
 	}

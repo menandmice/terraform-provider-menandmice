@@ -29,7 +29,10 @@ type FindDNSRecResponse struct {
 
 func (c Mmclient) FindDNSRec(zone string, filter map[string]string) ([]DNSRecord, error) {
 	var re FindDNSRecResponse
-	err := c.Get(&re, "DNSZones/"+zone+"/DNSRecords", nil, filter)
+
+	query := map[string]interface{}{"filter": map2filter(filter)}
+
+	err := c.Get(&re, "DNSZones/"+zone+"/DNSRecords", query)
 	return re.Result.DNSRecords, err
 }
 
@@ -41,7 +44,7 @@ type ReadDNSRecResponse struct {
 
 func (c *Mmclient) ReadDNSRec(ref string) (*DNSRecord, error) {
 	var re ReadDNSRecResponse
-	err := c.Get(&re, "dnsrecords/"+ref, nil, nil)
+	err := c.Get(&re, "dnsrecords/"+ref, nil)
 
 	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		return nil, nil

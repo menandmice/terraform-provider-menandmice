@@ -20,21 +20,19 @@ func DataSourceDNSZones() *schema.Resource {
 				Description: "The number of zones to return.",
 				Optional:    true,
 			},
-			"filter": {
-				Type:        schema.TypeString,
-				Description: "Raw filter String. Can be used to create more complex filter with >= etz",
-				Optional:    true,
-			},
-
+			// TODO disabled for no. not realy needed. And need to be tested first
+			// "filter": {
+			// 	Type:        schema.TypeString,
+			// 	Description: "Raw filter String. Can be used to create more complex filter with >= etz",
+			// 	Optional:    true,
+			// },
 			"folder": {
-				Type: schema.TypeString,
-				// TODO
+				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Reference to a folder from which to get zones.",
+				Description: "Folder from which to get zones.",
 			},
 			"server": {
-				Type: schema.TypeString,
-				// TODO
+				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "Fully qualified name of the DNS server where the record is stored, ending with the trailing dot '.'.",
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
@@ -42,45 +40,14 @@ func DataSourceDNSZones() *schema.Resource {
 			"view": {
 				Type:        schema.TypeString,
 				Description: "Name of the view this DNS zone is in.",
-				// TODO
-				Optional: true,
+				Optional:    true,
 				// Default:     "",
 			},
-			// "name": {
-			// 	Type:         schema.TypeString,
-			// 	Description:  "Fully qualified name of DNS zone, ending with the trailing dot '.'.",
-			// 	ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "name must end with '.'"),
-			// 	Required:     true,
-			// },
 			"dynamic": {
 				Type:        schema.TypeBool,
 				Description: "If the DNS zone is dynamic.",
 				Optional:    true,
 			},
-			// TODO following nameing convetion it would be ad_intergrated
-			// "adintegrated": {
-			// 	Type:        schema.TypeBool,
-			// 	Description: "If the DNS zone is AD integrated.",
-			// 	Computed:    true,
-			// },
-			//
-			// // // TODO unify dnsviewref dnsviewrefs
-			// // TODO following nameing convetion it would be dns_view_ref
-			// "dnsviewref": {
-			// 	Type:        schema.TypeString,
-			// 	Description: "Interal references to views.",
-			// 	Computed:    true,
-			// },
-			//
-			// // TODO following nameing convetion it would be dns_view_refs
-			// "dnsviewrefs": {
-			// 	Type:        schema.TypeSet,
-			// 	Description: "Interal references to views. Only used with Active Directory.",
-			// 	Elem: &schema.Schema{
-			// 		Type: schema.TypeString,
-			// 	},
-			// 	Computed: true,
-			// },
 			"type": {
 				Type:        schema.TypeString,
 				Description: "The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward.",
@@ -127,7 +94,7 @@ func DataSourceDNSZones() *schema.Resource {
 							Computed:    true,
 						},
 
-						// TODO following nameing convetion it would be ad_intergrated
+						// TODO following nameing convetion it would be ad_integrated
 						"adintegrated": {
 							Type:        schema.TypeBool,
 							Description: "If the DNS zone is AD integrated.",
@@ -185,7 +152,6 @@ func DataSourceDNSZones() *schema.Resource {
 							},
 							Computed: true,
 						},
-
 						"created": {
 							Type:        schema.TypeString,
 							Description: "Date when zone was created in Micetro.",
@@ -219,7 +185,7 @@ func flattenZones(zones []DNSZone) []interface{} {
 		flat := make(map[string]interface{})
 		flat["ref"] = zone.Ref
 		flat["name"] = zone.Name
-		// flat["ad_intergrated"] = zone.AdIntegrated //TODO
+		flat["adintegrated"] = zone.AdIntegrated
 		// panic(zone.DNSViewRef)
 		flat["dnsviewref"] = zone.DNSViewRef
 		flat["dnsviewrefs"] = zone.DNSViewRefs
@@ -247,7 +213,6 @@ func dataSourceDNSZonesRead(c context.Context, d *schema.ResourceData, m interfa
 	limit := d.Get("limit").(int)
 
 	filter := map[string]string{}
-	// if filter,ok :+
 	if folder, ok := d.GetOk("folder"); ok {
 		filter["folderRef"] = folder.(string)
 	}
@@ -268,6 +233,10 @@ func dataSourceDNSZonesRead(c context.Context, d *schema.ResourceData, m interfa
 
 	if zoneType, ok := d.GetOk("type"); ok {
 		filter["type"] = zoneType.(string)
+	}
+
+	if rawFilter, ok := d.GetOk("filter"); ok {
+		filter["filter"] = rawFilter.(string)
 	}
 
 	dnszones, err := client.FindDNSZones(limit, filter)

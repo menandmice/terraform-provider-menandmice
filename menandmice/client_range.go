@@ -87,7 +87,7 @@ type ReadRangeResponse struct {
 
 func (c Mmclient) ReadRange(ref string) (*Range, error) {
 	var re ReadRangeResponse
-	err := c.Get(&re, "Ranges/"+ref, nil, nil)
+	err := c.Get(&re, "Ranges/"+ref, nil)
 	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		return nil, nil
 	}
@@ -193,7 +193,7 @@ func (c Mmclient) NextFreeAddress(request NextFreeAddressRequest) (string, error
 	if request.StartAddress != "" {
 		query["startAddress"] = request.StartAddress
 	}
-	err := c.Get(&re, "Ranges/"+request.RangeRef+"/NextFreeAddress", query, nil)
+	err := c.Get(&re, "Ranges/"+request.RangeRef+"/NextFreeAddress", query)
 	return re.Result.Address, err
 }
 
@@ -238,7 +238,7 @@ func (c Mmclient) AvailableAddressBlocks(request AvailableAddressBlocksRequest) 
 	if request.StartAddress != "" {
 		query["startAddress"] = request.StartAddress
 	}
-	err := c.Get(&re, "Ranges/"+request.RangeRef+"/AvailableAddressBlocks", query, nil)
+	err := c.Get(&re, "Ranges/"+request.RangeRef+"/AvailableAddressBlocks", query)
 	return re.Result.AddressBlocks, err
 
 }

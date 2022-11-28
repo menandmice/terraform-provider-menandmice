@@ -27,7 +27,7 @@ type ReadDHCPReservationResponse struct {
 
 func (c *Mmclient) ReadDHCPReservation(ref string) (*DHCPReservation, error) {
 	var re ReadDHCPReservationResponse
-	err := c.Get(&re, "DHCPReservations/"+ref, nil, nil)
+	err := c.Get(&re, "DHCPReservations/"+ref, nil)
 	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		//DHCPReservationNotFound not found
 		return nil, nil
@@ -112,6 +112,9 @@ type FindDHCPScopeResponse struct {
 // TODO add find by ref
 func (c Mmclient) FindDHCPScope(filter map[string]string) ([]DHCPScope, error) {
 	var re FindDHCPScopeResponse
-	err := c.Get(&re, "DHCPScopes/", nil, filter)
+
+	query := map[string]interface{}{"filter": map2filter(filter)}
+
+	err := c.Get(&re, "DHCPScopes/", query)
 	return re.Result.DHCPScopes, err
 }

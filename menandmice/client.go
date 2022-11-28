@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	ResourceNotFound = 16544
+	ResourceNotFound           = 16544
+	ObjectNotFoundForReference = 2049
 )
 
 type Mmclient struct{ resty.Client }
@@ -163,14 +164,29 @@ func ResponseError(response *resty.Response, errorResponse ErrorResponse) error 
 	}
 	return nil
 }
+func map2filter(filter map[string]string) string {
+	if filter == nil {
+		return ""
+	}
+	var condition string
+	conditions := make([]string, 0, len(filter))
+	for key, val := range filter {
+		if key == "_raw_filter" {
+			condition = val
+		} else {
+			condition = fmt.Sprintf("%s=%s", key, val)
+		}
+		conditions = append(conditions, condition)
+	}
+	return strings.Join(conditions, "&")
+}
 
 // TODO think its better to make filter just a string. and a key of query.
 // and create a helper function query (filter map[string]string, raw_filter) String
-func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}, filter map[string]string) error {
+func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}) error {
 
 	//TODO better error message
 	var errorResponse ErrorResponse
-	var querystring string
 
 	request := c.R().
 		SetError(&errorResponse).
@@ -179,21 +195,6 @@ func (c *Mmclient) Get(result interface{}, path string, query map[string]interfa
 	for key, val := range query {
 
 		request = request.SetQueryParam(key, fmt.Sprintf("%v", val))
-	}
-	if filter != nil {
-
-		var condition string
-		conditions := make([]string, 0, len(filter))
-		for key, val := range filter {
-			if key == "_raw_filter" {
-				condition = val
-			} else {
-				condition = fmt.Sprintf("%s=%s", key, val)
-			}
-			conditions = append(conditions, condition)
-		}
-		querystring = strings.Join(conditions, "&")
-		request = request.SetQueryParam("filter", querystring)
 	}
 
 	r, err := request.Get(path)
