@@ -19,13 +19,14 @@ const (
 
 type Mmclient struct{ resty.Client }
 
-// Cfg config to construct client.
+// Cfg config to construct client
 type Cfg struct {
 	MMEndpoint string
 	MMUsername string
 	MMPassword string
-	Timeout    int
 	TLSVerify  bool
+	Timeout    int
+	Version    string
 	Debug      bool
 }
 
@@ -44,6 +45,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	}
 
 	if match, _ := regexp.MatchString("^(http|https)://", c.MMEndpoint); !match {
+
 		return nil, fmt.Errorf("REST API endpoint: %s must start with \"http://\" or \"https://\"", c.MMEndpoint)
 	}
 
@@ -62,6 +64,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 
 	client.SetBasicAuth(c.MMUsername, c.MMPassword)
 	client.SetHeader("Content-Type", "application/json")
+	client.SetHeader("User-Agen", "terraform-provider-menandmice "+c.Version)
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
 	client.SetHostURL(c.MMEndpoint + "/mmws/api")
 

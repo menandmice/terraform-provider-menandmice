@@ -15,9 +15,9 @@ func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
 	location := "here"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMenandmiceIPAMRecDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckMenandmiceIPAMRecDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckMenandmiceIPAMRecConfigBasic(address1, location, true),
@@ -57,8 +57,8 @@ func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
 }
 
 func testAccCheckMenandmiceIPAMRecDestroy(s *terraform.State) error {
-	c := testAccProvider.Meta().(*Mmclient)
 
+	c := testAccProvider.Meta().(*Mmclient)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "menandmice_ipam_record" {
 			continue

@@ -16,9 +16,9 @@ func TestAccMenandmiceDHCPReservationBasic(t *testing.T) {
 	// addressess2 := `"192.168.2.138","192.168.2.139"`
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMenandmiceDHCPReservationDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckMenandmiceDHCPReservationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckMenandmiceDHCPReservationConfigBasic(name, owner, clientIdentifier, addressess1),
