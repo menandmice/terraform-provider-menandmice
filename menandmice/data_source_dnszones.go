@@ -246,6 +246,7 @@ func dataSourceDNSZonesRead(c context.Context, d *schema.ResourceData, m interfa
 	client := m.(*Mmclient)
 	limit := d.Get("limit").(int)
 
+	// TODO implement raw filter
 	filter := map[string]string{}
 	// if filter,ok :+
 	if folder, ok := d.GetOk("folder"); ok {

@@ -47,7 +47,7 @@ type ReadIPAMRECResponse struct {
 
 func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
 	var re ReadIPAMRECResponse
-	err := c.Get(&re, "IPAMRecords/"+ref, nil, nil)
+	err := c.Get(&re, "IPAMRecords/"+ref, nil)
 	return re.Result.IPAMRecord, err
 }
 
