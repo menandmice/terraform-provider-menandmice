@@ -1,5 +1,6 @@
 
 # bet practice from https://www.terraform.io/plugin/sdkv2/best-practices/versioning
+
 ## 0.3.1 (Unreleased)
 
 BREAKING CHANGES:
@@ -8,6 +9,7 @@ BREAKING CHANGES:
 
 FEATURES:
 
+* **New Data_source:**: menandmice_dns_zones
 * data_source/dnsrecord attribute fqdn is added
 
 ## 0.3.0
