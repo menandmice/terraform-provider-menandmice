@@ -94,10 +94,10 @@ func resourceIPAMRec() *schema.Resource {
 				},
 				ForceNew: true,
 			},
-			// TODO Think this can be removed/deprecated
 			"current_address": {
 				Type:        schema.TypeString,
 				Description: "Address currently used.",
+				Deprecated:  "user address instead",
 				Computed:    true,
 			},
 			// TODO might not be a good idea to make this configerable.

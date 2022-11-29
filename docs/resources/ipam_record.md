@@ -44,7 +44,7 @@ resource "menandmice_ipam_record" "example2" {
 
 ### Read-Only
 
-- `current_address` (String) Address currently used.
+- `current_address` (String, Deprecated) Address currently used.
 - `device` (String) The device associated with the object.
 - `discovery_type` (String) The discovery method of the IP address. Example: None, Ping, ARP, Lease, Custom.
 - `extraneous_ptr` (Boolean) 'True' if there are extraneous PTR records for the object.
