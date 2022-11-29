@@ -1,7 +1,7 @@
 
 # bet practice from https://www.terraform.io/plugin/sdkv2/best-practices/versioning
 
-## 0.3.1 (Unreleased)
+## 0.4.0 (Unreleased)
 
 BREAKING CHANGES:
 
