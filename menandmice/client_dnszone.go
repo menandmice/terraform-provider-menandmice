@@ -24,7 +24,7 @@ type DNSZoneProperties struct {
 	CustomProperties  map[string]string `json:"customProperties,omitempty"`
 	AdReplicationType string            `json:"adReplicationType,omitempty"`
 	AdPartition       string            `json:"adPartition,omitempty"`
-	DisplayName       string            `json:"displyaName,omitempty"`
+	DisplayName       string            `json:"displayName,omitempty"`
 }
 
 type FindDNSZoneResponse struct {

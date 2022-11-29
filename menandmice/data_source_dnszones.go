@@ -94,25 +94,45 @@ func DataSourceDNSZones() *schema.Resource {
 							Computed:    true,
 						},
 
-						// TODO following nameing convetion it would be ad_integrated
-						"adintegrated": {
+						"ad_integrated": {
 							Type:        schema.TypeBool,
 							Description: "If the DNS zone is AD integrated.",
 							Computed:    true,
 						},
 
-						// TODO unify dnsviewref dnsviewrefs
-						// TODO following nameing convetion it would be dns_view_ref
-						"dnsviewref": {
+						"adintegrated": {
+							Type:        schema.TypeBool,
+							Description: "If the DNS zone is AD integrated.",
+							Deprecated:  "use ad_integrated instead",
+							Computed:    true,
+						},
+
+						"dns_view_ref": {
 							Type:        schema.TypeString,
 							Description: "Interal references to views.",
 							Computed:    true,
 						},
+						"dnsviewref": {
+							Type:        schema.TypeString,
+							Description: "Interal references to views.",
+							Deprecated:  "use dns_view_ref instead",
+							Computed:    true,
+						},
 
-						// TODO following nameing convetion it would be dns_view_refs
+						"dns_view_refs": {
+							Type:        schema.TypeSet,
+							Description: "Interal references to views. Only used with Active Directory.",
+
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Computed: true,
+						},
 						"dnsviewrefs": {
 							Type:        schema.TypeSet,
 							Description: "Interal references to views. Only used with Active Directory.",
+
+							Deprecated: "use dns_view_refs instead",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -162,7 +182,14 @@ func DataSourceDNSZones() *schema.Resource {
 							Description: "Date when zone was last modified in Micetro.",
 							Computed:    true,
 						},
+
 						"displayname": {
+							Type:        schema.TypeString,
+							Description: "A display name to distinguish the zone from other, identically named zone instances.",
+							Deprecated:  "user display_name instead",
+							Computed:    true,
+						},
+						"display_name": {
 							Type:        schema.TypeString,
 							Description: "A display name to distinguish the zone from other, identically named zone instances.",
 							Computed:    true,
@@ -186,9 +213,11 @@ func flattenZones(zones []DNSZone) []interface{} {
 		flat["ref"] = zone.Ref
 		flat["name"] = zone.Name
 		flat["adintegrated"] = zone.AdIntegrated
-		// panic(zone.DNSViewRef)
+		flat["ad_integrated"] = zone.AdIntegrated
+		flat["dns_view_ref"] = zone.DNSViewRef
 		flat["dnsviewref"] = zone.DNSViewRef
 		flat["dnsviewrefs"] = zone.DNSViewRefs
+		flat["dns_view_refs"] = zone.DNSViewRefs
 		flat["authority"] = zone.Authority
 		flat["created"] = zone.Created
 		flat["lastmodified"] = zone.LastModified
@@ -199,8 +228,10 @@ func flattenZones(zones []DNSZone) []interface{} {
 		flat["kskids"] = zone.KskIDs
 		flat["zskids"] = zone.ZskIDs
 		flat["customp_properties"] = zone.CustomProperties
+		// are not api respones
 		// flat["adReplicationType"] = zone.AdReplicationType
 		// flat["adPartition"] = zone.AdPartition
+		flat["display_name"] = zone.DisplayName
 		flat["displayname"] = zone.DisplayName
 		flattend[i] = flat
 	}
@@ -249,25 +280,4 @@ func dataSourceDNSZonesRead(c context.Context, d *schema.ResourceData, m interfa
 	}
 	d.SetId(strconv.Itoa(len(dnszones)))
 	return diags
-	//
-	// server := tryGetString(d, "server")
-	// view := tryGetString(d, "view")
-	// name := tryGetString(d, "name")
-	// dnsZoneRef := server + ":" + view + ":" + name
-	// dnszone, err := client.ReadDNSZone(dnsZoneRef)
-	//
-	// if err != nil {
-	// 	return diag.FromErr(err)
-	// }
-	//
-	// if dnszone == nil {
-	// 	if view == "" {
-	// 		return diag.Errorf("The DNS zone %v does not exist on server %v", name, server)
-	// 	}
-	// 	return diag.Errorf("The DNS zone %v does not exist in view %v on %v", name, view, server)
-	// }
-	// writeDNSZoneSchema(d, *dnszone)
-	// d.SetId(dnszone.Ref)
-	//
-	// return diags
 }

@@ -48,8 +48,7 @@ data "menandmice_dns_zones" "zones" {
 - `custom_properties` (Map of String) Map of custom properties associated with this DNS zone.
 - `dnssecsigned` (Boolean) If DNS signing is enabled.
 - `dynamic` (Boolean) If the DNS zone is dynamic.
-- `filter` (String) Raw filter String. Can be used to create more complex filter with >= etz
-- `folder` (String) Reference to a folder from which to get zones.
+- `folder` (String) Folder from which to get zones.
 - `limit` (Number) The number of zones to return.
 - `server` (String) Fully qualified name of the DNS server where the record is stored, ending with the trailing dot '.'.
 - `type` (String) The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward.
@@ -65,11 +64,15 @@ data "menandmice_dns_zones" "zones" {
 
 Read-Only:
 
+- `ad_integrated` (Boolean)
 - `adintegrated` (Boolean)
 - `authority` (String)
 - `created` (String)
 - `customp_properties` (Map of String)
+- `display_name` (String)
 - `displayname` (String)
+- `dns_view_ref` (String)
+- `dns_view_refs` (Set of String)
 - `dnssecsigned` (Boolean)
 - `dnsviewref` (String)
 - `dnsviewrefs` (Set of String)

@@ -35,11 +35,15 @@ resource "menandmice_dns_zone" "zone2" {
 
 ### Optional
 
-- `adintegrated` (Boolean) If the DNS zone is AD integrated. (Default: False)
-- `adpartition` (String) The AD partition if the zone is AD integrated.
-- `adreplicationtype` (String) Replication type if the zone is AD integrated.
+- `ad_integrated` (Boolean) If the DNS zone is AD integrated. (Default: False)
+- `ad_partition` (String) The AD partition if the zone is AD integrated.
+- `ad_replication_type` (String) Replication type if the zone is AD integrated.
+- `adintegrated` (Boolean, Deprecated) If the DNS zone is AD integrated. (Default: False)
+- `adpartition` (String, Deprecated) The AD partition if the zone is AD integrated.
+- `adreplicationtype` (String, Deprecated) Replication type if the zone is AD integrated.
 - `custom_properties` (Map of String) Map of custom properties associated with this DNS zone.
-- `displayname` (String) A display name to distinguish the zone from other, identically named zone instances.
+- `display_name` (String) A display name to distinguish the zone from other, identically named zone instances.
+- `displayname` (String, Deprecated) A display name to distinguish the zone from other, identically named zone instances.
 - `dnssecsigned` (Boolean)
 - `dynamic` (Boolean) If the DNS zone is dynamic. (Default: False)
 - `kskids` (String) A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.
@@ -51,8 +55,10 @@ resource "menandmice_dns_zone" "zone2" {
 ### Read-Only
 
 - `created` (String) DDate when zone was created in Micetro.
-- `dnsviewref` (String) Interal references to views.
-- `dnsviewrefs` (Set of String) Interal references to views. Only used with Active Directory.
+- `dns_view_ref` (String) Interal references to views.
+- `dns_view_refs` (Set of String) Interal references to views. Only used with Active Directory.
+- `dnsviewref` (String, Deprecated) Interal references to views.
+- `dnsviewrefs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
 - `id` (String) The ID of this resource.
 - `lastmodified` (String) Date when zone was last modified in Micetro.
 - `ref` (String) Internal references to this DNS zone.

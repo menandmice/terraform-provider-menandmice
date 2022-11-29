@@ -82,7 +82,7 @@ func configure(version string, p *schema.Provider) func(context.Context, *schema
 			TLSVerify:  d.Get("tls_verify").(bool),
 			Timeout:    d.Get("timeout").(int),
 			Version:    version,
-			// Debug:      true,
+			Debug:      true, //FIXME
 		}
 
 		if params.MMEndpoint == "" {

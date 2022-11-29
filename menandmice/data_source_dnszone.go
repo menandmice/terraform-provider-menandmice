@@ -44,25 +44,46 @@ func DataSourceDNSZone() *schema.Resource {
 				Description: "If the DNS zone is dynamic.",
 				Computed:    true,
 			},
-			// TODO following nameing convetion it would be ad_intergrated
 			"adintegrated": {
+				Type:        schema.TypeBool,
+				Description: "If the DNS zone is AD integrated.",
+				Deprecated:  "use ad_integrated instead",
+				Computed:    true,
+			},
+			"ad_integrated": {
 				Type:        schema.TypeBool,
 				Description: "If the DNS zone is AD integrated.",
 				Computed:    true,
 			},
 
 			// TODO unify dnsviewref dnsviewrefs
-			// TODO following nameing convetion it would be dns_view_ref
 			"dnsviewref": {
 				Type:        schema.TypeString,
 				Description: "Interal references to views.",
+				Deprecated:  "use dns_view_ref instead",
 				Computed:    true,
 			},
 
-			// TODO following nameing convetion it would be dns_view_refs
+			"dns_view_ref": {
+				Type:        schema.TypeString,
+				Description: "Interal references to views.",
+				Deprecated:  "use dns_view_ref instead",
+				Computed:    true,
+			},
+
 			"dnsviewrefs": {
 				Type:        schema.TypeSet,
 				Description: "Interal references to views. Only used with Active Directory.",
+				Deprecated:  "use dns_view_refs instead",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Computed: true,
+			},
+			"dns_view_refs": {
+				Type:        schema.TypeSet,
+				Description: "Interal references to views. Only used with Active Directory.",
+				Deprecated:  "use dns_view_refs instead",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -114,6 +135,12 @@ func DataSourceDNSZone() *schema.Resource {
 				Computed:    true,
 			},
 			"displayname": {
+				Type:        schema.TypeString,
+				Description: "A display name to distinguish the zone from other, identically named zone instances.",
+				Computed:    true,
+				Deprecated:  "use display_name instead",
+			},
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "A display name to distinguish the zone from other, identically named zone instances.",
 				Computed:    true,

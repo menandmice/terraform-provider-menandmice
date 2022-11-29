@@ -33,14 +33,18 @@ data "menandmice_dns_zone" "zone1" {
 
 ### Read-Only
 
-- `adintegrated` (Boolean) If the DNS zone is AD integrated.
+- `ad_integrated` (Boolean) If the DNS zone is AD integrated.
+- `adintegrated` (Boolean, Deprecated) If the DNS zone is AD integrated.
 - `authority` (String) The authoritative DNS server for this zone.
 - `created` (String) Date when zone was created in Micetro.
 - `customp_properties` (Map of String) Map of custom properties associated with this DNS zone.
-- `displayname` (String) A display name to distinguish the zone from other, identically named zone instances.
+- `display_name` (String) A display name to distinguish the zone from other, identically named zone instances.
+- `displayname` (String, Deprecated) A display name to distinguish the zone from other, identically named zone instances.
+- `dns_view_ref` (String, Deprecated) Interal references to views.
+- `dns_view_refs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
 - `dnssecsigned` (Boolean) If DNS signing is enabled.
-- `dnsviewref` (String) Interal references to views.
-- `dnsviewrefs` (Set of String) Interal references to views. Only used with Active Directory.
+- `dnsviewref` (String, Deprecated) Interal references to views.
+- `dnsviewrefs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
 - `dynamic` (Boolean) If the DNS zone is dynamic.
 - `id` (String) The ID of this resource.
 - `kskids` (String) A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.
