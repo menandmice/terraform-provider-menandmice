@@ -12,6 +12,14 @@ FEATURES:
 * **New Data_source:**: menandmice_dns_zones
 * data_source/dnsrecord attribute fqdn is added
 
+* NOTES:
+
+* data_source/menandmice_ipam_record start marking `current_address` as deprecated. use `address`
+* menandmice_dns_zone start marking `adintegrated` as deprecated. use `ad_integrated`
+* menandmice_dns_zone start marking `displayname` as deprecated. use `display_name`
+* menandmice_dns_zone start marking `dnsviewref` as deprecated. use `dns_view_ref`
+* menandmice_dns_zone start marking `dnsviewrefs` as deprecated. use `dns_view_refs`
+
 ## 0.3.0
 
 FEATURES:
