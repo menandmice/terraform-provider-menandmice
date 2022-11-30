@@ -5,16 +5,17 @@
 
 BREAKING CHANGES:
 
-* data_source/dnsrecord name attribute can't end with a "." anymore
+* dnsrecord name attribute can't end with a "." anymore
 
 FEATURES:
 
 * **New Data_source:**: menandmice_dns_zones
 * data_source/dnsrecord attribute fqdn is added
+* resource/dnsrecord attribute fqdn is added
 
 * NOTES:
 
-* data_source/menandmice_ipam_record start marking `current_address` as deprecated. use `address`
+* resource/menandmice_ipam_record start marking `current_address` as deprecated. use `address`
 * menandmice_dns_zone start marking `adintegrated` as deprecated. use `ad_integrated`
 * menandmice_dns_zone start marking `displayname` as deprecated. use `display_name`
 * menandmice_dns_zone start marking `dnsviewref` as deprecated. use `dns_view_ref`
