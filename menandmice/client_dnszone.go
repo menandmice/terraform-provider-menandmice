@@ -34,7 +34,7 @@ type FindDNSZoneResponse struct {
 	} `json:"result"`
 }
 
-func (c Mmclient) FindDNSZones(limit int, filter map[string]string) ([]DNSZone, error) {
+func (c Mmclient) FindDNSZones(limit int, filter map[string]interface{}) ([]DNSZone, error) {
 	var re FindDNSZoneResponse
 	query := map[string]interface{}{
 		"limit": limit,
@@ -58,7 +58,7 @@ func (c Mmclient) FindDNSZones(limit int, filter map[string]string) ([]DNSZone, 
 
 	if rawFilter, ok := filter["filter"]; ok {
 		// TODO does this work
-		query["filter"] = rawFilter + "&" + map2filter(filter)
+		query["filter"] = rawFilter.(string) + "&" + map2filter(filter)
 	} else {
 		query["filter"] = map2filter(filter)
 	}

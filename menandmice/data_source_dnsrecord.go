@@ -96,7 +96,7 @@ func dataSourceDNSRectRead(c context.Context, d *schema.ResourceData, m interfac
 
 	dnsZoneRef := tryGetString(d, "server") + ":" + tryGetString(d, "view") + ":" + tryGetString(d, "zone")
 
-	dnsrecs, err := client.FindDNSRec(dnsZoneRef, map[string]string{
+	dnsrecs, err := client.FindDNSRec(dnsZoneRef, map[string]interface{}{
 		"name": tryGetString(d, "name"),
 		"type": tryGetString(d, "type"),
 	})

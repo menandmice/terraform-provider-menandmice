@@ -164,18 +164,14 @@ func ResponseError(response *resty.Response, errorResponse ErrorResponse) error 
 	}
 	return nil
 }
-func map2filter(filter map[string]string) string {
+func map2filter(filter map[string]interface{}) string {
 	if filter == nil {
 		return ""
 	}
 	var condition string
 	conditions := make([]string, 0, len(filter))
 	for key, val := range filter {
-		if key == "_raw_filter" {
-			condition = val
-		} else {
-			condition = fmt.Sprintf("%s=%s", key, val)
-		}
+		condition = fmt.Sprintf("%s=%v", key, val)
 		conditions = append(conditions, condition)
 	}
 	return strings.Join(conditions, "&")

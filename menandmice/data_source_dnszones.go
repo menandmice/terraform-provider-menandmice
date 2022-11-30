@@ -207,31 +207,39 @@ func dataSourceDNSZonesRead(c context.Context, d *schema.ResourceData, m interfa
 	client := m.(*Mmclient)
 	limit := d.Get("limit").(int)
 
-	filter := map[string]string{}
+	filter := map[string]interface{}{}
 	if folder, ok := d.GetOk("folder"); ok {
-		filter["folderRef"] = folder.(string)
+		filter["folderRef"] = folder
 	}
 
 	if server, ok := d.GetOk("server"); ok {
-		filter["dnsServerRef"] = server.(string)
+		filter["dnsServerRef"] = server
 	}
 
 	if customProperties, ok := d.GetOk("custom_properties"); ok {
 		for key, val := range customProperties.(map[string]interface{}) {
-			filter[key] = val.(string)
+			filter[key] = val
 		}
 	}
 
 	if view, ok := d.GetOk("view"); ok {
-		filter["dnsViewRef"] = view.(string)
+		filter["dnsViewRef"] = view
 	}
 
 	if zoneType, ok := d.GetOk("type"); ok {
-		filter["type"] = zoneType.(string)
+		filter["type"] = zoneType
 	}
 
 	if rawFilter, ok := d.GetOk("filter"); ok {
-		filter["filter"] = rawFilter.(string)
+		filter["filter"] = rawFilter
+	}
+
+	if dnssecSigned, ok := d.GetOk("dnssec_signed"); ok {
+		filter["dnssecSigned"] = dnssecSigned
+	}
+
+	if dynamic, ok := d.GetOk("dynamic"); ok {
+		filter["dynamic"] = dynamic
 	}
 
 	dnszones, err := client.FindDNSZones(limit, filter)

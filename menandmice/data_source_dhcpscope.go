@@ -81,9 +81,9 @@ func dataSourceDHCPScopeRead(c context.Context, d *schema.ResourceData, m interf
 	var diags diag.Diagnostics
 	client := m.(*Mmclient)
 
-	filter := map[string]string{"RangeRef": d.Get("cidr").(string)}
+	filter := map[string]interface{}{"RangeRef": d.Get("cidr")}
 	if dhcpServerRef, ok := d.GetOk("dhcp_server"); ok {
-		filter["dhcpServerRef"] = dhcpServerRef.(string)
+		filter["dhcpServerRef"] = dhcpServerRef
 	}
 	dhcpScopes, err := client.FindDHCPScope(filter)
 

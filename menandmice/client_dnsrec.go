@@ -27,7 +27,7 @@ type FindDNSRecResponse struct {
 	} `json:"result"`
 }
 
-func (c Mmclient) FindDNSRec(zone string, filter map[string]string) ([]DNSRecord, error) {
+func (c Mmclient) FindDNSRec(zone string, filter map[string]interface{}) ([]DNSRecord, error) {
 	var re FindDNSRecResponse
 
 	query := map[string]interface{}{"filter": map2filter(filter)}

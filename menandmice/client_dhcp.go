@@ -110,7 +110,7 @@ type FindDHCPScopeResponse struct {
 }
 
 // TODO add find by ref
-func (c Mmclient) FindDHCPScope(filter map[string]string) ([]DHCPScope, error) {
+func (c Mmclient) FindDHCPScope(filter map[string]interface{}) ([]DHCPScope, error) {
 	var re FindDHCPScopeResponse
 
 	query := map[string]interface{}{"filter": map2filter(filter)}
