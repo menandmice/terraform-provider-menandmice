@@ -79,10 +79,7 @@ func resourceIPAMRec() *schema.Resource {
 				Description:  "The IP address to claim.",
 				ExactlyOneOf: []string{"free_ip", "address"},
 				Optional:     true,
-				// TODO validation.IsIPAddress does this to
-				ValidateFunc: validation.Any(
-					validation.IsIPv4Address,
-					validation.IsIPv6Address),
+				ValidateFunc: validation.IsIPAddress,
 				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
 					if ipv6AddressDiffSuppress(key, old, new, d) {
 						return true

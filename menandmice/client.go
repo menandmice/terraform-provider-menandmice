@@ -69,13 +69,13 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
 	client.SetHostURL(c.MMEndpoint + "/mmws/api")
 
-	// TODO remove retry. does not help
-	client.SetRetryCount(5)
-	client.SetRetryWaitTime(1 * time.Second)
-	client.AddRetryCondition(func(r *resty.Response, e error) bool {
-		// also retry  on server errors
-		return r.StatusCode() >= 500 && r.StatusCode() < 600
-	})
+	// // TODO remove retry. does not help
+	// client.SetRetryCount(5)
+	// client.SetRetryWaitTime(1 * time.Second)
+	// client.AddRetryCondition(func(r *resty.Response, e error) bool {
+	// 	// also retry  on server errors
+	// 	return r.StatusCode() >= 500 && r.StatusCode() < 600
+	// })
 
 	// Test if we can make a connection
 
@@ -181,8 +181,6 @@ func map2filter(filter map[string]string) string {
 	return strings.Join(conditions, "&")
 }
 
-// TODO think its better to make filter just a string. and a key of query.
-// and create a helper function query (filter map[string]string, raw_filter) String
 func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}) error {
 
 	//TODO better error message
