@@ -42,9 +42,8 @@ resource "menandmice_dns_zone" "zone2" {
 - `adpartition` (String, Deprecated) The AD partition if the zone is AD integrated.
 - `adreplicationtype` (String, Deprecated) Replication type if the zone is AD integrated.
 - `custom_properties` (Map of String) Map of custom properties associated with this DNS zone.
-- `display_name` (String) A display name to distinguish the zone from other, identically named zone instances.
-- `displayname` (String, Deprecated) A display name to distinguish the zone from other, identically named zone instances.
-- `dnssecsigned` (Boolean)
+- `dnssec_signed` (Boolean)
+- `dnssecsigned` (Boolean, Deprecated)
 - `dynamic` (Boolean) If the DNS zone is dynamic. (Default: False)
 - `kskids` (String) A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.
 - `masters` (List of String) List of IP addresses of all master zones, for slave zones.
@@ -55,6 +54,8 @@ resource "menandmice_dns_zone" "zone2" {
 ### Read-Only
 
 - `created` (String) DDate when zone was created in Micetro.
+- `display_name` (String) A display name to distinguish the zone from other, identically named zone instances.
+- `displayname` (String, Deprecated) A display name to distinguish the zone from other, identically named zone instances.
 - `dns_view_ref` (String) Interal references to views.
 - `dns_view_refs` (Set of String) Interal references to views. Only used with Active Directory.
 - `dnsviewref` (String, Deprecated) Interal references to views.

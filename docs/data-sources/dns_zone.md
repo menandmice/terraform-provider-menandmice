@@ -29,6 +29,7 @@ data "menandmice_dns_zone" "zone1" {
 
 ### Optional
 
+- `dnssec_signed` (Boolean) If DNS signing is enabled.
 - `view` (String) Name of the view this DNS zone is in.
 
 ### Read-Only
@@ -42,7 +43,7 @@ data "menandmice_dns_zone" "zone1" {
 - `displayname` (String, Deprecated) A display name to distinguish the zone from other, identically named zone instances.
 - `dns_view_ref` (String, Deprecated) Interal references to views.
 - `dns_view_refs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
-- `dnssecsigned` (Boolean) If DNS signing is enabled.
+- `dnssecsigned` (Boolean, Deprecated) If DNS signing is enabled.
 - `dnsviewref` (String, Deprecated) Interal references to views.
 - `dnsviewrefs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
 - `dynamic` (Boolean) If the DNS zone is dynamic.

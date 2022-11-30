@@ -99,10 +99,18 @@ func DataSourceDNSZone() *schema.Resource {
 				Description: "The authoritative DNS server for this zone.",
 				Computed:    true,
 			},
+
+			"dnssec_signed": {
+				Type:        schema.TypeBool,
+				Description: "If DNS signing is enabled.",
+				Optional:    true,
+				Default:     false,
+			},
 			"dnssecsigned": {
 				Type:        schema.TypeBool,
 				Description: "If DNS signing is enabled.",
 				Computed:    true,
+				Deprecated:  "use dnssec_signed instead",
 			},
 			"kskids": {
 				Type:        schema.TypeString,

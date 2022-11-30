@@ -46,7 +46,7 @@ data "menandmice_dns_zones" "zones" {
 
 - `authority` (String) The authoritative DNS server for this zone.
 - `custom_properties` (Map of String) Map of custom properties associated with this DNS zone.
-- `dnssecsigned` (Boolean) If DNS signing is enabled.
+- `dnssec_signed` (Boolean) If DNS signing is enabled.
 - `dynamic` (Boolean) If the DNS zone is dynamic.
 - `folder` (String) Folder from which to get zones.
 - `limit` (Number) The number of zones to return.
@@ -65,17 +65,13 @@ data "menandmice_dns_zones" "zones" {
 Read-Only:
 
 - `ad_integrated` (Boolean)
-- `adintegrated` (Boolean)
 - `authority` (String)
 - `created` (String)
 - `customp_properties` (Map of String)
 - `display_name` (String)
-- `displayname` (String)
 - `dns_view_ref` (String)
 - `dns_view_refs` (Set of String)
-- `dnssecsigned` (Boolean)
-- `dnsviewref` (String)
-- `dnsviewrefs` (Set of String)
+- `dnssec_signed` (Boolean)
 - `dynamic` (Boolean)
 - `kskids` (String)
 - `lastmodified` (String)

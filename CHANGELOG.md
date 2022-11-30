@@ -21,6 +21,7 @@ FEATURES:
 * menandmice_dns_zone start marking `displayname` as deprecated. use `display_name`
 * menandmice_dns_zone start marking `dnsviewref` as deprecated. use `dns_view_ref`
 * menandmice_dns_zone start marking `dnsviewrefs` as deprecated. use `dns_view_refs`
+* menandmice_dns_zone start marking `dnssecsigned` as deprecated. use `dnssec_signed`
 
 ## 0.3.0
 

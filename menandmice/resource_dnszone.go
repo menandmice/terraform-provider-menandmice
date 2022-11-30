@@ -126,10 +126,20 @@ func resourceDNSZone() *schema.Resource {
 			},
 
 			// TODO  following naming convention whould be dnssec_signed
+
+			"dnssec_signed": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Default:       false,
+				ConflictsWith: []string{"dnssecsigned"},
+			},
+
 			"dnssecsigned": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Default:       false,
+				ConflictsWith: []string{"dnssec_signed"},
+				Deprecated:    "use dnssec_signed instead",
 			},
 
 			"kskids": {
@@ -231,6 +241,7 @@ func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
 	d.Set("dns_view_refs", dnszone.DNSViewRefs)
 	d.Set("authority", dnszone.Authority)
 	d.Set("type", dnszone.ZoneType)
+	d.Set("dnssec_signed", dnszone.DnssecSigned)
 	d.Set("dnssecsigned", dnszone.DnssecSigned)
 	d.Set("kskids", dnszone.KskIDs)
 	d.Set("zskids", dnszone.ZskIDs)
@@ -285,7 +296,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 
 	dnssecSigned, ok := d.GetOk("dnssecsigned")
 	if !ok {
-		displayName = d.Get("display_name")
+		dnssecSigned = d.Get("dnssec_signed")
 	}
 
 	dnszone := DNSZone{
@@ -301,7 +312,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		DNSZoneProperties: DNSZoneProperties{
 			Dynamic:           d.Get("dynamic").(bool),
 			ZoneType:          tryGetString(d, "type"),
-			DnssecSigned:      d.Get("dnssecsigned").(bool),
+			DnssecSigned:      dnssecSigned.(bool),
 			KskIDs:            tryGetString(d, "kskids"),
 			ZskIDs:            tryGetString(d, "zskids"),
 			AdReplicationType: adReplicationType.(string),

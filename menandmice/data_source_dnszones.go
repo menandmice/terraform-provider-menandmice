@@ -23,7 +23,7 @@ func DataSourceDNSZones() *schema.Resource {
 			// TODO disabled for no. not realy needed. And need to be tested first
 			// "filter": {
 			// 	Type:        schema.TypeString,
-			// 	Description: "Raw filter String. Can be used to create more complex filter with >= etz",
+			// 	Description: "Raw quickfilter String. Can be used to create more complex filter with >= etz",
 			// 	Optional:    true,
 			// },
 			"folder": {
@@ -58,7 +58,7 @@ func DataSourceDNSZones() *schema.Resource {
 				Description: "The authoritative DNS server for this zone.",
 				Optional:    true,
 			},
-			"dnssecsigned": {
+			"dnssec_signed": {
 				Type:        schema.TypeBool,
 				Description: "If DNS signing is enabled.",
 				Optional:    true,
@@ -123,7 +123,7 @@ func DataSourceDNSZones() *schema.Resource {
 							Description: "The authoritative DNS server for this zone.",
 							Computed:    true,
 						},
-						"dnssecsigned": {
+						"dnssec_signed": {
 							Type:        schema.TypeBool,
 							Description: "If DNS signing is enabled.",
 							Computed:    true,
@@ -189,7 +189,7 @@ func flattenZones(zones []DNSZone) []interface{} {
 
 		flat["dynamic"] = zone.Dynamic
 		flat["type"] = zone.ZoneType
-		flat["dnssecsigned"] = zone.DnssecSigned
+		flat["dnssec_signed"] = zone.DnssecSigned
 		flat["kskids"] = zone.KskIDs
 		flat["zskids"] = zone.ZskIDs
 		flat["customp_properties"] = zone.CustomProperties
