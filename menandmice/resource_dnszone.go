@@ -201,19 +201,17 @@ func resourceDNSZone() *schema.Resource {
 			},
 			// TODO display might need to be computed not optional
 			"display_name": {
-				Type:          schema.TypeString,
-				ConflictsWith: []string{"displayname"},
-				Description:   "A display name to distinguish the zone from other, identically named zone instances.",
-				Optional:      true,
+				Type:        schema.TypeString,
+				Description: "A display name to distinguish the zone from other, identically named zone instances.",
+				Computed:    true,
 			},
 
 			// TODO display might need to be computed not optional
 			"displayname": {
-				Type:          schema.TypeString,
-				ConflictsWith: []string{"display_name"},
-				Deprecated:    "use displayname instead",
-				Description:   "A display name to distinguish the zone from other, identically named zone instances.",
-				Optional:      true,
+				Type:        schema.TypeString,
+				Deprecated:  "use displayname instead",
+				Description: "A display name to distinguish the zone from other, identically named zone instances.",
+				Computed:    true,
 			},
 		},
 	}
@@ -280,7 +278,12 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		adReplicationType = d.Get("ad_replication_type")
 	}
 
-	displayName, ok := d.GetOk("displayname")
+	// displayName, ok := d.GetOk("displayname")
+	// if !ok {
+	// 	displayName = d.Get("display_name")
+	// }
+
+	dnssecSigned, ok := d.GetOk("dnssecsigned")
 	if !ok {
 		displayName = d.Get("display_name")
 	}
@@ -304,7 +307,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 			AdReplicationType: adReplicationType.(string),
 			AdPartition:       adPartition.(string),
 			CustomProperties:  customProperties,
-			DisplayName:       displayName.(string),
+			// DisplayName:       displayName.(string),
 		},
 	}
 

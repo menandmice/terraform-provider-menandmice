@@ -6,6 +6,7 @@
 BREAKING CHANGES:
 
 * dnsrecord name attribute can't end with a "." anymore
+* resouce/dnszone displayname became read only. setting it was allowed before, but did not work
 
 FEATURES:
 
