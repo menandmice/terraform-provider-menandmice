@@ -102,7 +102,8 @@ func resourceIPAMRec() *schema.Resource {
 			"claimed": {
 				Type:        schema.TypeBool,
 				Description: "If address should be claimed. Default: true",
-				Computed:    true,
+				Optional:    true,
+				Default:     true,
 			},
 			// "dnshost": &schema.Schema{
 			// },
