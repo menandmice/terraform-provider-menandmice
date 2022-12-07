@@ -39,8 +39,9 @@ func resourceDNSZone() *schema.Resource {
 			"dynamic": {
 				Type:        schema.TypeBool,
 				Description: "If the DNS zone is dynamic. (Default: False)",
-				Optional:    true,
-				Default:     false,
+				Computed:    true,
+				// Optional:    true,
+				// Default:     false,
 			},
 			"ad_integrated": {
 				Type:          schema.TypeBool,
@@ -56,7 +57,6 @@ func resourceDNSZone() *schema.Resource {
 				ConflictsWith: []string{"ad_integrated"},
 				Deprecated:    "use ad_integrated instead",
 				Optional:      true,
-				Default:       false,
 				ForceNew:      true,
 			},
 			"view": {
@@ -209,14 +209,12 @@ func resourceDNSZone() *schema.Resource {
 				Description: "Date when zone was last modified in Micetro.",
 				Computed:    true,
 			},
-			// TODO display might need to be computed not optional
 			"display_name": {
 				Type:        schema.TypeString,
 				Description: "A display name to distinguish the zone from other, identically named zone instances.",
 				Computed:    true,
 			},
 
-			// TODO display might need to be computed not optional
 			"displayname": {
 				Type:        schema.TypeString,
 				Deprecated:  "use displayname instead",
@@ -299,10 +297,15 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		dnssecSigned = d.Get("dnssec_signed")
 	}
 
+	adIntegrated, ok := d.GetOk("adintegrated")
+	if !ok {
+		adIntegrated = d.Get("ad_integrated")
+	}
+
 	dnszone := DNSZone{
 		Ref:          tryGetString(d, "ref"),
 		Name:         d.Get("name").(string),
-		AdIntegrated: d.Get("adintegrated").(bool),
+		AdIntegrated: adIntegrated.(bool),
 		Authority:    tryGetString(d, "authority"),
 
 		// you should not set this yourself
@@ -310,7 +313,7 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		// LastModified: tryGetString(d, "lastmodified"),
 
 		DNSZoneProperties: DNSZoneProperties{
-			Dynamic:           d.Get("dynamic").(bool),
+			// Dynamic:           d.Get("dynamic").(bool),
 			ZoneType:          tryGetString(d, "type"),
 			DnssecSigned:      dnssecSigned.(bool),
 			KskIDs:            tryGetString(d, "kskids"),
