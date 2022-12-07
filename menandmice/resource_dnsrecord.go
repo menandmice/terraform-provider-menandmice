@@ -147,7 +147,7 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 
 	// set fqdn for user convience. this not information from the api
 	if zone, ok := d.Get("zone").(string); ok && zone != "" {
-		d.Set("fqdn", dnsrec.Name+"."+zone) // FIXME
+		d.Set("fqdn", dnsrec.Name+"."+zone)
 	}
 }
 
