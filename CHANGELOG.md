@@ -5,6 +5,7 @@
 
 BREAKING CHANGES:
 
+* data_source/dhcpscope cidr is renamed to range
 * dnsrecord name attribute can't end with a "." anymore
 * resouce/dnszone displayname became read only. setting it was allowed before, but did not work
 * resouce/dnszone dynamic became read only. setting it was allowed before, but did not work

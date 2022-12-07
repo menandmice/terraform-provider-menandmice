@@ -23,8 +23,15 @@ func DataSourceDHCPScope() *schema.Resource {
 				Computed:    true,
 			},
 
-			// TODO rename cidr to range
 			"cidr": {
+				Type:        schema.TypeString,
+				Description: "The cidr of DHCPScope.",
+				Deprecated:  "use range instead",
+				// TODO validate
+				Optional: true,
+			},
+
+			"range": {
 				Type:        schema.TypeString,
 				Description: "The cidr of DHCPScope.",
 				// TODO validate
@@ -70,6 +77,7 @@ func writeDHCPScopeSchema(d *schema.ResourceData, dhcpScope DHCPScope) {
 	d.Set("ref", dhcpScope.Ref)
 	d.Set("name", dhcpScope.Name)
 	d.Set("cidr", dhcpScope.RangeRef)
+	d.Set("range", dhcpScope.RangeRef)
 	d.Set("dhcp_server", dhcpScope.DHCPServerRef)
 	d.Set("superscope", dhcpScope.Superscope)
 	d.Set("description", dhcpScope.Description)
@@ -81,7 +89,9 @@ func dataSourceDHCPScopeRead(c context.Context, d *schema.ResourceData, m interf
 	var diags diag.Diagnostics
 	client := m.(*Mmclient)
 
-	filter := map[string]interface{}{"RangeRef": d.Get("cidr")}
+	rangeRef := d.Get("range")
+
+	filter := map[string]interface{}{"RangeRef": rangeRef}
 	if dhcpServerRef, ok := d.GetOk("dhcp_server"); ok {
 		filter["dhcpServerRef"] = dhcpServerRef
 	}
