@@ -15,7 +15,7 @@ description: |-
 ```terraform
 data "menandmice_dhcp_scope" "scope1" {
   dhcp_server = "micetro.example.net."
-  cidr        = "192.168.2.0/24"
+  range       = "192.168.2.0/24"
 }
 ```
 
@@ -24,10 +24,11 @@ data "menandmice_dhcp_scope" "scope1" {
 
 ### Required
 
-- `cidr` (String) The cidr of DHCPScope.
+- `range` (String) The cidr of DHCPScope.
 
 ### Optional
 
+- `cidr` (String, Deprecated) The cidr of DHCPScope.
 - `dhcp_server` (String) The DHCP server of this scope.
 
 ### Read-Only
