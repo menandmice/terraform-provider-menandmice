@@ -44,7 +44,6 @@ resource "menandmice_dns_zone" "zone2" {
 - `custom_properties` (Map of String) Map of custom properties associated with this DNS zone.
 - `dnssec_signed` (Boolean)
 - `dnssecsigned` (Boolean, Deprecated)
-- `dynamic` (Boolean) If the DNS zone is dynamic. (Default: False)
 - `kskids` (String) A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.
 - `masters` (List of String) List of IP addresses of all master zones, for slave zones.
 - `type` (String) The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward. (Default: Master)
@@ -60,6 +59,7 @@ resource "menandmice_dns_zone" "zone2" {
 - `dns_view_refs` (Set of String) Interal references to views. Only used with Active Directory.
 - `dnsviewref` (String, Deprecated) Interal references to views.
 - `dnsviewrefs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
+- `dynamic` (Boolean) If the DNS zone is dynamic. (Default: False)
 - `id` (String) The ID of this resource.
 - `lastmodified` (String) Date when zone was last modified in Micetro.
 - `ref` (String) Internal references to this DNS zone.
