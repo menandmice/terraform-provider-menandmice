@@ -56,16 +56,27 @@ func DataSourceRange() *schema.Resource {
 				Description: "The display name of the AD site to which the range belongs.",
 				Computed:    true,
 			},
-			// TODO childRanges
-			// "childRanges": {
-			// 	Type:        schema.TypeList,
-			// 	Description: "An list of child ranges of the range.",
-			// 	Computed:    true,
 
-			// redundant
-			// IsLeaf            bool       `json:"isLeaf"`
-			// NumChildren int        `json:"numchildren"`
+			"child_ranges": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "An list of child ranges of the range.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ref": {
+							Type:        schema.TypeString,
+							Description: "Internal references to this child range.",
+							Computed:    true,
+						},
 
+						"name": {
+							Type:        schema.TypeString,
+							Description: "Name to this child range.",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			// TODO dhcpScopes
 			// "dhcpScopes": {
 			// 	Type:        schema.TypeList,

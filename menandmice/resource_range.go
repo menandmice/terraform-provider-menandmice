@@ -157,15 +157,27 @@ func resourceRange() *schema.Resource {
 				Description: "The display name of the AD site to which the range belongs.",
 				Computed:    true,
 			},
-			// TODO childRanges
-			// "childRanges": {
-			// 	Type:        schema.TypeList,
-			// 	Description: "An list of child ranges of the range.",
 
-			// redundant
-			// IsLeaf            bool       `json:"isLeaf"`
-			// NumChildren int        `json:"numchildren"`
+			"child_ranges": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "An list of child ranges of the range.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ref": {
+							Type:        schema.TypeString,
+							Description: "Internal references to this child range.",
+							Computed:    true,
+						},
 
+						"name": {
+							Type:        schema.TypeString,
+							Description: "Name to this child range.",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			// TODO dhcpScopes
 			// "dhcpScopes": {
 			// 	Type:        schema.TypeList,
@@ -367,7 +379,14 @@ func writeRangeSchema(d *schema.ResourceData, iprange Range) {
 
 	d.Set("created", iprange.Created)           // TODO convert to timeformat RFC 3339
 	d.Set("lastmodified", iprange.LastModified) // TODO convert to timeformat RFC 3339
-
+	var namedRefs = make([]map[string]interface{}, len(iprange.ChildRanges))
+	for i, namedRef := range iprange.ChildRanges {
+		namedRefs[i] = map[string]interface{}{
+			"ref":  namedRef.Name,
+			"name": namedRef.Ref,
+		}
+	}
+	d.Set("child_ranges", namedRefs)
 	// TODO	 discovery, discoveredProperties,cloudAllocationPools
 }
 
@@ -432,10 +451,6 @@ func readRangeSchema(d *schema.ResourceData) Range {
 		Name: name,
 		From: from,
 		To:   to,
-
-		// you should not set this yourself
-		// Created:      d.Get("created").(string),
-		// LastModified: tryGetString(d, "lastmodified"),
 
 		InheritAccess: d.Get("inherit_access").(bool),
 		RangeProperties: RangeProperties{
