@@ -26,3 +26,11 @@ resource "menandmice_range" "example3" {
   description = "Test"
 }
 
+resource "menandmice_range" "example4" {
+  free_range {
+    ranges = ["10.0.16.0/24","10.0.17.0/24"]
+    size = 100
+  }
+  title       = "Test Terraform example3"
+  description = "Test"
+}

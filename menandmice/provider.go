@@ -12,21 +12,21 @@ func Provider(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			Schema: map[string]*schema.Schema{
-				"endpoint": &schema.Schema{
+				"endpoint": {
 					Type: schema.TypeString,
 					// Required:    true,
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_ENDPOINT", nil),
 					Description: "Micetro API endpoint",
 				},
-				"username": &schema.Schema{
+				"username": {
 					Type: schema.TypeString,
 					// Required:    true,
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_USERNAME", nil),
 					Description: "Micetro username",
 				},
-				"password": &schema.Schema{
+				"password": {
 					Type: schema.TypeString,
 					// Required:    true,
 					Optional:    true,
@@ -34,14 +34,14 @@ func Provider(version string) func() *schema.Provider {
 					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_PASSWORD", nil),
 					Description: "Micetro password",
 				},
-				"tls_verify": &schema.Schema{
+				"tls_verify": {
 					Type: schema.TypeBool,
 					// Required:    true,
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_TLS_VERIFY", true),
 					Description: "Micetro SSL validation",
 				},
-				"timeout": &schema.Schema{
+				"timeout": {
 					Type: schema.TypeInt,
 					// Required:    true,
 					Optional:    true,

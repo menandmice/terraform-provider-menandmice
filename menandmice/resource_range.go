@@ -54,9 +54,20 @@ func resourceRange() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						// TODO user range_ref here?
 						"range": {
-							Type:        schema.TypeString,
-							Description: "Pick IP address from range with name",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Pick IP address from range with name",
+							ExactlyOneOf: []string{"free_range.0.range", "free_range.0.ranges"},
+							Optional:     true,
+						},
+
+						"ranges": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description:  "Pick IP address from one of these range with name",
+							ExactlyOneOf: []string{"free_range.0.range", "free_range.0.ranges"},
+							Optional:     true,
 						},
 						"start_at": {
 							Type:          schema.TypeString,
@@ -360,18 +371,16 @@ func writeRangeSchema(d *schema.ResourceData, iprange Range) {
 	// TODO	 discovery, discoveredProperties,cloudAllocationPools
 }
 
-func readAvailableAddressBlocksRequest(freeRange interface{}) AvailableAddressBlocksRequest {
-
-	freeRangeInterface := freeRange.([]interface{})[0].(map[string]interface{})
+func readAvailableAddressBlocksRequest(freeRange map[string]interface{}) AvailableAddressBlocksRequest {
 
 	availableAddressBlocksRequest := AvailableAddressBlocksRequest{
-		RangeRef:           freeRangeInterface["range"].(string),
-		StartAddress:       freeRangeInterface["start_at"].(string),
-		Size:               freeRangeInterface["size"].(int),
-		Mask:               freeRangeInterface["mask"].(int),
+		RangeRef:           freeRange["range"].(string),
+		StartAddress:       freeRange["start_at"].(string),
+		Size:               freeRange["size"].(int),
+		Mask:               freeRange["mask"].(int),
 		Limit:              1,
-		IgnoreSubnetFlag:   freeRangeInterface["ignore_subnet_flag"].(bool),
-		TemporaryClaimTime: freeRangeInterface["temporary_claim_time"].(int),
+		IgnoreSubnetFlag:   freeRange["ignore_subnet_flag"].(bool),
+		TemporaryClaimTime: freeRange["temporary_claim_time"].(int),
 	}
 
 	return availableAddressBlocksRequest
@@ -444,23 +453,45 @@ func readRangeSchema(d *schema.ResourceData) Range {
 func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Mmclient)
 
-	if freeRangeMap, ok := d.GetOk("free_range"); ok {
+	var AvailableAddressBlocks []AddressBlock
+	if freeRange, ok := d.GetOk("free_range"); ok {
+
+		freeRangeMap := freeRange.([]interface{})[0].(map[string]interface{})
+		var ranges []interface{}
+		if rangeName, ok := freeRangeMap["range"]; ok {
+			ranges = []interface{}{rangeName}
+		} else {
+			ranges = []interface{}{freeRangeMap["ranges"]}
+		}
+
+		// For readAvailableAddressBlocksRequest "range" has to be set.
+		// Which is not the case if ranges was used
+		freeRangeMap["range"] = ranges[0]
 		availableAddressBlocksRequest := readAvailableAddressBlocksRequest(freeRangeMap)
+		for _, iprange := range ranges {
+			rangeName := iprange.(string)
 
-		tflog.Debug(c, "Request a available AddressBlock")
-		AvailableAddressBlocks, err := client.AvailableAddressBlocks(availableAddressBlocksRequest)
+			tflog.Debug(c, "Request a available AddressBlock")
+			availableAddressBlocksRequest.RangeRef = rangeName
+			AvailableAddressBlocks, err := client.AvailableAddressBlocks(availableAddressBlocksRequest)
 
-		if err != nil {
-			return diag.FromErr(err)
+			if err != nil {
+				return diag.FromErr(err)
+				// TODO do we want to make errors allowed as long there is one succesfull AvailableAddressBlocksRequest
+			}
+
+			if len(AvailableAddressBlocks) >= 1 {
+				break
+			}
 		}
-		if len(AvailableAddressBlocks) <= 0 {
-			// TODO better messages
-			return diag.Errorf("No available address blocks found")
-		}
-		d.Set("from", AvailableAddressBlocks[0].From)
-		d.Set("to", AvailableAddressBlocks[0].To)
-
 	}
+
+	if len(AvailableAddressBlocks) <= 0 {
+		// TODO better messages
+		return diag.Errorf("No available address blocks found")
+	}
+	d.Set("from", AvailableAddressBlocks[0].From)
+	d.Set("to", AvailableAddressBlocks[0].To)
 
 	// TODO discovery
 	// discovery_schemas, ok := d.GetOk("discovery")
