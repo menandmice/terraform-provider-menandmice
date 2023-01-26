@@ -200,7 +200,7 @@ func resourceRange() *schema.Resource {
 
 			"locked": {
 				Type:        schema.TypeBool,
-				Description: "Determines if the range is defined as a subnet.",
+				Description: "Determines if the range is locked.",
 				Default:     false,
 				Optional:    true,
 			},
@@ -382,8 +382,8 @@ func writeRangeSchema(d *schema.ResourceData, iprange Range) {
 	var namedRefs = make([]map[string]interface{}, len(iprange.ChildRanges))
 	for i, namedRef := range iprange.ChildRanges {
 		namedRefs[i] = map[string]interface{}{
-			"ref":  namedRef.Name,
-			"name": namedRef.Ref,
+			"ref":  namedRef.Ref,
+			"name": namedRef.Name,
 		}
 	}
 	d.Set("child_ranges", namedRefs)
