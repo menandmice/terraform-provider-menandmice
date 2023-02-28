@@ -13,6 +13,7 @@ BREAKING CHANGES:
 FEATURES:
 
 * **New Data_source:**: menandmice_dns_zones
+* **New Data_source:**: menandmice_ranges
 * data_source/dnsrecord attribute `fqdn` is added
 * resource/dnsrecord    attribute `fqdn` is added
 * data_source/range has new attribute `child_ranges`

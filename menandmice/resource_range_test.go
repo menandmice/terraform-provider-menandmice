@@ -218,7 +218,7 @@ resource "menandmice_range" "testrange" {
     start_at = "%s"
     size = %v
     temporary_claim_time = 1
-}
+  }
 
   title       = "%s"
 }

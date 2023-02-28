@@ -85,6 +85,38 @@ type ReadRangeResponse struct {
 	} `json:"result"`
 }
 
+type FindRangesResponse struct {
+	Result struct {
+		Ranges       []Range `json:"ranges"`
+		TotalResults int     `json:"totalResults"`
+	} `json:"result"`
+}
+
+func (c Mmclient) FindRanges(limit int, filter map[string]interface{}) ([]Range, error) {
+	var re FindRangesResponse
+	query := map[string]interface{}{
+		"limit": limit,
+	}
+
+	if folderRef, ok := filter["folderRef"]; ok {
+		query["folderRef"] = folderRef
+		delete(filter, "folderRef")
+	}
+
+	if rawFilter, ok := filter["filter"]; ok {
+		// TODO does this work
+		query["filter"] = rawFilter.(string) + "&" + map2filter(filter)
+	} else {
+		query["filter"] = map2filter(filter)
+	}
+	err := c.Get(&re, "ranges/", query)
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ObjectNotFoundForReference {
+		// folder, view, or server where not found, is not error but return empty list
+		return []Range{}, nil
+	}
+	return re.Result.Ranges, err
+}
+
 func (c Mmclient) ReadRange(ref string) (*Range, error) {
 	var re ReadRangeResponse
 	err := c.Get(&re, "Ranges/"+ref, nil)
@@ -134,10 +166,11 @@ type UpdateRangeRequest struct {
 	SaveComment       string `json:"saveComment"`
 	DeleteUnspecified bool   `json:"deleteUnspecified"`
 
-	// we can`t use DNSZoneProperties for this because CustomProperties should be flattend first
 	Properties map[string]interface{} `json:"properties"`
 }
 
+// TODO Add test for this. there was bug in this, but it was never detected.
+// Are there properties can be update in place
 func (c *Mmclient) UpdateRange(rangeProperties RangeProperties, ref string) error {
 
 	// A workaround to create properties with same fields as DNSZoneProperties but with flattend CustomProperties
@@ -157,7 +190,7 @@ func (c *Mmclient) UpdateRange(rangeProperties RangeProperties, ref string) erro
 		properties[key] = value
 	}
 
-	update := UpdateDNSZoneRequest{
+	update := UpdateRangeRequest{
 		Ref:     ref,
 		ObjType: "Range",
 		// TODO  reuse same constant everywhere for comment
@@ -166,7 +199,7 @@ func (c *Mmclient) UpdateRange(rangeProperties RangeProperties, ref string) erro
 		Properties:        properties,
 	}
 
-	return c.Put(update, "DNSZones/"+ref)
+	return c.Put(update, "Ranges/"+ref)
 }
 
 type NextFreeAddressRespons struct {

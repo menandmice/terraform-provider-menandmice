@@ -98,7 +98,7 @@ func DataSourceRange() *schema.Resource {
 
 			"locked": {
 				Type:        schema.TypeBool,
-				Description: "Determines if the range is defined as a subnet.",
+				Description: "Determines if the range is locked.",
 				Computed:    true,
 			},
 			"auto_assign": {

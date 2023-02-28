@@ -34,18 +34,18 @@ func DataSourceDNSZones() *schema.Resource {
 			"server": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "Fully qualified name of the DNS server where the record is stored, ending with the trailing dot '.'.",
+				Description:  "Fully qualified name of the DNS server where the Zones is stored, ending with the trailing dot '.'.",
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
 			},
 			"view": {
 				Type:        schema.TypeString,
-				Description: "Name of the view this DNS zone is in.",
+				Description: "Name of the view where DNS zone has to be in.",
 				Optional:    true,
 				// Default:     "",
 			},
 			"dynamic": {
 				Type:        schema.TypeBool,
-				Description: "If the DNS zone is dynamic.",
+				Description: "If the DNS zone has to be dynamic.",
 				Optional:    true,
 			},
 			"type": {
@@ -55,12 +55,12 @@ func DataSourceDNSZones() *schema.Resource {
 			},
 			"authority": {
 				Type:        schema.TypeString,
-				Description: "The authoritative DNS server for this zone.",
+				Description: "The authoritative DNS server for the zone.",
 				Optional:    true,
 			},
 			"dnssec_signed": {
 				Type:        schema.TypeBool,
-				Description: "If DNS signing is enabled.",
+				Description: "If DNS signing has to be enabled.",
 				Optional:    true,
 			},
 			"custom_properties": {
@@ -169,6 +169,7 @@ func DataSourceDNSZones() *schema.Resource {
 		},
 	}
 }
+
 func flattenZones(zones []DNSZone) []interface{} {
 	if zones == nil {
 		return make([]interface{}, 0)
@@ -201,6 +202,7 @@ func flattenZones(zones []DNSZone) []interface{} {
 	}
 	return flattend
 }
+
 func dataSourceDNSZonesRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
@@ -246,7 +248,6 @@ func dataSourceDNSZonesRead(c context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("type", "test")
 	if err := d.Set("zones", flattenZones(dnszones)); err != nil {
 		return diag.FromErr(err)
 	}

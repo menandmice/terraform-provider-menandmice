@@ -13,7 +13,7 @@ func TestAccMenandmiceDHCPReservationBasic(t *testing.T) {
 	owner := "DHCPScopes/192.168.2.128/25"
 	clientIdentifier := "44:55:66:77:88:00"
 	addressess1 := `"192.168.2.138"`
-	// addressess2 := `"192.168.2.138","192.168.2.139"`
+	addressess2 := `"192.168.2.139"`
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -26,13 +26,12 @@ func TestAccMenandmiceDHCPReservationBasic(t *testing.T) {
 					testAccCheckResourceExists("menandmice_dhcp_reservation.testreservation"),
 				),
 			},
-			// TODO test update dhcp reservation
-			// {
-			// 	Config: testAccCheckMenandmiceDHCPReservationConfigBasic(name, owner, clientIdentifier, addressess2),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckResourceExists("menandmice_dhcp_reservation.testreservation"),
-			// 	),
-			// },
+			{
+				Config: testAccCheckMenandmiceDHCPReservationConfigBasic(name, owner, clientIdentifier, addressess2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_dhcp_reservation.testreservation"),
+				),
+			},
 			{
 
 				ResourceName:      "menandmice_dhcp_reservation.testreservation",

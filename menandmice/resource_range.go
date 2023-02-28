@@ -3,6 +3,7 @@ package menandmice
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -341,44 +342,52 @@ func resourceRange() *schema.Resource {
 }
 
 func writeRangeSchema(d *schema.ResourceData, iprange Range) {
+	// We schema indirecly via creating a Map here.
+	// So we can share code with data_source_ranges.
+	// data_source_ranges has to set same fields but for every range it finds
+	SetFromMap(d, flattenRange(iprange))
+}
 
-	d.Set("ref", iprange.Ref)
-	d.Set("name", iprange.Name)
+func flattenRange(iprange Range) map[string]interface{} {
+	var m = map[string]interface{}{}
+	m["ref"] = iprange.Ref
+	m["name"] = iprange.Name
 
 	if _, _, err := net.ParseCIDR(iprange.Name); err == nil {
-		d.Set("cidr", iprange.Name)
+		m["cidr"] = iprange.Name
 	} else {
-		d.Set("cidr", "")
+		m["cidr"] = ""
 	}
 
-	d.Set("from", iprange.From)
-	d.Set("to", iprange.To)
-	d.Set("parent_ref", iprange.ParentRef)
-	d.Set("ad_site_ref", iprange.AdSiteRef)
-	d.Set("ad_site_display_name", iprange.AdSiteDisplayName)
+	m["from"] = iprange.From
+	m["to"] = iprange.To
+	m["parent_ref"] = iprange.ParentRef
+	m["ad_site_ref"] = iprange.AdSiteRef
+	m["ad_site_display_name"] = iprange.AdSiteDisplayName
 
 	// TODO childRanges, dhcpScopes,authority
-	d.Set("subnet", iprange.Subnet)
-	d.Set("locked", iprange.Locked)
-	d.Set("auto_assign", iprange.AutoAssign)
-	d.Set("has_schedule", iprange.HasSchedule)
-	d.Set("has_monitor", iprange.HasMonitor)
+	m["subnet"] = iprange.Subnet
+	m["locked"] = iprange.Locked
+	m["auto_assign"] = iprange.AutoAssign
+	m["has_schedule"] = iprange.HasSchedule
+	m["has_monitor"] = iprange.HasMonitor
 
 	// api exposes this as custom properties
-	d.Set("title", iprange.RangeProperties.CustomProperties["Title"])
-	d.Set("description", iprange.RangeProperties.CustomProperties["Description"])
+	m["title"] = iprange.RangeProperties.CustomProperties["Title"]
+	m["description"] = iprange.RangeProperties.CustomProperties["Description"]
 
 	delete(iprange.CustomProperties, "Title")
 	delete(iprange.CustomProperties, "Description")
-	d.Set("custom_properties", iprange.CustomProperties)
+	m["custom_properties"] = iprange.CustomProperties
 
-	d.Set("is_container", iprange.IsContainer)
-	d.Set("utilization_percentage", iprange.UtilizationPercentage)
-	d.Set("has_rogue_addresses", iprange.HasRogueAddresses)
-	d.Set("cloud_network_ref", iprange.CloudNetworkRef)
+	m["is_container"] = iprange.IsContainer
+	m["utilization_percentage"] = iprange.UtilizationPercentage
+	m["has_rogue_addresses"] = iprange.HasRogueAddresses
+	m["cloud_network_ref"] = iprange.CloudNetworkRef
 
-	d.Set("created", iprange.Created)           // TODO convert to timeformat RFC 3339
-	d.Set("lastmodified", iprange.LastModified) // TODO convert to timeformat RFC 3339
+	m["created"] = iprange.Created           // TODO convert to timeformat RFC 3339
+	m["lastmodified"] = iprange.LastModified // TODO convert to timeformat RFC 3339
+
 	var namedRefs = make([]map[string]interface{}, len(iprange.ChildRanges))
 	for i, namedRef := range iprange.ChildRanges {
 		namedRefs[i] = map[string]interface{}{
@@ -386,8 +395,9 @@ func writeRangeSchema(d *schema.ResourceData, iprange Range) {
 			"name": namedRef.Name,
 		}
 	}
-	d.Set("child_ranges", namedRefs)
+	m["child_ranges"] = namedRefs
 	// TODO	 discovery, discoveredProperties,cloudAllocationPools
+	return m
 }
 
 func readAvailableAddressBlocksRequest(freeRange map[string]interface{}) AvailableAddressBlocksRequest {
@@ -467,12 +477,13 @@ func readRangeSchema(d *schema.ResourceData) Range {
 
 func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Mmclient)
-
+	var err error
 	var AvailableAddressBlocks []AddressBlock
-	if freeRange, ok := d.GetOk("free_range"); ok {
 
+	if freeRange, ok := d.GetOk("free_range"); ok {
 		freeRangeMap := freeRange.([]interface{})[0].(map[string]interface{})
 		var ranges []interface{}
+		// convert to list if range, otherwise pick from ranges
 		if rangeName, ok := freeRangeMap["range"]; ok {
 			ranges = []interface{}{rangeName}
 		} else {
@@ -488,8 +499,7 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 
 			tflog.Debug(c, "Request a available AddressBlock")
 			availableAddressBlocksRequest.RangeRef = rangeName
-			AvailableAddressBlocks, err := client.AvailableAddressBlocks(availableAddressBlocksRequest)
-
+			AvailableAddressBlocks, err = client.AvailableAddressBlocks(availableAddressBlocksRequest)
 			if err != nil {
 				return diag.FromErr(err)
 				// TODO do we want to make errors allowed as long there is one succesfull AvailableAddressBlocksRequest
@@ -498,15 +508,17 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 			if len(AvailableAddressBlocks) >= 1 {
 				break
 			}
+			tflog.Info(c, fmt.Sprintf("No suitable unclaimed range found in %v", rangeName))
 		}
-	}
 
-	if len(AvailableAddressBlocks) <= 0 {
-		// TODO better messages
-		return diag.Errorf("No available address blocks found")
+		if len(AvailableAddressBlocks) <= 0 {
+			// TODO better messages
+			return diag.Errorf("No available address blocks found")
+		}
+
+		d.Set("from", AvailableAddressBlocks[0].From)
+		d.Set("to", AvailableAddressBlocks[0].To)
 	}
-	d.Set("from", AvailableAddressBlocks[0].From)
-	d.Set("to", AvailableAddressBlocks[0].To)
 
 	// TODO discovery
 	// discovery_schemas, ok := d.GetOk("discovery")

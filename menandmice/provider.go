@@ -64,6 +64,7 @@ func Provider(version string) func() *schema.Provider {
 				"menandmice_dhcp_reservation": DataSourceDHCPReservation(),
 				"menandmice_dhcp_scope":       DataSourceDHCPScope(),
 				"menandmice_range":            DataSourceRange(),
+				"menandmice_ranges":           DataSourceRanges(),
 			},
 		}
 		p.ConfigureContextFunc = configure(version, p)
