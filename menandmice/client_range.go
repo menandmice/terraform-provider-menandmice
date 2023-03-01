@@ -79,13 +79,7 @@ type DiscoveryProperties struct {
 	VRFName              string
 }
 
-type ReadRangeResponse struct {
-	Result struct {
-		Range `json:"range"`
-	} `json:"result"`
-}
-
-type FindRangesResponse struct {
+type findRangesResponse struct {
 	Result struct {
 		Ranges       []Range `json:"ranges"`
 		TotalResults int     `json:"totalResults"`
@@ -93,7 +87,7 @@ type FindRangesResponse struct {
 }
 
 func (c Mmclient) FindRanges(limit int, filter map[string]interface{}) ([]Range, error) {
-	var re FindRangesResponse
+	var re findRangesResponse
 	query := map[string]interface{}{
 		"limit": limit,
 	}
@@ -117,8 +111,14 @@ func (c Mmclient) FindRanges(limit int, filter map[string]interface{}) ([]Range,
 	return re.Result.Ranges, err
 }
 
+type readRangeResponse struct {
+	Result struct {
+		Range `json:"range"`
+	} `json:"result"`
+}
+
 func (c Mmclient) ReadRange(ref string) (*Range, error) {
-	var re ReadRangeResponse
+	var re readRangeResponse
 	err := c.Get(&re, "Ranges/"+ref, nil)
 	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		return nil, nil
@@ -127,7 +127,7 @@ func (c Mmclient) ReadRange(ref string) (*Range, error) {
 	return &re.Result.Range, err
 }
 
-type CreateRangeRequest struct {
+type createRangeRequest struct {
 	Range       Range     `json:"range"`
 	SaveComment string    `json:"saveComment"`
 	Discovery   Discovery `json:"discovery"`
@@ -135,7 +135,7 @@ type CreateRangeRequest struct {
 
 func (c *Mmclient) CreateRange(iprange Range, discovery Discovery) (string, error) {
 	var objRef string
-	postcreate := CreateRangeRequest{
+	postcreate := createRangeRequest{
 		Range:       iprange,
 		SaveComment: "created by terraform",
 		Discovery:   discovery,
@@ -160,7 +160,7 @@ func (c *Mmclient) DeleteRange(ref string) error {
 	return err
 }
 
-type UpdateRangeRequest struct {
+type updateRangeRequest struct {
 	Ref               string `json:"ref"`
 	ObjType           string `json:"objType"`
 	SaveComment       string `json:"saveComment"`
@@ -190,7 +190,7 @@ func (c *Mmclient) UpdateRange(rangeProperties RangeProperties, ref string) erro
 		properties[key] = value
 	}
 
-	update := UpdateRangeRequest{
+	update := updateRangeRequest{
 		Ref:     ref,
 		ObjType: "Range",
 		// TODO  reuse same constant everywhere for comment
@@ -202,7 +202,7 @@ func (c *Mmclient) UpdateRange(rangeProperties RangeProperties, ref string) erro
 	return c.Put(update, "Ranges/"+ref)
 }
 
-type NextFreeAddressRespons struct {
+type nextFreeAddressRespons struct {
 	Result struct {
 		Address string `json:"address"`
 	} `json:"result"`
@@ -217,7 +217,7 @@ type NextFreeAddressRequest struct {
 }
 
 func (c Mmclient) NextFreeAddress(request NextFreeAddressRequest) (string, error) {
-	var re NextFreeAddressRespons
+	var re nextFreeAddressRespons
 	query := map[string]interface{}{
 		"ping":               request.Ping,
 		"excludeDHCP":        request.ExcludeDHCP,
@@ -230,7 +230,7 @@ func (c Mmclient) NextFreeAddress(request NextFreeAddressRequest) (string, error
 	return re.Result.Address, err
 }
 
-type AvailableAddressBlocksRespons struct {
+type availableAddressBlocksRespons struct {
 	Result struct {
 		AddressBlocks []AddressBlock `json:"addressBlocks"`
 	} `json:"result"`
@@ -253,7 +253,7 @@ type AvailableAddressBlocksRequest struct {
 
 func (c Mmclient) AvailableAddressBlocks(request AvailableAddressBlocksRequest) ([]AddressBlock, error) {
 
-	var re AvailableAddressBlocksRespons
+	var re availableAddressBlocksRespons
 	query := map[string]interface{}{
 		"limit":              request.Limit,
 		"ignoreSubnetFlag":   request.IgnoreSubnetFlag,
