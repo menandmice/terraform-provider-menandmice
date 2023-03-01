@@ -12,6 +12,7 @@ func DataSourceRange() *schema.Resource {
 		ReadContext: dataSourceRangeRead,
 		Schema: map[string]*schema.Schema{
 
+			// TODO add atributes: cloudAllocationPools, dhcpScopes authority ,discoveredProperties
 			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal references to this range.",
@@ -77,7 +78,6 @@ func DataSourceRange() *schema.Resource {
 					},
 				},
 			},
-			// TODO dhcpScopes
 			// "dhcpScopes": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
@@ -168,7 +168,6 @@ func DataSourceRange() *schema.Resource {
 				Computed:    true,
 			},
 
-			// TODO cloudAllocationPools
 			// "cloudAllocationPools": {
 			// Type:        schema.TypeList,
 			// Optional:    true,
@@ -176,7 +175,6 @@ func DataSourceRange() *schema.Resource {
 			// 	Schema: map[string]*schema.Schema{
 			// },
 
-			// TODO discoveredProperties
 			// "discoveredProperties": {
 			// Type:        schema.TypeList,
 			// Optional:    true,

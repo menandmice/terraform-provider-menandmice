@@ -58,6 +58,8 @@ func DataSourceRanges() *schema.Resource {
 				Description: "Ranges found with described properties.",
 				Computed:    true,
 				Elem: &schema.Resource{
+
+					// TODO add atributes: cloudAllocationPools, dhcpScopes authority ,discoveredProperties
 					Schema: map[string]*schema.Schema{
 
 						"ref": {
@@ -71,11 +73,11 @@ func DataSourceRanges() *schema.Resource {
 							Description: "The CIDR of the range, or from-to address range.",
 							Required:    true,
 						},
-						"cidr": {
-							Type:        schema.TypeString,
-							Description: "The CIDR of the range",
-							Optional:    true,
-						},
+						// "cidr": {
+						// 	Type:        schema.TypeString,
+						// 	Description: "The CIDR of the range",
+						// 	Optional:    true,
+						// },
 						"from": {
 							Type:        schema.TypeString,
 							Description: "The starting IP address of the range.",
@@ -123,8 +125,6 @@ func DataSourceRanges() *schema.Resource {
 								},
 							},
 						},
-
-						// TODO dhcpScopes
 						// "dhcpScopes": {
 						// 	Type:        schema.TypeList,
 						// 	Description:
@@ -215,7 +215,6 @@ func DataSourceRanges() *schema.Resource {
 							Computed:    true,
 						},
 
-						// TODO cloudAllocationPools
 						// "cloudAllocationPools": {
 						// Type:        schema.TypeList,
 						// Optional:    true,
@@ -223,7 +222,6 @@ func DataSourceRanges() *schema.Resource {
 						// 	Schema: map[string]*schema.Schema{
 						// },
 
-						// TODO discoveredProperties
 						// "discoveredProperties": {
 						// Type:        schema.TypeList,
 						// Optional:    true,
