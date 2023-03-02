@@ -46,13 +46,13 @@ func DataSourceIPAMRec() *schema.Resource {
 			},
 			"last_seen_date": {
 				Type:        schema.TypeString,
-				Description: "The date when the address was last seen during IP address discovery.",
+				Description: "The date when the address was last seen during IP address discovery in rfc3339 time format.",
 				Computed:    true,
 			},
 
 			"last_discovery_date": {
 				Type:        schema.TypeString,
-				Description: "The date when the system last performed IP address discovery for this IP address.",
+				Description: "The date when the system last performed IP address discovery for this IP address rfc3339 time format.",
 				Computed:    true,
 			},
 			"last_known_client_identifier": {
