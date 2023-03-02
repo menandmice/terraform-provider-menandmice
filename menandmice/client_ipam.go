@@ -39,14 +39,14 @@ type DNSHost struct {
 	RelatedRecords []DNSRecord `json:"relatedRecords"`
 }
 
-type ReadIPAMRECResponse struct {
+type readIPAMRECResponse struct {
 	Result struct {
 		IPAMRecord `json:"ipamRecord"`
 	} `json:"result"`
 }
 
 func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
-	var re ReadIPAMRECResponse
+	var re readIPAMRECResponse
 	err := c.Get(&re, "IPAMRecords/"+ref, nil)
 	return re.Result.IPAMRecord, err
 }
@@ -75,7 +75,7 @@ func (c *Mmclient) DeleteIPAMRec(ref string) error {
 	return c.Delete(deleteRequest("IPAddress"), "IPAMRecords/"+ref)
 }
 
-type UpdateIPAMRecRequest struct {
+type updateIPAMRecRequest struct {
 	Ref               string `json:"ref"`
 	ObjType           string `json:"objType"`
 	SaveComment       string `json:"saveComment"`
@@ -105,7 +105,7 @@ func (c *Mmclient) UpdateIPAMRec(ipamProperties IPAMProperties, ref string) erro
 		properties[key] = value
 	}
 
-	update := UpdateIPAMRecRequest{
+	update := updateIPAMRecRequest{
 		Ref:               ref,
 		ObjType:           "IPAddress",
 		SaveComment:       "updated by terraform",

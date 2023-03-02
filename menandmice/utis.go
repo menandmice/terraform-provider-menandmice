@@ -59,6 +59,7 @@ func ipv6AddressDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 
 	return oldIP.Equal(newIP)
 }
+
 func toError(diags diag.Diagnostics) error {
 
 	if diags.HasError() {
@@ -72,4 +73,17 @@ func toError(diags diag.Diagnostics) error {
 
 	}
 	return nil
+}
+
+// SetFromMap set schema from map of interface
+func SetFromMap(d *schema.ResourceData, m map[string]interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	for key, value := range m {
+
+		err := d.Set(key, value)
+		if err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
+	}
+	return diags
 }

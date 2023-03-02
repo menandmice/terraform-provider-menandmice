@@ -27,7 +27,7 @@ type DNSZoneProperties struct {
 	DisplayName       string            `json:"displayName,omitempty"`
 }
 
-type FindDNSZoneResponse struct {
+type findDNSZoneResponse struct {
 	Result struct {
 		DNSZones     []DNSZone `json:"dnsZones"`
 		TotalResults int       `json:"totalResults"`
@@ -35,7 +35,7 @@ type FindDNSZoneResponse struct {
 }
 
 func (c Mmclient) FindDNSZones(limit int, filter map[string]interface{}) ([]DNSZone, error) {
-	var re FindDNSZoneResponse
+	var re findDNSZoneResponse
 	query := map[string]interface{}{
 		"limit": limit,
 	}
@@ -70,14 +70,14 @@ func (c Mmclient) FindDNSZones(limit int, filter map[string]interface{}) ([]DNSZ
 	return re.Result.DNSZones, err
 }
 
-type ReadDNSZoneResponse struct {
+type readDNSZoneResponse struct {
 	Result struct {
 		DNSZone `json:"dnsZone"`
 	} `json:"result"`
 }
 
 func (c Mmclient) ReadDNSZone(ref string) (*DNSZone, error) {
-	var re ReadDNSZoneResponse
+	var re readDNSZoneResponse
 	err := c.Get(&re, "DNSZones/"+ref, nil)
 	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		return nil, nil
@@ -86,7 +86,7 @@ func (c Mmclient) ReadDNSZone(ref string) (*DNSZone, error) {
 	return &re.Result.DNSZone, err
 }
 
-type CreateDNSZoneRequest struct {
+type createDNSZoneRequest struct {
 	DNSZone     DNSZone  `json:"dnsZone"`
 	SaveComment string   `json:"saveComment"`
 	Masters     []string `json:"masters,omitempty"`
@@ -94,7 +94,7 @@ type CreateDNSZoneRequest struct {
 
 func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (string, error) {
 	var objRef string
-	postcreate := CreateDNSZoneRequest{
+	postcreate := createDNSZoneRequest{
 		DNSZone:     dnszone,
 		SaveComment: "created by terraform",
 		Masters:     masters,
@@ -119,7 +119,7 @@ func (c *Mmclient) DeleteDNSZone(ref string) error {
 	return err
 }
 
-type UpdateDNSZoneRequest struct {
+type updateDNSZoneRequest struct {
 	Ref               string `json:"ref"`
 	ObjType           string `json:"objType"`
 	SaveComment       string `json:"saveComment"`
@@ -148,7 +148,7 @@ func (c *Mmclient) UpdateDNSZone(dnsZoneProperties DNSZoneProperties, ref string
 		properties[key] = value
 	}
 
-	update := UpdateDNSZoneRequest{
+	update := updateDNSZoneRequest{
 		Ref:               ref,
 		ObjType:           "DNSZone",
 		SaveComment:       "updated by terraform",

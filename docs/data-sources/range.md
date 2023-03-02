@@ -34,6 +34,7 @@ output "range" {
 - `ad_site_display_name` (String) The display name of the AD site to which the range belongs.
 - `ad_site_ref` (String) Internal reference of the AD site to which the the range belongs.
 - `auto_assign` (Boolean) Determines if it should be possible to automatically assign IP addresses from the range.
+- `child_ranges` (List of Object) An list of child ranges of the range. (see [below for nested schema](#nestedatt--child_ranges))
 - `cloud_network_ref` (String) A internal reference to its cloud network
 - `created` (String) DDate when zone was created in Micetro.
 - `custom_properties` (Map of String) Map of custom properties associated with this range. You can only assign properties that are already defined in Micetro.
@@ -46,12 +47,20 @@ output "range" {
 - `inherit_access` (Boolean) If this range should inherit its access bits from its parent range.
 - `is_container` (Boolean) Set to true to create a container instead of a range.
 - `lastmodified` (String) Date when zone was last modified in Micetro.
-- `locked` (Boolean) Determines if the range is defined as a subnet.
+- `locked` (Boolean) Determines if the range is locked.
 - `parent_ref` (String) A reference to the range that contains the subranges
 - `ref` (String) Internal references to this range.
 - `subnet` (Boolean) Determines if the range is defined as a subnet.
 - `title` (String) The title of the Range
 - `to` (String) The ending IP address of the range.
 - `utilization_percentage` (Number) Utilization percentage for range.
+
+<a id="nestedatt--child_ranges"></a>
+### Nested Schema for `child_ranges`
+
+Read-Only:
+
+- `name` (String)
+- `ref` (String)
 
 

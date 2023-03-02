@@ -13,10 +13,14 @@ BREAKING CHANGES:
 FEATURES:
 
 * **New Data_source:**: menandmice_dns_zones
-* data_source/dnsrecord attribute fqdn is added
-* resource/dnsrecord attribute fqdn is added
+* **New Data_source:**: menandmice_ranges
+* data_source/dnsrecord attribute `fqdn` is added
+* resource/dnsrecord    attribute `fqdn` is added
+* data_source/range has new attribute `child_ranges`
+* resource/range    has new attribute `child_ranges`
+* resource/range `free_range` attribute now support searching in multiple `ranges`
 
-* NOTES:
+NOTES:
 
 * resource/menandmice_ipam_record start marking `current_address` as deprecated. use `address`
 * menandmice_dns_zone start marking `adintegrated` as deprecated. use `ad_integrated`

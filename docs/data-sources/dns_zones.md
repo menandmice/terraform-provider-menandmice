@@ -44,15 +44,15 @@ data "menandmice_dns_zones" "zones" {
 
 ### Optional
 
-- `authority` (String) The authoritative DNS server for this zone.
+- `authority` (String) The authoritative DNS server for the zone.
 - `custom_properties` (Map of String) Map of custom properties associated with this DNS zone.
-- `dnssec_signed` (Boolean) If DNS signing is enabled.
-- `dynamic` (Boolean) If the DNS zone is dynamic.
+- `dnssec_signed` (Boolean) If DNS signing has to be enabled.
+- `dynamic` (Boolean) If the DNS zone has to be dynamic.
 - `folder` (String) Folder from which to get zones.
 - `limit` (Number) The number of zones to return.
-- `server` (String) Fully qualified name of the DNS server where the record is stored, ending with the trailing dot '.'.
+- `server` (String) Fully qualified name of the DNS server where the Zones is stored, ending with the trailing dot '.'.
 - `type` (String) The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward.
-- `view` (String) Name of the view this DNS zone is in.
+- `view` (String) Name of the view where DNS zone has to be in.
 
 ### Read-Only
 
