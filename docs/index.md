@@ -21,10 +21,11 @@ terraform {
   }
 }
 provider "menandmice" {
-  endpoint   = "https://micetro.example.net" # can also be set with MENANDMICE_ENDPOINT environment variable
-  username   = "apiuser"                     # can also be set with MENANDMICE_USERNAME environment variable
-  password   = "secret"                      # can also be set with MENANDMICE_PASSWORD environment variable
-  tls_verify = false                         # can also be set with MENANDMICE_TLS_VERIFY environment variable
+  endpoint        = "https://micetro.example.net" # can also be set with MENANDMICE_ENDPOINT environment variable
+  username        = "apiuser"                     # can also be set with MENANDMICE_USERNAME environment variable
+  password        = "secret"                      # can also be set with MENANDMICE_PASSWORD environment variable
+  server_timezone = "America/Chicago"             # can also be set with MENANDMICE_SERVER_TIMEZONE environment variable
+  tls_verify      = false                         # can also be set with MENANDMICE_TLS_VERIFY environment variable
 }
 ```
 
@@ -35,6 +36,7 @@ provider "menandmice" {
 
 - `endpoint` (String) Micetro API endpoint
 - `password` (String, Sensitive) Micetro password
+- `server_timezone` (String) Timezone of Mictro server. in IANA Time Zone format. example: America/Chicago.See;https://en.wikipedia.org/wiki/List_of_tz_database_time_zones .
 - `timeout` (Number) Micetro Request timeout
 - `tls_verify` (Boolean) Micetro SSL validation
 - `username` (String) Micetro username

@@ -37,7 +37,7 @@ data "menandmice_dns_zone" "zone1" {
 - `ad_integrated` (Boolean) If the DNS zone is AD integrated.
 - `adintegrated` (Boolean, Deprecated) If the DNS zone is AD integrated.
 - `authority` (String) The authoritative DNS server for this zone.
-- `created` (String) Date when zone was created in Micetro.
+- `created` (String) Date when zone was created in Micetro in rfc3339 time format
 - `customp_properties` (Map of String) Map of custom properties associated with this DNS zone.
 - `display_name` (String) A display name to distinguish the zone from other, identically named zone instances.
 - `displayname` (String, Deprecated) A display name to distinguish the zone from other, identically named zone instances.
@@ -49,7 +49,7 @@ data "menandmice_dns_zone" "zone1" {
 - `dynamic` (Boolean) If the DNS zone is dynamic.
 - `id` (String) The ID of this resource.
 - `kskids` (String) A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.
-- `lastmodified` (String) Date when zone was last modified in Micetro.
+- `lastmodified` (String) Date when zone was last modified in Micetro rfc3339 time format
 - `ref` (String) Internal references to this DNS zone.
 - `type` (String) The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward.
 - `zskids` (String) A comma-separated string of IDs of ZSKs. Starting with active keys, then inactive keys in parenthesis.

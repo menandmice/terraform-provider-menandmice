@@ -18,13 +18,17 @@ const (
 	ObjectNotFoundForReference = 2049
 )
 
-type Mmclient struct{ resty.Client }
+type Mmclient struct {
+	serverLocation *time.Location
+	resty.Client
+}
 
 // Cfg config to construct client
 type Cfg struct {
 	MMEndpoint string
 	MMUsername string
 	MMPassword string
+	MMTimezone string
 	TLSVerify  bool
 	Timeout    int
 	Version    string
@@ -38,7 +42,10 @@ func init() {
 
 // ClientInit establishes default settings on the REST client.
 func ClientInit(c *Cfg) (*Mmclient, error) {
-	client := Mmclient{Client: *resty.New()}
+	client := Mmclient{
+		// default current timezone
+		Client: *resty.New(),
+	}
 	client.SetDebug(c.Debug)
 	if c.MMEndpoint == "" {
 		return nil, errors.New("REST API endpoint must be configured")
@@ -56,6 +63,16 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	if c.MMPassword == "" {
 		return nil, errors.New("Invalid password")
 	}
+	if c.MMTimezone != "" {
+
+		if location, err := time.LoadLocation(c.MMTimezone); err == nil {
+			client.serverLocation = location
+		} else {
+			return nil, err
+		}
+	} else {
+		client.serverLocation = time.Now().Location()
+	}
 
 	if !c.TLSVerify {
 		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -68,14 +85,6 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetHeader("User-Agen", "terraform-provider-menandmice "+c.Version)
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
 	client.SetHostURL(c.MMEndpoint + "/mmws/api")
-
-	// // TODO remove retry. does not help
-	// client.SetRetryCount(5)
-	// client.SetRetryWaitTime(1 * time.Second)
-	// client.AddRetryCondition(func(r *resty.Response, e error) bool {
-	// 	// also retry  on server errors
-	// 	return r.StatusCode() >= 500 && r.StatusCode() < 600
-	// })
 
 	// Test if we can make a connection
 

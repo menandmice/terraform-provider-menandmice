@@ -138,7 +138,7 @@ func dataSourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeIPAMRecSchema(d, ipam)
+	diags = writeIPAMRecSchema(d, ipam, client.serverLocation)
 	d.SetId(ipam.Ref)
 
 	return diags

@@ -3,6 +3,7 @@ package menandmice
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -231,12 +232,12 @@ func DataSourceRanges() *schema.Resource {
 
 						"created": {
 							Type:        schema.TypeString,
-							Description: "DDate when zone was created in Micetro.",
+							Description: "Date when range was created in Micetro in rfc3339 time format",
 							Computed:    true,
 						},
 						"lastmodified": {
 							Type:        schema.TypeString,
-							Description: "Date when zone was last modified in Micetro.",
+							Description: "Date when range was last modified in Micetro rfc3339 time format",
 							Computed:    true,
 						},
 					},
@@ -246,17 +247,21 @@ func DataSourceRanges() *schema.Resource {
 	}
 }
 
-func flattenRanges(ipranges []Range) []interface{} {
+func flattenRanges(ipranges []Range, tz *time.Location) ([]interface{}, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	if ipranges == nil {
-		return make([]interface{}, 0)
+		return make([]interface{}, 0), diags
 	}
 	flattend := make([]interface{}, len(ipranges))
 
 	for i, iprange := range ipranges {
 
-		flattend[i] = flattenRange(iprange)
+		flattend[i], diags = flattenRange(iprange, tz)
+		if diags != nil {
+			return nil, diags
+		}
 	}
-	return flattend
+	return flattend, diags
 }
 
 func dataSourceRangesRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -293,8 +298,11 @@ func dataSourceRangesRead(c context.Context, d *schema.ResourceData, m interface
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	if err := d.Set("ranges", flattenRanges(ipranges)); err != nil {
+	ranges, diags := flattenRanges(ipranges, client.serverLocation)
+	if diags != nil {
+		return diags
+	}
+	if err := d.Set("ranges", ranges); err != nil {
 		return diag.FromErr(err)
 	}
 

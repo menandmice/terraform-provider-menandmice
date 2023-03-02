@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -86,4 +87,9 @@ func SetFromMap(d *schema.ResourceData, m map[string]interface{}) diag.Diagnosti
 		}
 	}
 	return diags
+}
+
+func MmTimeString2rfc(timeStr string, location *time.Location) (string, error) {
+	t, err := time.ParseInLocation("Jan 2, 2006 15:04:05", timeStr, location)
+	return t.In(time.Local).Format(time.RFC3339), err
 }
