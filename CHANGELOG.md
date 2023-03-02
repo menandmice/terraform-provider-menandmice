@@ -5,6 +5,11 @@
 
 BREAKING CHANGES:
 
+* multiple date the time format is changed to rfc 3339
+  - lastmodified
+  - created
+  - last_seen_data
+  - last_discovery_date
 * data_source/dhcpscope cidr is renamed to range
 * dnsrecord name attribute can't end with a "." anymore
 * resouce/dnszone displayname became read only. setting it was allowed before, but did not work
