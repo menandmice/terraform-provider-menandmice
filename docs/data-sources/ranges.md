@@ -51,7 +51,6 @@ Read-Only:
 - `ad_site_ref` (String)
 - `auto_assign` (Boolean)
 - `child_ranges` (List of Object) (see [below for nested schema](#nestedobjatt--ranges--child_ranges))
-- `cidr` (String)
 - `cloud_network_ref` (String)
 - `created` (String)
 - `custom_properties` (Map of String)

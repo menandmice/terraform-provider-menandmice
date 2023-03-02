@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -201,12 +202,12 @@ func resourceDNSZone() *schema.Resource {
 			},
 			"created": {
 				Type:        schema.TypeString,
-				Description: "DDate when zone was created in Micetro.",
+				Description: "Date when zone was created in Micetro in rfc3339 time format",
 				Computed:    true,
 			},
 			"lastmodified": {
 				Type:        schema.TypeString,
-				Description: "Date when zone was last modified in Micetro.",
+				Description: "Date when zone was last modified in Micetro rfc3339 time format",
 				Computed:    true,
 			},
 			"display_name": {
@@ -225,8 +226,9 @@ func resourceDNSZone() *schema.Resource {
 	}
 }
 
-func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
+func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone, tz *time.Location) diag.Diagnostics {
 
+	var diags diag.Diagnostics
 	d.Set("ref", dnszone.Ref)
 	d.Set("name", dnszone.Name)
 	d.Set("dynamic", dnszone.Dynamic)
@@ -249,9 +251,21 @@ func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
 	d.Set("ad_replication_type", dnszone.AdReplicationType)
 	d.Set("adpartition", dnszone.AdPartition)
 	d.Set("ad_partition", dnszone.AdPartition)
-	d.Set("created", dnszone.Created)           // TODO convert to timeformat RFC 3339
-	d.Set("lastmodified", dnszone.LastModified) // TODO convert to timeformat RFC 3339
+
+	created, err := MmTimeString2rfc(dnszone.Created, tz)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("created", created)
+
+	lastmodified, err := MmTimeString2rfc(dnszone.LastModified, tz)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("lastmodified", lastmodified)
+
 	d.Set("displayname", dnszone.DisplayName)
+	return diags
 }
 
 func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
@@ -379,7 +393,7 @@ func resourceDNSZoneRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diags
 	}
 
-	writeDNSZoneSchema(d, *dnszone)
+	diags = writeDNSZoneSchema(d, *dnszone, client.serverLocation)
 
 	return diags
 }

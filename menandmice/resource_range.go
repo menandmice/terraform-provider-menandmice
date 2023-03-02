@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -323,12 +324,12 @@ func resourceRange() *schema.Resource {
 
 			"created": {
 				Type:        schema.TypeString,
-				Description: "DDate when zone was created in Micetro.",
+				Description: "Date when range was created in Micetro in rfc3339 time format",
 				Computed:    true,
 			},
 			"lastmodified": {
 				Type:        schema.TypeString,
-				Description: "Date when zone was last modified in Micetro.",
+				Description: "Date when range was last modified in Micetro rfc3339 time format",
 				Computed:    true,
 			},
 			// "discovery": &schema.Schema{
@@ -370,14 +371,17 @@ func resourceRange() *schema.Resource {
 	}
 }
 
-func writeRangeSchema(d *schema.ResourceData, iprange Range) {
+func writeRangeSchema(d *schema.ResourceData, iprange Range, tz *time.Location) diag.Diagnostics {
 	// We schema indirecly via creating a Map here.
 	// So we can share code with data_source_ranges.
 	// data_source_ranges has to set same fields but for every range it finds
-	SetFromMap(d, flattenRange(iprange))
+	iprangeMap, diags := flattenRange(iprange, tz)
+	SetFromMap(d, iprangeMap)
+	return diags
 }
 
-func flattenRange(iprange Range) map[string]interface{} {
+func flattenRange(iprange Range, tz *time.Location) (map[string]interface{}, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	var m = map[string]interface{}{}
 	m["ref"] = iprange.Ref
 	m["name"] = iprange.Name
@@ -413,8 +417,16 @@ func flattenRange(iprange Range) map[string]interface{} {
 	m["has_rogue_addresses"] = iprange.HasRogueAddresses
 	m["cloud_network_ref"] = iprange.CloudNetworkRef
 
-	m["created"] = iprange.Created           // TODO convert to timeformat RFC 3339
-	m["lastmodified"] = iprange.LastModified // TODO convert to timeformat RFC 3339
+	created, err := MmTimeString2rfc(iprange.Created, tz)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+	m["created"] = created
+	lastmodified, err := MmTimeString2rfc(iprange.LastModified, tz)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+	m["lastmodified"] = lastmodified
 
 	var namedRefs = make([]map[string]interface{}, len(iprange.ChildRanges))
 	for i, namedRef := range iprange.ChildRanges {
@@ -425,7 +437,7 @@ func flattenRange(iprange Range) map[string]interface{} {
 	}
 	m["child_ranges"] = namedRefs
 	// TODO	 discovery, discoveredProperties,cloudAllocationPools
-	return m
+	return m, diags
 }
 
 func readAvailableAddressBlocksRequest(freeRange map[string]interface{}) AvailableAddressBlocksRequest {
@@ -584,7 +596,7 @@ func resourceRangeRead(c context.Context, d *schema.ResourceData, m interface{})
 		return diags
 	}
 
-	writeRangeSchema(d, *iprange)
+	diags = writeRangeSchema(d, *iprange, client.serverLocation)
 
 	return diags
 }

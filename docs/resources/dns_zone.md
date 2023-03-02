@@ -51,7 +51,7 @@ resource "menandmice_dns_zone" "zone2" {
 
 ### Read-Only
 
-- `created` (String) DDate when zone was created in Micetro.
+- `created` (String) Date when zone was created in Micetro in rfc3339 time format
 - `display_name` (String) A display name to distinguish the zone from other, identically named zone instances.
 - `displayname` (String, Deprecated) A display name to distinguish the zone from other, identically named zone instances.
 - `dns_view_ref` (String) Interal references to views.
@@ -60,7 +60,7 @@ resource "menandmice_dns_zone" "zone2" {
 - `dnsviewrefs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
 - `dynamic` (Boolean) If the DNS zone is dynamic. (Default: False)
 - `id` (String) The ID of this resource.
-- `lastmodified` (String) Date when zone was last modified in Micetro.
+- `lastmodified` (String) Date when zone was last modified in Micetro rfc3339 time format
 - `ref` (String) Internal references to this DNS zone.
 
 

@@ -149,12 +149,12 @@ func DataSourceDNSZones() *schema.Resource {
 						},
 						"created": {
 							Type:        schema.TypeString,
-							Description: "Date when zone was created in Micetro.",
+							Description: "Date when zone was created in Micetro in rfc3339 time format",
 							Computed:    true,
 						},
 						"lastmodified": {
 							Type:        schema.TypeString,
-							Description: "Date when zone was last modified in Micetro.",
+							Description: "Date when zone was last modified in Micetro rfc3339 time format",
 							Computed:    true,
 						},
 						"display_name": {

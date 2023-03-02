@@ -2,7 +2,10 @@ package menandmice
 
 import (
 	"context"
+	"fmt"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -14,39 +17,44 @@ func Provider(version string) func() *schema.Provider {
 			Schema: map[string]*schema.Schema{
 				"endpoint": {
 					Type: schema.TypeString,
-					// Required:    true,
+					// Required:    true,  // can be set via environment variable
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_ENDPOINT", nil),
 					Description: "Micetro API endpoint",
 				},
 				"username": {
 					Type: schema.TypeString,
-					// Required:    true,
+					// Required:    true,  // can be set via environment variable
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_USERNAME", nil),
 					Description: "Micetro username",
 				},
 				"password": {
 					Type: schema.TypeString,
-					// Required:    true,
+					// Required:    true, // can be set via environment variable
 					Optional:    true,
 					Sensitive:   true,
 					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_PASSWORD", nil),
 					Description: "Micetro password",
 				},
 				"tls_verify": {
-					Type: schema.TypeBool,
-					// Required:    true,
+					Type:        schema.TypeBool,
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_TLS_VERIFY", true),
 					Description: "Micetro SSL validation",
 				},
 				"timeout": {
-					Type: schema.TypeInt,
-					// Required:    true,
+					Type:        schema.TypeInt,
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_TIMEOUT", 30),
 					Description: "Micetro Request timeout",
+				},
+				"server_timezone": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					ValidateFunc: validTZ(),
+					DefaultFunc:  schema.EnvDefaultFunc("MENANDMICE_SERVER_TIMEZONE", nil),
+					Description:  "Timezone of Mictro server. in IANA Time Zone format. example: America/Chicago.See;https://en.wikipedia.org/wiki/List_of_tz_database_time_zones .",
 				},
 			},
 			ResourcesMap: map[string]*schema.Resource{
@@ -71,6 +79,20 @@ func Provider(version string) func() *schema.Provider {
 		return p
 	}
 }
+func validTZ() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, errs []error) {
+		v, ok := i.(string)
+		if !ok {
+			errs = append(errs, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		if _, err := time.LoadLocation(v); err != nil {
+			errs = append(errs, err)
+			return
+		}
+		return
+	}
+}
 
 func configure(version string, p *schema.Provider) func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	return func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -80,12 +102,12 @@ func configure(version string, p *schema.Provider) func(context.Context, *schema
 			MMEndpoint: d.Get("endpoint").(string),
 			MMUsername: d.Get("username").(string),
 			MMPassword: d.Get("password").(string),
+			MMTimezone: d.Get("server_timezone").(string),
 			TLSVerify:  d.Get("tls_verify").(bool),
 			Timeout:    d.Get("timeout").(int),
 			Version:    version,
 			// Debug:      true,
 		}
-
 		if params.MMEndpoint == "" {
 			diags = append(diags, diag.Errorf("No REST API endpoint set for provider menandmice.")...)
 		}
@@ -94,6 +116,9 @@ func configure(version string, p *schema.Provider) func(context.Context, *schema
 		}
 		if params.MMPassword == "" {
 			diags = append(diags, diag.Errorf("No password set for provider menandmice.")...)
+		}
+		if params.MMTimezone == "" {
+			tflog.Warn(ctx, "No Timezone set for Mictro server. Will assume is running in same timezone as this machine")
 		}
 		if diags != nil {
 			return nil, diags

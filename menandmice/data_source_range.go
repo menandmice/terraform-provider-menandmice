@@ -184,12 +184,12 @@ func DataSourceRange() *schema.Resource {
 
 			"created": {
 				Type:        schema.TypeString,
-				Description: "DDate when zone was created in Micetro.",
+				Description: "Date when range was created in Micetro in rfc3339 time format",
 				Computed:    true,
 			},
 			"lastmodified": {
 				Type:        schema.TypeString,
-				Description: "Date when zone was last modified in Micetro.",
+				Description: "Date when range was last modified in Micetro rfc3339 time format",
 				Computed:    true,
 			},
 		},
@@ -211,7 +211,7 @@ func dataSourceRangeRead(c context.Context, d *schema.ResourceData, m interface{
 		return diag.Errorf("range_%v does not exist", name)
 	}
 
-	writeRangeSchema(d, *iprange)
+	writeRangeSchema(d, *iprange, client.serverLocation)
 	d.SetId(iprange.Ref)
 
 	return diags

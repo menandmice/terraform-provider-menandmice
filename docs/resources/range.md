@@ -77,13 +77,13 @@ resource "menandmice_range" "example4" {
 - `ad_site_ref` (String) Internal reference of the AD site to which the the range belongs.
 - `child_ranges` (List of Object) An list of child ranges of the range. (see [below for nested schema](#nestedatt--child_ranges))
 - `cloud_network_ref` (String) A internal reference to its cloud network
-- `created` (String) DDate when zone was created in Micetro.
+- `created` (String) Date when range was created in Micetro in rfc3339 time format
 - `has_monitor` (Boolean) Determines if a discovery schedule has been set for the range.
 - `has_rogue_addresses` (Boolean) Set to true to create a container instead of a range.
 - `has_schedule` (Boolean) Determines if a discovery schedule has been set for the range.
 - `id` (String) The ID of this resource.
 - `inherit_access` (Boolean) If this range should inherit its access bits from its parent range.
-- `lastmodified` (String) Date when zone was last modified in Micetro.
+- `lastmodified` (String) Date when range was last modified in Micetro rfc3339 time format
 - `name` (String) The CIDR of the range, or from-to address range.
 - `parent_ref` (String) A reference to the range that contains the subranges
 - `ref` (String) Internal references to this range.

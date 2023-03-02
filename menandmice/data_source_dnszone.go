@@ -134,12 +134,12 @@ func DataSourceDNSZone() *schema.Resource {
 
 			"created": {
 				Type:        schema.TypeString,
-				Description: "Date when zone was created in Micetro.",
+				Description: "Date when zone was created in Micetro in rfc3339 time format",
 				Computed:    true,
 			},
 			"lastmodified": {
 				Type:        schema.TypeString,
-				Description: "Date when zone was last modified in Micetro.",
+				Description: "Date when zone was last modified in Micetro rfc3339 time format",
 				Computed:    true,
 			},
 			"displayname": {
@@ -178,7 +178,7 @@ func dataSourceDNSZoneRead(c context.Context, d *schema.ResourceData, m interfac
 		}
 		return diag.Errorf("The DNS zone %v does not exist in view %v on %v", name, view, server)
 	}
-	writeDNSZoneSchema(d, *dnszone)
+	writeDNSZoneSchema(d, *dnszone, client.serverLocation)
 	d.SetId(dnszone.Ref)
 
 	return diags
