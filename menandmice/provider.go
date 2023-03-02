@@ -54,7 +54,7 @@ func Provider(version string) func() *schema.Provider {
 					Optional:     true,
 					ValidateFunc: validTZ(),
 					DefaultFunc:  schema.EnvDefaultFunc("MENANDMICE_SERVER_TIMEZONE", nil),
-					Description:  "Timezone of Mictro server. in IANA Time Zone format. example: America/Chicago.See;https://en.wikipedia.org/wiki/List_of_tz_database_time_zones .",
+					Description:  "Timezone of Mictro server. in IANA Time Zone format. example: America/Chicago.See;https://en.wikipedia.org/wiki/List_of_tz_database_time_zones .Default to local time zone. If not set correcly terraform will print wrong times for things like creation and modiviaction dates",
 				},
 			},
 			ResourcesMap: map[string]*schema.Resource{

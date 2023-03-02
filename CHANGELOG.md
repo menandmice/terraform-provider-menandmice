@@ -14,6 +14,9 @@ FEATURES:
 
 * **New Data_source:**: menandmice_dns_zones
 * **New Data_source:**: menandmice_ranges
+* provider attribute `server_timezone` is added.
+  Will now print the correct time for things like creation and modification dates,
+  even if server is in a different time zone
 * data_source/dnsrecord attribute `fqdn` is added
 * resource/dnsrecord    attribute `fqdn` is added
 * data_source/range has new attribute `child_ranges`

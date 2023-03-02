@@ -2,6 +2,7 @@ package menandmice
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -210,8 +211,8 @@ func resourceIPAMRec() *schema.Resource {
 	}
 }
 
-func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
-
+func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord, tz *time.Location) diag.Diagnostics {
+	var diags diag.Diagnostics
 	d.Set("ref", ipamrec.Ref)
 	d.Set("address", ipamrec.Address)
 	d.Set("current_address", ipamrec.Address)
@@ -223,8 +224,18 @@ func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 
 	d.Set("discovery_type", ipamrec.DiscoveryType)
 
-	d.Set("last_seen_date", ipamrec.LastSeenDate)           // TODO convert to timeformat RFC 3339
-	d.Set("last_discovery_date", ipamrec.LastDiscoveryDate) // TODO convert to timeformat RFC 3339
+	lastSeenDate, err := MmTimeString2rfc(ipamrec.LastSeenDate, tz)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("last_seen_date", lastSeenDate)
+
+	lastDiscoveryDate, err := MmTimeString2rfc(ipamrec.LastDiscoveryDate, tz)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("last_discovery_date", lastDiscoveryDate)
+
 	d.Set("last_known_client_identifier", ipamrec.LastKnownClientIdentifier)
 	d.Set("device", ipamrec.Device)
 	d.Set("interface", ipamrec.Interface)
@@ -244,6 +255,7 @@ func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 	// }
 	d.Set("usage", ipamrec.Usage)
 	// d.Set("cloud_device_info", ipamrec.CloudDeviceInfo)
+	return diags
 }
 
 func readIPAMRecSchema(d *schema.ResourceData) IPAMRecord {
@@ -302,7 +314,7 @@ func resourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interface{
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeIPAMRecSchema(d, ipamrec)
+	diags = writeIPAMRecSchema(d, ipamrec, client.serverLocation)
 
 	return diags
 }

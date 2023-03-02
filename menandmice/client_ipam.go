@@ -52,7 +52,7 @@ func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
 }
 
 // TODO because this will only set IPAMProperties and ignore others. Maybe change to:
-// func (c *Mmclient) CreateIPAMRec(ipamProperites IPAMProperties,rec string) error {
+//	func (c *Mmclient) CreateIPAMRec(ipamProperites IPAMProperties,rec string) error {
 func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
 
 	// TODO this function will query ipamRecord bassed on IP address. But this is not unique
