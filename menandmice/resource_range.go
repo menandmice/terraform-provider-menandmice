@@ -23,6 +23,7 @@ func resourceRange() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 
+			// TODO add atributes: cloudAllocationPools, dhcpScopes authority ,discoveredProperties
 			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal references to this range.",
@@ -53,14 +54,12 @@ func resourceRange() *schema.Resource {
 				ForceNew:     true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						// TODO user range_ref here?
 						"range": {
 							Type:         schema.TypeString,
 							Description:  "Pick IP address from range with name",
 							ExactlyOneOf: []string{"free_range.0.range", "free_range.0.ranges"},
 							Optional:     true,
 						},
-
 						"ranges": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{
@@ -179,13 +178,11 @@ func resourceRange() *schema.Resource {
 					},
 				},
 			},
-			// TODO dhcpScopes
 			// "dhcpScopes": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
 			// 	// Default:      false,
 			// },
-			// TODO authority
 			// "authority": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
@@ -235,9 +232,45 @@ func resourceRange() *schema.Resource {
 			},
 
 			// TODO make custom_properties case insensitive
+			// TODO defaults custom_properties are set during creation by server. but terraform does not know about those
+			//		so we could fix this behavior:
+			//	    * we have to change that behavior, extra api call at create
+			//		* fetch defaults maybe at DefaultFunc or when doing update
+			//		* ignore changes from default
 			"custom_properties": {
 				Type:        schema.TypeMap,
 				Description: "Map of custom properties associated with this range. You can only assign properties that are already defined in Micetro.",
+
+				// DiffSuppressFunc: func(_key, _old, _new string, d *schema.ResourceData) bool {
+				// 	// this is need because DiffSuppressFunc does not support maps
+				// 	// https://github.com/hashicorp/terraform-plugin-sdk/issues/477
+				// 	// this solution is based on @diabloneo  from that issue
+				//	//  This does not work for configerdInterface/new
+				// 	oldInterface, configerdInterface := d.GetChange("custom_properties")
+				// 	old := oldInterface.(map[string]interface{})
+				// 	configerd := configerdInterface.(map[string]interface{})
+				// 	suppressDiff := false
+				//
+				// 	fmt.Printf("####### pre %v:%v\n\n", oldInterface, configerdInterface)
+				// 	for key, valOld := range old {
+				//
+				// 		if valNew, ok := configerd[key]; ok {
+				//
+				// 			fmt.Printf("####### %v:%v\n\n", valNew, valOld)
+				// 			if valNew != valOld {
+				// 				// panic(fmt.Sprintf("%v:%v", valNew, valOld))
+				//
+				// 				return false
+				// 			}
+				// 		} else {
+				// 			suppressDiff = true
+				// 			_ = suppressDiff
+				// 			// var client Mmclient
+				// 			// d.GetProviderMeta(client)
+				// 		}
+				// 	}
+				// 	return true //suppressDiff
+				// },
 
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -274,7 +307,6 @@ func resourceRange() *schema.Resource {
 				Computed:    true,
 			},
 
-			// TODO cloudAllocationPools
 			// "cloudAllocationPools": {
 			// Type:        schema.TypeList,
 			// Optional:    true,
@@ -282,7 +314,6 @@ func resourceRange() *schema.Resource {
 			// 	Schema: map[string]*schema.Schema{
 			// },
 
-			// TODO discoveredProperties
 			// "discoveredProperties": {
 			// Type:        schema.TypeList,
 			// Optional:    true,
@@ -300,13 +331,12 @@ func resourceRange() *schema.Resource {
 				Description: "Date when zone was last modified in Micetro.",
 				Computed:    true,
 			},
-			// TODO discovery
 			// "discovery": &schema.Schema{
 			// 	Type:        schema.TypeList,
 			// 	Description: "Used for discovery of ranges or scopes.",
-			// 	Computed:    true, // TODO make this configerable
+			// 	Computed:    true,
 			// 	// Optional:    true,
-			// 	// ForceNew:    true, // TODO can we make this update
+			// 	// ForceNew:    true,
 			// 	// MaxItems: 1,
 			// 	// default does not work for list
 			// 	// Default:     [1]map[string]interface{}{{"enabled": false}},
@@ -316,7 +346,6 @@ func resourceRange() *schema.Resource {
 			// 				Type:        schema.TypeInt,
 			// 				Description: "The interval between runs for the schedule.",
 			// 				Optional:    true,
-			// 				// TODO Default
 			// 			},
 			// 			"unit": &schema.Schema{
 			// 				Type:        schema.TypeString,
@@ -332,7 +361,7 @@ func resourceRange() *schema.Resource {
 			// 				Optional:    true,
 			// 				Default:     false,
 			// 			},
-			// 			// TODO "start_time" : &schema.Schema{
+			// 			// "start_time" : &schema.Schema{
 			// 			// },
 			// 		},
 			// 	},
@@ -365,7 +394,6 @@ func flattenRange(iprange Range) map[string]interface{} {
 	m["ad_site_ref"] = iprange.AdSiteRef
 	m["ad_site_display_name"] = iprange.AdSiteDisplayName
 
-	// TODO childRanges, dhcpScopes,authority
 	m["subnet"] = iprange.Subnet
 	m["locked"] = iprange.Locked
 	m["auto_assign"] = iprange.AutoAssign

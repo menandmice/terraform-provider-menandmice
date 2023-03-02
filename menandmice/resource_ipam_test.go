@@ -11,7 +11,7 @@ import (
 func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
 
 	address1 := "192.168.2.15"
-	// address2 := "::192.168.2.15" //TODO test ipv6
+	address2 := "::192:168:2:15"
 	location := "here"
 
 	resource.Test(t, resource.TestCase{
@@ -31,13 +31,13 @@ func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
 					testAccCheckResourceExists("menandmice_ipam_record.testipam"),
 				),
 			},
-			// TODO
-			// {
-			// 	Config: testAccCheckMenandmiceIPAMRecConfigBasic(address2, location, true),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckResourceExists("menandmice_ipam_record.testipam"),
-			// 	),
-			// },
+			// for testing ipv6
+			{
+				Config: testAccCheckMenandmiceIPAMRecConfigBasic(address2, location, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_ipam_record.testipam"),
+				),
+			},
 
 			// TODO add test for find free ip
 			{
