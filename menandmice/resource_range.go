@@ -529,6 +529,9 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 			ranges = []interface{}{rangeName}
 		} else {
 			ranges = freeRangeMap["ranges"].([]interface{})
+			if len(ranges) == 0 {
+				return diag.Errorf("No valide parent range provided. ranges is empty list.")
+			}
 		}
 		// For readAvailableAddressBlocksRequest "range" has to be set.
 		// Which is not the case if ranges was used
