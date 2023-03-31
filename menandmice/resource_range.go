@@ -552,7 +552,6 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 		}
 
 		if len(AvailableAddressBlocks) <= 0 {
-			// TODO better messages
 			return diag.Errorf("No available address blocks found")
 		}
 

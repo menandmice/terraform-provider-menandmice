@@ -74,11 +74,11 @@ func DataSourceRanges() *schema.Resource {
 							Description: "The CIDR of the range, or from-to address range.",
 							Required:    true,
 						},
-						// "cidr": {
-						// 	Type:        schema.TypeString,
-						// 	Description: "The CIDR of the range",
-						// 	Optional:    true,
-						// },
+						"cidr": {
+							Type:        schema.TypeString,
+							Description: "The CIDR of the range",
+							Optional:    true,
+						},
 						"from": {
 							Type:        schema.TypeString,
 							Description: "The starting IP address of the range.",

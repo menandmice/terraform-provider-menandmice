@@ -2,9 +2,9 @@ package menandmice
 
 import (
 	"context"
-	"fmt"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -50,11 +50,15 @@ func Provider(version string) func() *schema.Provider {
 					Description: "Micetro Request timeout",
 				},
 				"server_timezone": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					ValidateFunc: validTZ(),
-					DefaultFunc:  schema.EnvDefaultFunc("MENANDMICE_SERVER_TIMEZONE", nil),
-					Description:  "Timezone of Mictro server. in IANA Time Zone format. example: America/Chicago.See;https://en.wikipedia.org/wiki/List_of_tz_database_time_zones .Default to local time zone. If not set correcly terraform will print wrong times for things like creation and modiviaction dates",
+					Type:             schema.TypeString,
+					Optional:         true,
+					ValidateDiagFunc: validTZ(),
+					DefaultFunc:      schema.EnvDefaultFunc("MENANDMICE_SERVER_TIMEZONE", nil),
+					Description: `Timezone of Mictro server.
+						in IANA Time Zone format. example: America/Chicago.
+						See;https://en.wikipedia.org/wiki/List_of_tz_database_time_zones .
+						Default to local time zone.
+						If not set correcly terraform will print wrong times for things like creation and modiviaction dates`,
 				},
 			},
 			ResourcesMap: map[string]*schema.Resource{
@@ -79,18 +83,18 @@ func Provider(version string) func() *schema.Provider {
 		return p
 	}
 }
-func validTZ() schema.SchemaValidateFunc {
-	return func(i interface{}, k string) (s []string, errs []error) {
-		v, ok := i.(string)
+
+func validTZ() schema.SchemaValidateDiagFunc {
+	return func(v interface{}, k cty.Path) diag.Diagnostics {
+		value, ok := v.(string)
+		var diags diag.Diagnostics
 		if !ok {
-			errs = append(errs, fmt.Errorf("expected type of %s to be string", k))
-			return
+			return diag.Errorf("expected type of %s to be string", k)
 		}
-		if _, err := time.LoadLocation(v); err != nil {
-			errs = append(errs, err)
-			return
+		if _, err := time.LoadLocation(value); err != nil {
+			return diag.FromErr(err)
 		}
-		return
+		return diags
 	}
 }
 
@@ -106,7 +110,7 @@ func configure(version string, p *schema.Provider) func(context.Context, *schema
 			TLSVerify:  d.Get("tls_verify").(bool),
 			Timeout:    d.Get("timeout").(int),
 			Version:    version,
-			// Debug:      true,
+			Debug:      true, // FIXME
 		}
 		if params.MMEndpoint == "" {
 			diags = append(diags, diag.Errorf("No REST API endpoint set for provider menandmice.")...)

@@ -84,7 +84,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetHeader("Content-Type", "application/json")
 	client.SetHeader("User-Agen", "terraform-provider-menandmice "+c.Version)
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
-	client.SetHostURL(c.MMEndpoint + "/mmws/api")
+	client.SetBaseURL(c.MMEndpoint + "/mmws/api")
 
 	// Test if we can make a connection
 

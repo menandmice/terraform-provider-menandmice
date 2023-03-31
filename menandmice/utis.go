@@ -90,6 +90,9 @@ func SetFromMap(d *schema.ResourceData, m map[string]interface{}) diag.Diagnosti
 }
 
 func MmTimeString2rfc(timeStr string, location *time.Location) (string, error) {
+	if timeStr == "" {
+		return "", nil
+	}
 	t, err := time.ParseInLocation("Jan 2, 2006 15:04:05", timeStr, location)
 	return t.In(time.Local).Format(time.RFC3339), err
 }
