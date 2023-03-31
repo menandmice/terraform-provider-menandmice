@@ -110,7 +110,7 @@ func configure(version string, p *schema.Provider) func(context.Context, *schema
 			TLSVerify:  d.Get("tls_verify").(bool),
 			Timeout:    d.Get("timeout").(int),
 			Version:    version,
-			Debug:      true, // FIXME
+			Debug:      false,
 		}
 		if params.MMEndpoint == "" {
 			diags = append(diags, diag.Errorf("No REST API endpoint set for provider menandmice.")...)

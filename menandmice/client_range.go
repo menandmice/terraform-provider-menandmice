@@ -1,5 +1,7 @@
 package menandmice
 
+import "errors"
+
 type Range struct {
 	Ref               string     `json:"ref,omitempty"`
 	Name              string     `json:"name"`
@@ -270,6 +272,9 @@ func (c Mmclient) AvailableAddressBlocks(request AvailableAddressBlocksRequest) 
 
 	if request.StartAddress != "" {
 		query["startAddress"] = request.StartAddress
+	}
+	if request.RangeRef == "" {
+		return nil, errors.New("Range not specified")
 	}
 	err := c.Get(&re, "Ranges/"+request.RangeRef+"/AvailableAddressBlocks", query)
 	return re.Result.AddressBlocks, err

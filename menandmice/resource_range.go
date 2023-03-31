@@ -521,22 +521,22 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 	var AvailableAddressBlocks []AddressBlock
 
 	if freeRange, ok := d.GetOk("free_range"); ok {
-		freeRangeMap := freeRange.([]interface{})[0].(map[string]interface{})
+		freeRangeInterface := freeRange.([]interface{})[0]
+		freeRangeMap := freeRangeInterface.(map[string]interface{})
 		var ranges []interface{}
 		// convert to list if range, otherwise pick from ranges
-		if rangeName, ok := freeRangeMap["range"]; ok {
+		if rangeName, ok := freeRangeMap["range"]; ok && rangeName != "" {
 			ranges = []interface{}{rangeName}
 		} else {
-			ranges = []interface{}{freeRangeMap["ranges"]}
+			ranges = freeRangeMap["ranges"].([]interface{})
 		}
-
 		// For readAvailableAddressBlocksRequest "range" has to be set.
 		// Which is not the case if ranges was used
 		freeRangeMap["range"] = ranges[0]
 		availableAddressBlocksRequest := readAvailableAddressBlocksRequest(freeRangeMap)
 		for _, iprange := range ranges {
 			rangeName := iprange.(string)
-
+			// TODO validate rangeName
 			tflog.Debug(c, "Request a available AddressBlock")
 			availableAddressBlocksRequest.RangeRef = rangeName
 			AvailableAddressBlocks, err = client.AvailableAddressBlocks(availableAddressBlocksRequest)
