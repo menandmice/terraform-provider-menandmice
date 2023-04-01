@@ -19,12 +19,12 @@ func DataSourceRanges() *schema.Resource {
 				Optional:    true,
 			},
 
-			// TODO disabled for no. not realy needed. And need to be tested first
-			// "filter": {
-			// 	Type:        schema.TypeString,
-			// 	Description: "Raw quickfilter String. Can be used to create more complex filter with >= etz",
-			// 	Optional:    true,
-			// },
+			"filter": {
+				Type:          schema.TypeString,
+				Description:   "Raw quickfilter string. Can be used to create a more complex filter with =@ etc. instead of using custom_properties",
+				Optional:      true,
+				ConflictsWith: []string{"custom_properties"},
+			},
 
 			"folder": {
 				Type:        schema.TypeString,
