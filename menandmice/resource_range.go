@@ -57,7 +57,7 @@ func resourceRange() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"range": {
 							Type:         schema.TypeString,
-							Description:  "Pick IP address from range with name",
+							Description:  "Pick available address range from inside range with name",
 							ExactlyOneOf: []string{"free_range.0.range", "free_range.0.ranges"},
 							Optional:     true,
 						},
@@ -66,13 +66,13 @@ func resourceRange() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-							Description:  "Pick IP address from one of these range with name",
+							Description:  "Pick available address range from inside of one of these ranges",
 							ExactlyOneOf: []string{"free_range.0.range", "free_range.0.ranges"},
 							Optional:     true,
 						},
 						"start_at": {
 							Type:          schema.TypeString,
-							Description:   "Start searching for IP address from",
+							Description:   "Start searching for range from",
 							ConflictsWith: []string{"free_range.0.mask"},
 							Default:       "",
 							Optional:      true,
@@ -105,7 +105,7 @@ func resourceRange() *schema.Resource {
 						},
 						"temporary_claim_time": {
 							Type:         schema.TypeInt,
-							Description:  "Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.",
+							Description:  "Time in seconds to temporarily claim address block, so it isn't claimed by others while the claim is in progess.",
 							Default:      60,
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 300),

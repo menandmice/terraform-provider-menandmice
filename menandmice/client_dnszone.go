@@ -57,8 +57,8 @@ func (c Mmclient) FindDNSZones(limit int, filter map[string]interface{}) ([]DNSZ
 	}
 
 	if rawFilter, ok := filter["filter"]; ok {
-		// TODO does this work
-		query["filter"] = rawFilter.(string) + "&" + map2filter(filter)
+		// TODO for now rawfilter and other filter are mutual exclusive
+		query["filter"] = rawFilter.(string)
 	} else {
 		query["filter"] = map2filter(filter)
 	}

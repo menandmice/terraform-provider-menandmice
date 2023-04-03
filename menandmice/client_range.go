@@ -100,6 +100,7 @@ func (c Mmclient) FindRanges(limit int, filter map[string]interface{}) ([]Range,
 	}
 
 	if rawFilter, ok := filter["filter"]; ok {
+		// TODO for now rawfilter and other filter are mutual exclusive
 		query["filter"] = rawFilter.(string)
 	} else {
 		query["filter"] = map2filter(filter)

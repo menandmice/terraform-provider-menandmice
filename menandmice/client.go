@@ -187,11 +187,7 @@ func map2filter(filter map[string]interface{}) string {
 	var condition string
 	conditions := make([]string, 0, len(filter))
 	for key, val := range filter {
-		if regexp.MustCompile(`\s`).MatchString(key) {
-			condition = fmt.Sprintf("\"%s\"=%v", key, val)
-		} else {
-			condition = fmt.Sprintf("%s=%v", key, val)
-		}
+		condition = fmt.Sprintf("%s=%v", key, val)
 		conditions = append(conditions, condition)
 	}
 	return strings.Join(conditions, "&")

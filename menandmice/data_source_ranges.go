@@ -21,9 +21,9 @@ func DataSourceRanges() *schema.Resource {
 
 			"filter": {
 				Type:          schema.TypeString,
-				Description:   "Raw quickfilter string. Can be used to create a more complex filter with =@ etc. instead of using custom_properties",
+				Description:   "Raw quickfilter string. Can be used to create a more complex filter with =@ etc.",
 				Optional:      true,
-				ConflictsWith: []string{"custom_properties"},
+				ConflictsWith: []string{"custom_properties", "subnet", "is_container"},
 			},
 
 			"folder": {
