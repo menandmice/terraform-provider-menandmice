@@ -18,12 +18,19 @@ data "menandmice_dns_zone" "zone1" {
   server = "micetro.example.net."
 }
 
-resource "menandmice_dns_record" "rec2" {
-  name   = "test"
+resource "menandmice_dns_record" "rec1" {
+  name   = "test1"
   zone   = data.menandmice_dns_zone.zone1.name   # "zone1.net."
   server = data.menandmice_dns_zone.zone1.server # "micetro.example.net."
   data   = "192.168.2.2"                         # this will asign/claim  "192.168.2.2" ipam records
   type   = "A"
+}
+
+resource "menandmice_dns_record" "rec2" {
+  name         = "test2"
+  dns_zone_ref = data.menandmice_dns_zone.zone1.ref
+  data         = "192.168.2.2" # this will asign/claim  "192.168.2.2" ipam records
+  type         = "A"
 }
 ```
 
@@ -34,21 +41,21 @@ resource "menandmice_dns_record" "rec2" {
 
 - `data` (String) The data stored in the DNS record.
 - `name` (String) The DNS record name.
-- `server` (String) The DNS server where the DNS record is stored. Requires FQDN with the trialing dot '.'.
-- `zone` (String) The DNS zone where the record is stored. Requires a trailing dot '.'.
 
 ### Optional
 
 - `aging` (Number) The aging timestamp of dynamic records in AD integrated zones. Hours since January 1, 1601, UTC. Providing a non-zero value creates a dynamic record.
 - `comment` (String) Contains the comment string for the record. Only records in static DNS zones can have a comment string. Some cloud DNS provides do not support comments.
+- `dns_zone_ref` (String) Internal reference to the zone where this DNS record is stored.
 - `enabled` (Boolean) If the DNS record is enabled. (Default: True)
+- `server` (String) The DNS server where the DNS record is stored. Requires FQDN with the trialing dot '.'.
 - `ttl` (Number) The DNS record's Time To Live value in seconds, setting how long the record is allowed to be cached.
 - `type` (String) The DNS recod type. Accepted types: A, AAAA, CNAME, DNAME, DLV, DNSKEY, DS, HINFO, LOC, MX, NAPTR, NS, NSEC3PARAM, PTR, RP, SOA, SPF, SRV, SSHFP, TLSA, TXT. (Default: A)
 - `view` (String) The view of the DNS record. Example: internal.
+- `zone` (String) The DNS zone where the record is stored. Requires a trailing dot '.'.
 
 ### Read-Only
 
-- `dns_zone_ref` (String) Internal reference to the zone where this DNS record is stored.
 - `fqdn` (String) Fully qualified domain name of this DNS record.
 - `id` (String) The ID of this resource.
 - `ref` (String) Internal reference to this DNS record.

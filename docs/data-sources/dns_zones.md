@@ -48,6 +48,7 @@ data "menandmice_dns_zones" "zones" {
 - `custom_properties` (Map of String) Map of custom properties associated with this DNS zone.
 - `dnssec_signed` (Boolean) If DNS signing has to be enabled.
 - `dynamic` (Boolean) If the DNS zone has to be dynamic.
+- `filter` (String) Raw quickfilter String. Can be used to create more complex filter with =@ etz.
 - `folder` (String) Folder from which to get zones.
 - `limit` (Number) The number of zones to return.
 - `server` (String) Fully qualified name of the DNS server where the Zones is stored, ending with the trailing dot '.'.
