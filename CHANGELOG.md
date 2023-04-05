@@ -22,6 +22,7 @@ FEATURES:
 * provider attribute `server_timezone` is added.
   Will now print the correct time for things like creation and modification dates,
   even if server is in a different time zone
+* resource/dnsrecord attribute `dns_zone_ref` can now be set instead of `zone` and `server` and optional `view`
 * data_source/dnsrecord attribute `fqdn` is added
 * resource/dnsrecord    attribute `fqdn` is added
 * data_source/range has new attribute `child_ranges`
