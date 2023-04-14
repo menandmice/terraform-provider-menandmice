@@ -1,5 +1,7 @@
 package menandmice
 
+import "errors"
+
 type Range struct {
 	Ref               string     `json:"ref,omitempty"`
 	Name              string     `json:"name"`
@@ -98,8 +100,8 @@ func (c Mmclient) FindRanges(limit int, filter map[string]interface{}) ([]Range,
 	}
 
 	if rawFilter, ok := filter["filter"]; ok {
-		// TODO does this work
-		query["filter"] = rawFilter.(string) + "&" + map2filter(filter)
+		// TODO for now rawfilter and other filter are mutual exclusive
+		query["filter"] = rawFilter.(string)
 	} else {
 		query["filter"] = map2filter(filter)
 	}
@@ -270,6 +272,9 @@ func (c Mmclient) AvailableAddressBlocks(request AvailableAddressBlocksRequest) 
 
 	if request.StartAddress != "" {
 		query["startAddress"] = request.StartAddress
+	}
+	if request.RangeRef == "" {
+		return nil, errors.New("Range not specified")
 	}
 	err := c.Get(&re, "Ranges/"+request.RangeRef+"/AvailableAddressBlocks", query)
 	return re.Result.AddressBlocks, err

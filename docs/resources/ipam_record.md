@@ -50,9 +50,9 @@ resource "menandmice_ipam_record" "example2" {
 - `extraneous_ptr` (Boolean) 'True' if there are extraneous PTR records for the object.
 - `id` (String) The ID of this resource.
 - `interface` (String) The interface associated with the object.
-- `last_discovery_date` (String) The date when the system last performed IP address discovery for this IP address.
+- `last_discovery_date` (String) The date when the system last performed IP address discovery for this IP address rfc3339 time format.
 - `last_known_client_identifier` (String) The last known MAC address associated with the IP address discovery information.
-- `last_seen_date` (String) The date when the address was last seen during IP address discovery.
+- `last_seen_date` (String) The date when the address was last seen during IP address discovery in rfc3339 time format.
 - `ptr_status` (String) PTR record status. Example: Unknown, OK, Verify.
 - `ref` (String) Internal reference for the IP address.
 - `state` (String) The state of the IP address. Example: Free, Assigned, Claimed, Pending, Held.

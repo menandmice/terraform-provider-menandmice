@@ -29,6 +29,10 @@ output "range" {
 
 - `name` (String) The CIDR of the range, or from-to address range.
 
+### Optional
+
+- `cidr` (String) The CIDR of the range
+
 ### Read-Only
 
 - `ad_site_display_name` (String) The display name of the AD site to which the range belongs.

@@ -32,6 +32,7 @@ output "ranges" {
 ### Optional
 
 - `custom_properties` (Map of String) Search for zones with these custom_properties
+- `filter` (String) Raw quickfilter string. Can be used to create a more complex filter with =@ etc.
 - `folder` (String) Folder from which to get ranges.
 - `is_container` (Boolean) Filter on if range is a container
 - `limit` (Number) The number of zones to return.
@@ -51,6 +52,7 @@ Read-Only:
 - `ad_site_ref` (String)
 - `auto_assign` (Boolean)
 - `child_ranges` (List of Object) (see [below for nested schema](#nestedobjatt--ranges--child_ranges))
+- `cidr` (String)
 - `cloud_network_ref` (String)
 - `created` (String)
 - `custom_properties` (Map of String)

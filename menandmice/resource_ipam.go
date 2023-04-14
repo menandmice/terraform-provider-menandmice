@@ -79,6 +79,7 @@ func resourceIPAMRec() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The IP address to claim.",
 				ExactlyOneOf: []string{"free_ip", "address"},
+				Computed:     true,
 				Optional:     true,
 				ValidateFunc: validation.IsIPAddress,
 				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {

@@ -19,12 +19,12 @@ func DataSourceRanges() *schema.Resource {
 				Optional:    true,
 			},
 
-			// TODO disabled for no. not realy needed. And need to be tested first
-			// "filter": {
-			// 	Type:        schema.TypeString,
-			// 	Description: "Raw quickfilter String. Can be used to create more complex filter with >= etz",
-			// 	Optional:    true,
-			// },
+			"filter": {
+				Type:          schema.TypeString,
+				Description:   "Raw quickfilter string. Can be used to create a more complex filter with =@ etc.",
+				Optional:      true,
+				ConflictsWith: []string{"custom_properties", "subnet", "is_container"},
+			},
 
 			"folder": {
 				Type:        schema.TypeString,
@@ -74,11 +74,11 @@ func DataSourceRanges() *schema.Resource {
 							Description: "The CIDR of the range, or from-to address range.",
 							Required:    true,
 						},
-						// "cidr": {
-						// 	Type:        schema.TypeString,
-						// 	Description: "The CIDR of the range",
-						// 	Optional:    true,
-						// },
+						"cidr": {
+							Type:        schema.TypeString,
+							Description: "The CIDR of the range",
+							Optional:    true,
+						},
 						"from": {
 							Type:        schema.TypeString,
 							Description: "The starting IP address of the range.",

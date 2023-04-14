@@ -20,12 +20,19 @@ func DataSourceDNSZones() *schema.Resource {
 				Description: "The number of zones to return.",
 				Optional:    true,
 			},
-			// TODO disabled for no. not realy needed. And need to be tested first
-			// "filter": {
-			// 	Type:        schema.TypeString,
-			// 	Description: "Raw quickfilter String. Can be used to create more complex filter with >= etz",
-			// 	Optional:    true,
-			// },
+			"filter": {
+				Type:        schema.TypeString,
+				Description: "Raw quickfilter String. Can be used to create more complex filter with =@ etz.",
+
+				ConflictsWith: []string{
+					"custom_properties",
+					"dynamic",
+					"type",
+					"dnssec_signed",
+					"authority",
+				},
+				Optional: true,
+			},
 			"folder": {
 				Type:        schema.TypeString,
 				Optional:    true,

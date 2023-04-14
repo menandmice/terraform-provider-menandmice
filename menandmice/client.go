@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -84,7 +85,13 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	client.SetHeader("Content-Type", "application/json")
 	client.SetHeader("User-Agen", "terraform-provider-menandmice "+c.Version)
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
-	client.SetHostURL(c.MMEndpoint + "/mmws/api")
+	client.SetBaseURL(c.MMEndpoint + "/mmws/api")
+
+	// work around for micetro not understanding + in query string
+	client.SetPreRequestHook(func(_ *resty.Client, rawreq *http.Request) error {
+		rawreq.URL.RawQuery = strings.ReplaceAll(rawreq.URL.RawQuery, "+", "%20")
+		return nil
+	})
 
 	// Test if we can make a connection
 
@@ -186,6 +193,7 @@ func map2filter(filter map[string]interface{}) string {
 	return strings.Join(conditions, "&")
 }
 
+// TODO add context
 func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}) error {
 
 	//TODO better error message
@@ -209,6 +217,7 @@ func (c *Mmclient) Get(result interface{}, path string, query map[string]interfa
 	return ResponseError(r, errorResponse)
 }
 
+// TODO add context
 func (c *Mmclient) Post(data interface{}, result interface{}, path string) error {
 
 	//TODO better error message
@@ -226,6 +235,7 @@ func (c *Mmclient) Post(data interface{}, result interface{}, path string) error
 	return ResponseError(r, errorResponse)
 }
 
+// TODO add context
 func (c *Mmclient) Delete(data interface{}, path string) error {
 
 	var err error
@@ -242,6 +252,7 @@ func (c *Mmclient) Delete(data interface{}, path string) error {
 	return ResponseError(r, errorResponse)
 }
 
+// TODO add context
 func (c *Mmclient) Put(data interface{}, path string) error {
 	var errorResponse ErrorResponse
 	response, err := c.R().

@@ -57,7 +57,7 @@ func resourceRange() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"range": {
 							Type:         schema.TypeString,
-							Description:  "Pick IP address from range with name",
+							Description:  "Pick available address range from inside range with name",
 							ExactlyOneOf: []string{"free_range.0.range", "free_range.0.ranges"},
 							Optional:     true,
 						},
@@ -66,13 +66,13 @@ func resourceRange() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-							Description:  "Pick IP address from one of these range with name",
+							Description:  "Pick available address range from inside of one of these ranges",
 							ExactlyOneOf: []string{"free_range.0.range", "free_range.0.ranges"},
 							Optional:     true,
 						},
 						"start_at": {
 							Type:          schema.TypeString,
-							Description:   "Start searching for IP address from",
+							Description:   "Start searching for range from",
 							ConflictsWith: []string{"free_range.0.mask"},
 							Default:       "",
 							Optional:      true,
@@ -99,13 +99,13 @@ func resourceRange() *schema.Resource {
 
 						"ignore_subnet_flag": {
 							Type:        schema.TypeBool,
-							Description: "Exclude IP addresses that are assigned via DHCP",
+							Description: "Determines whether the subnet flag should be ignored when determining the size of the address blocks",
 							Default:     false,
 							Optional:    true,
 						},
 						"temporary_claim_time": {
 							Type:         schema.TypeInt,
-							Description:  "Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.",
+							Description:  "Time in seconds to temporarily claim address block, so it isn't claimed by others while the claim is in progess.",
 							Default:      60,
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 300),
@@ -521,22 +521,25 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 	var AvailableAddressBlocks []AddressBlock
 
 	if freeRange, ok := d.GetOk("free_range"); ok {
-		freeRangeMap := freeRange.([]interface{})[0].(map[string]interface{})
+		freeRangeInterface := freeRange.([]interface{})[0]
+		freeRangeMap := freeRangeInterface.(map[string]interface{})
 		var ranges []interface{}
 		// convert to list if range, otherwise pick from ranges
-		if rangeName, ok := freeRangeMap["range"]; ok {
+		if rangeName, ok := freeRangeMap["range"]; ok && rangeName != "" {
 			ranges = []interface{}{rangeName}
 		} else {
-			ranges = []interface{}{freeRangeMap["ranges"]}
+			ranges = freeRangeMap["ranges"].([]interface{})
+			if len(ranges) == 0 {
+				return diag.Errorf("No valide parent range provided. ranges is empty list.")
+			}
 		}
-
 		// For readAvailableAddressBlocksRequest "range" has to be set.
 		// Which is not the case if ranges was used
 		freeRangeMap["range"] = ranges[0]
 		availableAddressBlocksRequest := readAvailableAddressBlocksRequest(freeRangeMap)
 		for _, iprange := range ranges {
 			rangeName := iprange.(string)
-
+			// TODO validate rangeName
 			tflog.Debug(c, "Request a available AddressBlock")
 			availableAddressBlocksRequest.RangeRef = rangeName
 			AvailableAddressBlocks, err = client.AvailableAddressBlocks(availableAddressBlocksRequest)
@@ -552,7 +555,6 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 		}
 
 		if len(AvailableAddressBlocks) <= 0 {
-			// TODO better messages
 			return diag.Errorf("No available address blocks found")
 		}
 

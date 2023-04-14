@@ -36,7 +36,11 @@ provider "menandmice" {
 
 - `endpoint` (String) Micetro API endpoint
 - `password` (String, Sensitive) Micetro password
-- `server_timezone` (String) Timezone of Mictro server. in IANA Time Zone format. example: America/Chicago.See;https://en.wikipedia.org/wiki/List_of_tz_database_time_zones .
+- `server_timezone` (String) Timezone of Mictro server.
+						in IANA Time Zone format. example: America/Chicago.
+						See;https://en.wikipedia.org/wiki/List_of_tz_database_time_zones .
+						Default to local time zone.
+						If not set correcly terraform will print wrong times for things like creation and modiviaction dates
 - `timeout` (Number) Micetro Request timeout
 - `tls_verify` (Boolean) Micetro SSL validation
 - `username` (String) Micetro username

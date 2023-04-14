@@ -94,13 +94,13 @@ resource "menandmice_range" "example4" {
 
 Optional:
 
-- `ignore_subnet_flag` (Boolean) Exclude IP addresses that are assigned via DHCP
+- `ignore_subnet_flag` (Boolean) Determines whether the subnet flag should be ignored when determining the size of the address blocks
 - `mask` (Number) The minimum size of the address blocks, specified as a subnet mask.
-- `range` (String) Pick IP address from range with name
-- `ranges` (List of String) Pick IP address from one of these range with name
+- `range` (String) Pick available address range from inside range with name
+- `ranges` (List of String) Pick available address range from inside of one of these ranges
 - `size` (Number) The minimum size of the address blocks, specified as the number of addresses
-- `start_at` (String) Start searching for IP address from
-- `temporary_claim_time` (Number) Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.
+- `start_at` (String) Start searching for range from
+- `temporary_claim_time` (Number) Time in seconds to temporarily claim address block, so it isn't claimed by others while the claim is in progess.
 
 
 <a id="nestedatt--child_ranges"></a>
