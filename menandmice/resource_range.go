@@ -99,7 +99,7 @@ func resourceRange() *schema.Resource {
 
 						"ignore_subnet_flag": {
 							Type:        schema.TypeBool,
-							Description: "Exclude IP addresses that are assigned via DHCP",
+							Description: "Determines whether the subnet flag should be ignored when determining the size of the address blocks",
 							Default:     false,
 							Optional:    true,
 						},

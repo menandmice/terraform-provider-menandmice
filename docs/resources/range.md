@@ -94,7 +94,7 @@ resource "menandmice_range" "example4" {
 
 Optional:
 
-- `ignore_subnet_flag` (Boolean) Exclude IP addresses that are assigned via DHCP
+- `ignore_subnet_flag` (Boolean) Determines whether the subnet flag should be ignored when determining the size of the address blocks
 - `mask` (Number) The minimum size of the address blocks, specified as a subnet mask.
 - `range` (String) Pick available address range from inside range with name
 - `ranges` (List of String) Pick available address range from inside of one of these ranges
