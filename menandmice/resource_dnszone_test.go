@@ -17,9 +17,9 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 	view := ""
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMenandmiceDNSZoneDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckMenandmiceDNSZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckMenandmiceDNSZoneConfigBasic(name1, authority1),
@@ -50,7 +50,7 @@ func TestAccMenandmiceDNSZoneBasic(t *testing.T) {
 				ResourceName:      "menandmice_dns_zone.testzone",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateId:     authority1 + ":" + view + ":" + name2,
+				ImportStateId:     authority2 + ":" + view + ":" + name2,
 			},
 		},
 	})

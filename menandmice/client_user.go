@@ -16,27 +16,27 @@ type Member struct {
 	Name    string `json:"name"`
 }
 
-type ReadGroupResponse struct {
+type readGroupResponse struct {
 	Result struct {
 		Group `json:"group"`
 	} `json:"result"`
 }
 
 func (c *Mmclient) readGroup(ref string) (Group, error) {
-	var re ReadGroupResponse
-	err := c.Get(&re, "Groups/"+ref, nil, nil)
+	var re readGroupResponse
+	err := c.Get(&re, "Groups/"+ref, nil)
 	return re.Result.Group, err
 
 }
 
-type CreateGroupRequest struct {
+type createGroupRequest struct {
 	Group       Group  ` json:"group"`
 	SaveComment string `json:"saveComment"`
 }
 
 func (c *Mmclient) CreatGroup(group Group) (string, error) {
 	var objRef string
-	postcreate := CreateGroupRequest{
+	postcreate := createGroupRequest{
 		Group:       group,
 		SaveComment: "created by terraform",
 	}

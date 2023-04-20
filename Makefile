@@ -3,7 +3,7 @@ HOSTNAME	:=registry.terraform.io
 NAMESPACE	:=local
 NAME		:=menandmice
 BINARY		:=terraform-provider-${NAME}
-VERSION		:=0.3.0
+VERSION		:=0.4.0
 OS		:=$(shell uname|tr A-Z a-z)
 
 ifeq ($(shell uname -m),x86_64)
@@ -81,7 +81,6 @@ destroy : init
 	cd examples && terraform destroy -auto-approve
 
 test:
-	go test -i $(TEST) || exit 1
 	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
 
 testacc:

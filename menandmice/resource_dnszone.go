@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -39,16 +40,25 @@ func resourceDNSZone() *schema.Resource {
 			"dynamic": {
 				Type:        schema.TypeBool,
 				Description: "If the DNS zone is dynamic. (Default: False)",
-				Optional:    true,
-				Default:     false,
+				Computed:    true,
+				// Optional:    true,
+				// Default:     false,
 			},
-			// TODO following nameing convetion it would be ad_intergrated
+			"ad_integrated": {
+				Type:          schema.TypeBool,
+				Description:   "If the DNS zone is AD integrated. (Default: False)",
+				ConflictsWith: []string{"adintegrated"},
+				Optional:      true,
+				Default:       false,
+				ForceNew:      true,
+			},
 			"adintegrated": {
-				Type:        schema.TypeBool,
-				Description: "If the DNS zone is AD integrated. (Default: False)",
-				Optional:    true,
-				Default:     false,
-				ForceNew:    true,
+				Type:          schema.TypeBool,
+				Description:   "If the DNS zone is AD integrated. (Default: False)",
+				ConflictsWith: []string{"ad_integrated"},
+				Deprecated:    "use ad_integrated instead",
+				Optional:      true,
+				ForceNew:      true,
 			},
 			"view": {
 				Type:        schema.TypeString,
@@ -56,14 +66,30 @@ func resourceDNSZone() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 			},
-			"dnsviewref": {
+			"dns_view_ref": {
 				Type:        schema.TypeString,
 				Description: "Interal references to views.",
 				Computed:    true,
 			},
+			"dnsviewref": {
+				Type:        schema.TypeString,
+				Deprecated:  "use dns_view_ref instead",
+				Description: "Interal references to views.",
+				Computed:    true,
+			},
+
+			"dns_view_refs": {
+				Type:        schema.TypeSet,
+				Description: "Interal references to views. Only used with Active Directory.",
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"dnsviewrefs": {
 				Type:        schema.TypeSet,
 				Description: "Interal references to views. Only used with Active Directory.",
+				Deprecated:  "use dns_view_refs instead",
 				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -101,10 +127,20 @@ func resourceDNSZone() *schema.Resource {
 			},
 
 			// TODO  following naming convention whould be dnssec_signed
+
+			"dnssec_signed": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Default:       false,
+				ConflictsWith: []string{"dnssecsigned"},
+			},
+
 			"dnssecsigned": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Default:       false,
+				ConflictsWith: []string{"dnssec_signed"},
+				Deprecated:    "use dnssec_signed instead",
 			},
 
 			"kskids": {
@@ -127,67 +163,120 @@ func resourceDNSZone() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"adreplicationtype": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Replication type if the zone is AD integrated.",
+
+			"ad_replication_type": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   "Replication type if the zone is AD integrated.",
+				ConflictsWith: []string{"adreplicationtype"},
 				ValidateFunc: validation.StringInSlice([]string{
 					"None", "To_All_DNS_Servers_In_AD_Forrest",
 					"To_All_DNS_Servers_In_AD_Domain", "To_All_Domain_Controllers_In_AD_Domain",
 					"To_All_Domain_Controllers_In_Specified_Partition", "Unavailable",
 				}, false),
 			},
-			// TODO rename ad_partition
+			"adreplicationtype": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   "Replication type if the zone is AD integrated.",
+				Deprecated:    "use ad_replication_type instead",
+				ConflictsWith: []string{"ad_replication_type"},
+				ValidateFunc: validation.StringInSlice([]string{
+					"None", "To_All_DNS_Servers_In_AD_Forrest",
+					"To_All_DNS_Servers_In_AD_Domain", "To_All_Domain_Controllers_In_AD_Domain",
+					"To_All_Domain_Controllers_In_Specified_Partition", "Unavailable",
+				}, false),
+			},
+			"ad_partition": {
+				Type:          schema.TypeString,
+				Description:   "The AD partition if the zone is AD integrated.",
+				ConflictsWith: []string{"adpartition"},
+				Optional:      true,
+			},
 			"adpartition": {
-				Type:        schema.TypeString,
-				Description: "The AD partition if the zone is AD integrated.",
-				Optional:    true,
+				Type:          schema.TypeString,
+				Description:   "The AD partition if the zone is AD integrated.",
+				Deprecated:    "use ad_partition instead",
+				ConflictsWith: []string{"ad_partition"},
+				Optional:      true,
 			},
 			"created": {
 				Type:        schema.TypeString,
-				Description: "DDate when zone was created in Micetro.",
+				Description: "Date when zone was created in Micetro in rfc3339 time format",
 				Computed:    true,
 			},
 			"lastmodified": {
 				Type:        schema.TypeString,
-				Description: "Date when zone was last modified in Micetro.",
+				Description: "Date when zone was last modified in Micetro rfc3339 time format",
 				Computed:    true,
 			},
-			"displayname": {
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "A display name to distinguish the zone from other, identically named zone instances.",
-				Optional:    true,
+				Computed:    true,
+			},
+
+			"displayname": {
+				Type:        schema.TypeString,
+				Deprecated:  "use displayname instead",
+				Description: "A display name to distinguish the zone from other, identically named zone instances.",
+				Computed:    true,
 			},
 		},
 	}
 }
 
-func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone) {
+func writeDNSZoneSchema(d *schema.ResourceData, dnszone DNSZone, tz *time.Location) diag.Diagnostics {
 
+	var diags diag.Diagnostics
 	d.Set("ref", dnszone.Ref)
 	d.Set("name", dnszone.Name)
 	d.Set("dynamic", dnszone.Dynamic)
 	d.Set("adintegrated", dnszone.AdIntegrated)
+	d.Set("ad_integrated", dnszone.AdIntegrated)
 
 	d.Set("dnsviewref", dnszone.DNSViewRef)
+	d.Set("dns_view_ref", dnszone.DNSViewRef)
 	d.Set("dnsviewrefs", dnszone.DNSViewRefs)
+	d.Set("dns_view_refs", dnszone.DNSViewRefs)
 	d.Set("authority", dnszone.Authority)
 	d.Set("type", dnszone.ZoneType)
+	d.Set("dnssec_signed", dnszone.DnssecSigned)
 	d.Set("dnssecsigned", dnszone.DnssecSigned)
 	d.Set("kskids", dnszone.KskIDs)
 	d.Set("zskids", dnszone.ZskIDs)
 	d.Set("custom_properties", dnszone.CustomProperties)
 
 	d.Set("adreplicationtype", dnszone.AdReplicationType)
+	d.Set("ad_replication_type", dnszone.AdReplicationType)
 	d.Set("adpartition", dnszone.AdPartition)
-	d.Set("created", dnszone.Created)           // TODO convert to timeformat RFC 3339
-	d.Set("lastmodified", dnszone.LastModified) // TODO convert to timeformat RFC 3339
+	d.Set("ad_partition", dnszone.AdPartition)
+
+	created, err := MmTimeString2rfc(dnszone.Created, tz)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("created", created)
+
+	lastmodified, err := MmTimeString2rfc(dnszone.LastModified, tz)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("lastmodified", lastmodified)
+
 	d.Set("displayname", dnszone.DisplayName)
+	return diags
 }
 
 func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 
-	if dnsViewRefsRead, ok := d.GetOk("dnsviewrefs"); ok {
+	var dnsViewRefsRead interface{}
+	var ok bool
+	if dnsViewRefsRead, ok = d.GetOk("dnsviewrefs"); !ok {
+		dnsViewRefsRead, ok = d.GetOk("dns_view_refs")
+	}
+
+	if ok {
 		dnsViewRefList := dnsViewRefsRead.(*schema.Set).List()
 		var dnsViewRefs = make([]string, len(dnsViewRefList))
 		for i, view := range dnsViewRefList {
@@ -201,10 +290,36 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 			customProperties[key] = value.(string)
 		}
 	}
+
+	adPartition, ok := d.GetOk("adpartition")
+	if !ok {
+		adPartition = d.Get("ad_partition")
+	}
+
+	adReplicationType, ok := d.GetOk("adreplicationtype")
+	if !ok {
+		adReplicationType = d.Get("ad_replication_type")
+	}
+
+	// displayName, ok := d.GetOk("displayname")
+	// if !ok {
+	// 	displayName = d.Get("display_name")
+	// }
+
+	dnssecSigned, ok := d.GetOk("dnssecsigned")
+	if !ok {
+		dnssecSigned = d.Get("dnssec_signed")
+	}
+
+	adIntegrated, ok := d.GetOk("adintegrated")
+	if !ok {
+		adIntegrated = d.Get("ad_integrated")
+	}
+
 	dnszone := DNSZone{
 		Ref:          tryGetString(d, "ref"),
 		Name:         d.Get("name").(string),
-		AdIntegrated: d.Get("adintegrated").(bool),
+		AdIntegrated: adIntegrated.(bool),
 		Authority:    tryGetString(d, "authority"),
 
 		// you should not set this yourself
@@ -212,15 +327,15 @@ func readDNSZoneSchema(d *schema.ResourceData) DNSZone {
 		// LastModified: tryGetString(d, "lastmodified"),
 
 		DNSZoneProperties: DNSZoneProperties{
-			Dynamic:           d.Get("dynamic").(bool),
+			// Dynamic:           d.Get("dynamic").(bool),
 			ZoneType:          tryGetString(d, "type"),
-			DnssecSigned:      d.Get("dnssecsigned").(bool),
+			DnssecSigned:      dnssecSigned.(bool),
 			KskIDs:            tryGetString(d, "kskids"),
 			ZskIDs:            tryGetString(d, "zskids"),
-			AdReplicationType: tryGetString(d, "adreplicationtype"),
-			AdPartition:       tryGetString(d, "adpartition"),
+			AdReplicationType: adReplicationType.(string),
+			AdPartition:       adPartition.(string),
 			CustomProperties:  customProperties,
-			DisplayName:       tryGetString(d, "displayname"),
+			// DisplayName:       displayName.(string),
 		},
 	}
 
@@ -278,7 +393,7 @@ func resourceDNSZoneRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diags
 	}
 
-	writeDNSZoneSchema(d, *dnszone)
+	diags = writeDNSZoneSchema(d, *dnszone, client.serverLocation)
 
 	return diags
 }
@@ -286,8 +401,10 @@ func resourceDNSZoneRead(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceDNSZoneUpdate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	//can't change read only property
-	if d.HasChange("ref") || d.HasChange("adintegrated") ||
-		d.HasChange("dnsviewref") || d.HasChange("dnsviewrefs") ||
+	if d.HasChange("ref") ||
+		d.HasChange("adintegrated") || d.HasChange("ad_integrated") ||
+		d.HasChange("dnsviewref") || d.HasChange("dns_view_ref") ||
+		d.HasChange("dnsviewrefs") || d.HasChange("dns_view_refs") ||
 		d.HasChange("authority") {
 		// this can't never error can never happen because of "ForceNew: true," for these properties
 		return diag.Errorf("can't change read-only property of DNS zone")

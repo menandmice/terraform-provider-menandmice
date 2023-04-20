@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -14,18 +15,24 @@ import (
 )
 
 const (
-	ResourceNotFound = 16544
+	ResourceNotFound           = 16544
+	ObjectNotFoundForReference = 2049
 )
 
-type Mmclient struct{ resty.Client }
+type Mmclient struct {
+	serverLocation *time.Location
+	resty.Client
+}
 
-// Cfg config to construct client.
+// Cfg config to construct client
 type Cfg struct {
 	MMEndpoint string
 	MMUsername string
 	MMPassword string
-	Timeout    int
+	MMTimezone string
 	TLSVerify  bool
+	Timeout    int
+	Version    string
 	Debug      bool
 }
 
@@ -36,7 +43,10 @@ func init() {
 
 // ClientInit establishes default settings on the REST client.
 func ClientInit(c *Cfg) (*Mmclient, error) {
-	client := Mmclient{Client: *resty.New()}
+	client := Mmclient{
+		// default current timezone
+		Client: *resty.New(),
+	}
 	client.SetDebug(c.Debug)
 	if c.MMEndpoint == "" {
 		return nil, errors.New("REST API endpoint must be configured")
@@ -44,6 +54,7 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	}
 
 	if match, _ := regexp.MatchString("^(http|https)://", c.MMEndpoint); !match {
+
 		return nil, fmt.Errorf("REST API endpoint: %s must start with \"http://\" or \"https://\"", c.MMEndpoint)
 	}
 
@@ -52,6 +63,16 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 	}
 	if c.MMPassword == "" {
 		return nil, errors.New("Invalid password")
+	}
+	if c.MMTimezone != "" {
+
+		if location, err := time.LoadLocation(c.MMTimezone); err == nil {
+			client.serverLocation = location
+		} else {
+			return nil, err
+		}
+	} else {
+		client.serverLocation = time.Now().Location()
 	}
 
 	if !c.TLSVerify {
@@ -62,15 +83,14 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 
 	client.SetBasicAuth(c.MMUsername, c.MMPassword)
 	client.SetHeader("Content-Type", "application/json")
+	client.SetHeader("User-Agen", "terraform-provider-menandmice "+c.Version)
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)
-	client.SetHostURL(c.MMEndpoint + "/mmws/api")
+	client.SetBaseURL(c.MMEndpoint + "/mmws/api")
 
-	// TODO remove retry. does not help
-	client.SetRetryCount(5)
-	client.SetRetryWaitTime(1 * time.Second)
-	client.AddRetryCondition(func(r *resty.Response, e error) bool {
-		// also retry  on server errors
-		return r.StatusCode() >= 500 && r.StatusCode() < 600
+	// work around for micetro not understanding + in query string
+	client.SetPreRequestHook(func(_ *resty.Client, rawreq *http.Request) error {
+		rawreq.URL.RawQuery = strings.ReplaceAll(rawreq.URL.RawQuery, "+", "%20")
+		return nil
 	})
 
 	// Test if we can make a connection
@@ -160,12 +180,24 @@ func ResponseError(response *resty.Response, errorResponse ErrorResponse) error 
 	}
 	return nil
 }
+func map2filter(filter map[string]interface{}) string {
+	if filter == nil {
+		return ""
+	}
+	var condition string
+	conditions := make([]string, 0, len(filter))
+	for key, val := range filter {
+		condition = fmt.Sprintf("%s=%v", key, val)
+		conditions = append(conditions, condition)
+	}
+	return strings.Join(conditions, "&")
+}
 
-func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}, filter map[string]string) error {
+// TODO add context
+func (c *Mmclient) Get(result interface{}, path string, query map[string]interface{}) error {
 
 	//TODO better error message
 	var errorResponse ErrorResponse
-	var querystring string
 
 	request := c.R().
 		SetError(&errorResponse).
@@ -174,15 +206,6 @@ func (c *Mmclient) Get(result interface{}, path string, query map[string]interfa
 	for key, val := range query {
 
 		request = request.SetQueryParam(key, fmt.Sprintf("%v", val))
-	}
-	if filter != nil {
-
-		conditions := make([]string, 0, len(filter))
-		for key, val := range filter {
-			conditions = append(conditions, fmt.Sprintf("%s=%s", key, val))
-		}
-		querystring = strings.Join(conditions, "&")
-		request = request.SetQueryParam("filter", querystring)
 	}
 
 	r, err := request.Get(path)
@@ -194,6 +217,7 @@ func (c *Mmclient) Get(result interface{}, path string, query map[string]interfa
 	return ResponseError(r, errorResponse)
 }
 
+// TODO add context
 func (c *Mmclient) Post(data interface{}, result interface{}, path string) error {
 
 	//TODO better error message
@@ -211,6 +235,7 @@ func (c *Mmclient) Post(data interface{}, result interface{}, path string) error
 	return ResponseError(r, errorResponse)
 }
 
+// TODO add context
 func (c *Mmclient) Delete(data interface{}, path string) error {
 
 	var err error
@@ -227,6 +252,7 @@ func (c *Mmclient) Delete(data interface{}, path string) error {
 	return ResponseError(r, errorResponse)
 }
 
+// TODO add context
 func (c *Mmclient) Put(data interface{}, path string) error {
 	var errorResponse ErrorResponse
 	response, err := c.R().

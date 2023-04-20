@@ -39,20 +39,20 @@ type DNSHost struct {
 	RelatedRecords []DNSRecord `json:"relatedRecords"`
 }
 
-type ReadIPAMRECResponse struct {
+type readIPAMRECResponse struct {
 	Result struct {
 		IPAMRecord `json:"ipamRecord"`
 	} `json:"result"`
 }
 
 func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
-	var re ReadIPAMRECResponse
-	err := c.Get(&re, "IPAMRecords/"+ref, nil, nil)
+	var re readIPAMRECResponse
+	err := c.Get(&re, "IPAMRecords/"+ref, nil)
 	return re.Result.IPAMRecord, err
 }
 
 // TODO because this will only set IPAMProperties and ignore others. Maybe change to:
-// func (c *Mmclient) CreateIPAMRec(ipamProperites IPAMProperties,rec string) error {
+//	func (c *Mmclient) CreateIPAMRec(ipamProperites IPAMProperties,rec string) error {
 func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
 
 	// TODO this function will query ipamRecord bassed on IP address. But this is not unique
@@ -75,7 +75,7 @@ func (c *Mmclient) DeleteIPAMRec(ref string) error {
 	return c.Delete(deleteRequest("IPAddress"), "IPAMRecords/"+ref)
 }
 
-type UpdateIPAMRecRequest struct {
+type updateIPAMRecRequest struct {
 	Ref               string `json:"ref"`
 	ObjType           string `json:"objType"`
 	SaveComment       string `json:"saveComment"`
@@ -105,7 +105,7 @@ func (c *Mmclient) UpdateIPAMRec(ipamProperties IPAMProperties, ref string) erro
 		properties[key] = value
 	}
 
-	update := UpdateIPAMRecRequest{
+	update := updateIPAMRecRequest{
 		Ref:               ref,
 		ObjType:           "IPAddress",
 		SaveComment:       "updated by terraform",

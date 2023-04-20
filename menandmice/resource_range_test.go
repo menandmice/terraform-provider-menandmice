@@ -15,9 +15,9 @@ func TestAccMenandmiceRangeCIDR(t *testing.T) {
 	title1 := "Terraform acceptance testrange #1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMenandmiceRangeDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckMenandmiceRangeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckMenandmiceRangeConfigCIDR(cidr1, title1),
@@ -70,9 +70,9 @@ func TestAccMenandmiceRangeToFrom(t *testing.T) {
 	description2 := title2
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMenandmiceRangeDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckMenandmiceRangeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckMenandmiceRangeConfigToFrom(from1, to1, title1, description1, locked1, autoAssign1),
@@ -160,9 +160,9 @@ func TestAccMenandmiceRangeFreeRange(t *testing.T) {
 	title := "Terraform acceptionat testrange #1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMenandmiceRangeDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckMenandmiceRangeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckMenandmiceRangeConfigFreeRangeSize(parentRange1, startAt1, size1, title),
@@ -218,7 +218,7 @@ resource "menandmice_range" "testrange" {
     start_at = "%s"
     size = %v
     temporary_claim_time = 1
-}
+  }
 
   title       = "%s"
 }

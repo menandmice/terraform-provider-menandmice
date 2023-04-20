@@ -24,32 +24,61 @@ type DNSZoneProperties struct {
 	CustomProperties  map[string]string `json:"customProperties,omitempty"`
 	AdReplicationType string            `json:"adReplicationType,omitempty"`
 	AdPartition       string            `json:"adPartition,omitempty"`
-	DisplayName       string            `json:"displyaName,omitempty"`
+	DisplayName       string            `json:"displayName,omitempty"`
 }
 
-type FindDNSZoneResponse struct {
+type findDNSZoneResponse struct {
 	Result struct {
 		DNSZones     []DNSZone `json:"dnsZones"`
 		TotalResults int       `json:"totalResults"`
 	} `json:"result"`
 }
 
-// No longer used
-func (c Mmclient) FindDNSZone(filter map[string]string) ([]DNSZone, error) {
-	var re FindDNSZoneResponse
-	err := c.Get(&re, "dnszones/", nil, filter)
+func (c Mmclient) FindDNSZones(limit int, filter map[string]interface{}) ([]DNSZone, error) {
+	var re findDNSZoneResponse
+	query := map[string]interface{}{
+		"limit": limit,
+	}
+
+	if folderRef, ok := filter["folderRef"]; ok {
+		query["folderRef"] = folderRef
+		delete(filter, "folderRef")
+	}
+
+	if dnsViewRef, ok := filter["dnsViewRef"]; ok {
+		query["dnsViewRef"] = dnsViewRef
+
+		delete(filter, "dnsViewRef")
+	}
+
+	if dnsServerRef, ok := filter["dnsServerRef"]; ok {
+		query["dnsServerRef"] = dnsServerRef
+		delete(filter, "dnsServerRef")
+	}
+
+	if rawFilter, ok := filter["filter"]; ok {
+		// TODO for now rawfilter and other filter are mutual exclusive
+		query["filter"] = rawFilter.(string)
+	} else {
+		query["filter"] = map2filter(filter)
+	}
+	err := c.Get(&re, "dnszones/", query)
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ObjectNotFoundForReference {
+		// folder, view, or server where not found, is not error but return empty list
+		return []DNSZone{}, nil
+	}
 	return re.Result.DNSZones, err
 }
 
-type ReadDNSZoneResponse struct {
+type readDNSZoneResponse struct {
 	Result struct {
 		DNSZone `json:"dnsZone"`
 	} `json:"result"`
 }
 
 func (c Mmclient) ReadDNSZone(ref string) (*DNSZone, error) {
-	var re ReadDNSZoneResponse
-	err := c.Get(&re, "DNSZones/"+ref, nil, nil)
+	var re readDNSZoneResponse
+	err := c.Get(&re, "DNSZones/"+ref, nil)
 	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		return nil, nil
 	}
@@ -57,7 +86,7 @@ func (c Mmclient) ReadDNSZone(ref string) (*DNSZone, error) {
 	return &re.Result.DNSZone, err
 }
 
-type CreateDNSZoneRequest struct {
+type createDNSZoneRequest struct {
 	DNSZone     DNSZone  `json:"dnsZone"`
 	SaveComment string   `json:"saveComment"`
 	Masters     []string `json:"masters,omitempty"`
@@ -65,7 +94,7 @@ type CreateDNSZoneRequest struct {
 
 func (c *Mmclient) CreateDNSZone(dnszone DNSZone, masters []string) (string, error) {
 	var objRef string
-	postcreate := CreateDNSZoneRequest{
+	postcreate := createDNSZoneRequest{
 		DNSZone:     dnszone,
 		SaveComment: "created by terraform",
 		Masters:     masters,
@@ -90,7 +119,7 @@ func (c *Mmclient) DeleteDNSZone(ref string) error {
 	return err
 }
 
-type UpdateDNSZoneRequest struct {
+type updateDNSZoneRequest struct {
 	Ref               string `json:"ref"`
 	ObjType           string `json:"objType"`
 	SaveComment       string `json:"saveComment"`
@@ -119,7 +148,7 @@ func (c *Mmclient) UpdateDNSZone(dnsZoneProperties DNSZoneProperties, ref string
 		properties[key] = value
 	}
 
-	update := UpdateDNSZoneRequest{
+	update := updateDNSZoneRequest{
 		Ref:               ref,
 		ObjType:           "DNSZone",
 		SaveComment:       "updated by terraform",

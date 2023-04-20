@@ -3,7 +3,9 @@ package menandmice
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -22,6 +24,7 @@ func resourceRange() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 
+			// TODO add atributes: cloudAllocationPools, dhcpScopes authority ,discoveredProperties
 			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal references to this range.",
@@ -40,8 +43,9 @@ func resourceRange() *schema.Resource {
 				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
 					return new == ""
 				},
-				ForceNew: true,
-				Optional: true,
+				ValidateFunc: validation.IsCIDR,
+				ForceNew:     true,
+				Optional:     true,
 			},
 			"free_range": {
 				Type:         schema.TypeList,
@@ -52,15 +56,24 @@ func resourceRange() *schema.Resource {
 				ForceNew:     true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						// TODO user range_ref here?
 						"range": {
-							Type:        schema.TypeString,
-							Description: "Pick IP address from range with name",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Pick available address range from inside range with name",
+							ExactlyOneOf: []string{"free_range.0.range", "free_range.0.ranges"},
+							Optional:     true,
+						},
+						"ranges": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description:  "Pick available address range from inside of one of these ranges",
+							ExactlyOneOf: []string{"free_range.0.range", "free_range.0.ranges"},
+							Optional:     true,
 						},
 						"start_at": {
 							Type:          schema.TypeString,
-							Description:   "Start searching for IP address from",
+							Description:   "Start searching for range from",
 							ConflictsWith: []string{"free_range.0.mask"},
 							Default:       "",
 							Optional:      true,
@@ -87,13 +100,13 @@ func resourceRange() *schema.Resource {
 
 						"ignore_subnet_flag": {
 							Type:        schema.TypeBool,
-							Description: "Exclude IP addresses that are assigned via DHCP",
+							Description: "Determines whether the subnet flag should be ignored when determining the size of the address blocks",
 							Default:     false,
 							Optional:    true,
 						},
 						"temporary_claim_time": {
 							Type:         schema.TypeInt,
-							Description:  "Time in seconds to temporarily claim IP address, so it isn't claimed by others while the claim is in progess.",
+							Description:  "Time in seconds to temporarily claim address block, so it isn't claimed by others while the claim is in progess.",
 							Default:      60,
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 300),
@@ -146,22 +159,32 @@ func resourceRange() *schema.Resource {
 				Description: "The display name of the AD site to which the range belongs.",
 				Computed:    true,
 			},
-			// TODO childRanges
-			// "childRanges": {
-			// 	Type:        schema.TypeList,
-			// 	Description: "An list of child ranges of the range.",
 
-			// redundant
-			// IsLeaf            bool       `json:"isLeaf"`
-			// NumChildren int        `json:"numchildren"`
+			"child_ranges": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "An list of child ranges of the range.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ref": {
+							Type:        schema.TypeString,
+							Description: "Internal references to this child range.",
+							Computed:    true,
+						},
 
-			// TODO dhcpScopes
+						"name": {
+							Type:        schema.TypeString,
+							Description: "Name to this child range.",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			// "dhcpScopes": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
 			// 	// Default:      false,
 			// },
-			// TODO authority
 			// "authority": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
@@ -177,7 +200,7 @@ func resourceRange() *schema.Resource {
 
 			"locked": {
 				Type:        schema.TypeBool,
-				Description: "Determines if the range is defined as a subnet.",
+				Description: "Determines if the range is locked.",
 				Default:     false,
 				Optional:    true,
 			},
@@ -211,9 +234,45 @@ func resourceRange() *schema.Resource {
 			},
 
 			// TODO make custom_properties case insensitive
+			// TODO defaults custom_properties are set during creation by server. but terraform does not know about those
+			//		so we could fix this behavior:
+			//	    * we have to change that behavior, extra api call at create
+			//		* fetch defaults maybe at DefaultFunc or when doing update
+			//		* ignore changes from default
 			"custom_properties": {
 				Type:        schema.TypeMap,
 				Description: "Map of custom properties associated with this range. You can only assign properties that are already defined in Micetro.",
+
+				// DiffSuppressFunc: func(_key, _old, _new string, d *schema.ResourceData) bool {
+				// 	// this is need because DiffSuppressFunc does not support maps
+				// 	// https://github.com/hashicorp/terraform-plugin-sdk/issues/477
+				// 	// this solution is based on @diabloneo  from that issue
+				//	//  This does not work for configerdInterface/new
+				// 	oldInterface, configerdInterface := d.GetChange("custom_properties")
+				// 	old := oldInterface.(map[string]interface{})
+				// 	configerd := configerdInterface.(map[string]interface{})
+				// 	suppressDiff := false
+				//
+				// 	fmt.Printf("####### pre %v:%v\n\n", oldInterface, configerdInterface)
+				// 	for key, valOld := range old {
+				//
+				// 		if valNew, ok := configerd[key]; ok {
+				//
+				// 			fmt.Printf("####### %v:%v\n\n", valNew, valOld)
+				// 			if valNew != valOld {
+				// 				// panic(fmt.Sprintf("%v:%v", valNew, valOld))
+				//
+				// 				return false
+				// 			}
+				// 		} else {
+				// 			suppressDiff = true
+				// 			_ = suppressDiff
+				// 			// var client Mmclient
+				// 			// d.GetProviderMeta(client)
+				// 		}
+				// 	}
+				// 	return true //suppressDiff
+				// },
 
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -250,7 +309,6 @@ func resourceRange() *schema.Resource {
 				Computed:    true,
 			},
 
-			// TODO cloudAllocationPools
 			// "cloudAllocationPools": {
 			// Type:        schema.TypeList,
 			// Optional:    true,
@@ -258,7 +316,6 @@ func resourceRange() *schema.Resource {
 			// 	Schema: map[string]*schema.Schema{
 			// },
 
-			// TODO discoveredProperties
 			// "discoveredProperties": {
 			// Type:        schema.TypeList,
 			// Optional:    true,
@@ -268,21 +325,20 @@ func resourceRange() *schema.Resource {
 
 			"created": {
 				Type:        schema.TypeString,
-				Description: "DDate when zone was created in Micetro.",
+				Description: "Date when range was created in Micetro in rfc3339 time format",
 				Computed:    true,
 			},
 			"lastmodified": {
 				Type:        schema.TypeString,
-				Description: "Date when zone was last modified in Micetro.",
+				Description: "Date when range was last modified in Micetro rfc3339 time format",
 				Computed:    true,
 			},
-			// TODO discovery
 			// "discovery": &schema.Schema{
 			// 	Type:        schema.TypeList,
 			// 	Description: "Used for discovery of ranges or scopes.",
-			// 	Computed:    true, // TODO make this configerable
+			// 	Computed:    true,
 			// 	// Optional:    true,
-			// 	// ForceNew:    true, // TODO can we make this update
+			// 	// ForceNew:    true,
 			// 	// MaxItems: 1,
 			// 	// default does not work for list
 			// 	// Default:     [1]map[string]interface{}{{"enabled": false}},
@@ -292,7 +348,6 @@ func resourceRange() *schema.Resource {
 			// 				Type:        schema.TypeInt,
 			// 				Description: "The interval between runs for the schedule.",
 			// 				Optional:    true,
-			// 				// TODO Default
 			// 			},
 			// 			"unit": &schema.Schema{
 			// 				Type:        schema.TypeString,
@@ -308,7 +363,7 @@ func resourceRange() *schema.Resource {
 			// 				Optional:    true,
 			// 				Default:     false,
 			// 			},
-			// 			// TODO "start_time" : &schema.Schema{
+			// 			// "start_time" : &schema.Schema{
 			// 			// },
 			// 		},
 			// 	},
@@ -317,61 +372,85 @@ func resourceRange() *schema.Resource {
 	}
 }
 
-func writeRangeSchema(d *schema.ResourceData, iprange Range) {
+func writeRangeSchema(d *schema.ResourceData, iprange Range, tz *time.Location) diag.Diagnostics {
+	// We schema indirecly via creating a Map here.
+	// So we can share code with data_source_ranges.
+	// data_source_ranges has to set same fields but for every range it finds
+	iprangeMap, diags := flattenRange(iprange, tz)
+	SetFromMap(d, iprangeMap)
+	return diags
+}
 
-	d.Set("ref", iprange.Ref)
-	d.Set("name", iprange.Name)
+func flattenRange(iprange Range, tz *time.Location) (map[string]interface{}, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var m = map[string]interface{}{}
+	m["ref"] = iprange.Ref
+	m["name"] = iprange.Name
 
 	if _, _, err := net.ParseCIDR(iprange.Name); err == nil {
-		d.Set("cidr", iprange.Name)
+		m["cidr"] = iprange.Name
 	} else {
-		d.Set("cidr", "")
+		m["cidr"] = ""
 	}
 
-	d.Set("from", iprange.From)
-	d.Set("to", iprange.To)
-	d.Set("parent_ref", iprange.ParentRef)
-	d.Set("ad_site_ref", iprange.AdSiteRef)
-	d.Set("ad_site_display_name", iprange.AdSiteDisplayName)
+	m["from"] = iprange.From
+	m["to"] = iprange.To
+	m["parent_ref"] = iprange.ParentRef
+	m["ad_site_ref"] = iprange.AdSiteRef
+	m["ad_site_display_name"] = iprange.AdSiteDisplayName
 
-	// TODO childRanges, dhcpScopes,authority
-	d.Set("subnet", iprange.Subnet)
-	d.Set("locked", iprange.Locked)
-	d.Set("auto_assign", iprange.AutoAssign)
-	d.Set("has_schedule", iprange.HasSchedule)
-	d.Set("has_monitor", iprange.HasMonitor)
+	m["subnet"] = iprange.Subnet
+	m["locked"] = iprange.Locked
+	m["auto_assign"] = iprange.AutoAssign
+	m["has_schedule"] = iprange.HasSchedule
+	m["has_monitor"] = iprange.HasMonitor
 
 	// api exposes this as custom properties
-	d.Set("title", iprange.RangeProperties.CustomProperties["Title"])
-	d.Set("description", iprange.RangeProperties.CustomProperties["Description"])
+	m["title"] = iprange.RangeProperties.CustomProperties["Title"]
+	m["description"] = iprange.RangeProperties.CustomProperties["Description"]
 
 	delete(iprange.CustomProperties, "Title")
 	delete(iprange.CustomProperties, "Description")
-	d.Set("custom_properties", iprange.CustomProperties)
+	m["custom_properties"] = iprange.CustomProperties
 
-	d.Set("is_container", iprange.IsContainer)
-	d.Set("utilization_percentage", iprange.UtilizationPercentage)
-	d.Set("has_rogue_addresses", iprange.HasRogueAddresses)
-	d.Set("cloud_network_ref", iprange.CloudNetworkRef)
+	m["is_container"] = iprange.IsContainer
+	m["utilization_percentage"] = iprange.UtilizationPercentage
+	m["has_rogue_addresses"] = iprange.HasRogueAddresses
+	m["cloud_network_ref"] = iprange.CloudNetworkRef
 
-	d.Set("created", iprange.Created)           // TODO convert to timeformat RFC 3339
-	d.Set("lastmodified", iprange.LastModified) // TODO convert to timeformat RFC 3339
+	created, err := MmTimeString2rfc(iprange.Created, tz)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+	m["created"] = created
+	lastmodified, err := MmTimeString2rfc(iprange.LastModified, tz)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+	m["lastmodified"] = lastmodified
 
+	var namedRefs = make([]map[string]interface{}, len(iprange.ChildRanges))
+	for i, namedRef := range iprange.ChildRanges {
+		namedRefs[i] = map[string]interface{}{
+			"ref":  namedRef.Ref,
+			"name": namedRef.Name,
+		}
+	}
+	m["child_ranges"] = namedRefs
 	// TODO	 discovery, discoveredProperties,cloudAllocationPools
+	return m, diags
 }
 
-func readAvailableAddressBlocksRequest(freeRange interface{}) AvailableAddressBlocksRequest {
-
-	freeRangeInterface := freeRange.([]interface{})[0].(map[string]interface{})
+func readAvailableAddressBlocksRequest(freeRange map[string]interface{}) AvailableAddressBlocksRequest {
 
 	availableAddressBlocksRequest := AvailableAddressBlocksRequest{
-		RangeRef:           freeRangeInterface["range"].(string),
-		StartAddress:       freeRangeInterface["start_at"].(string),
-		Size:               freeRangeInterface["size"].(int),
-		Mask:               freeRangeInterface["mask"].(int),
+		RangeRef:           freeRange["range"].(string),
+		StartAddress:       freeRange["start_at"].(string),
+		Size:               freeRange["size"].(int),
+		Mask:               freeRange["mask"].(int),
 		Limit:              1,
-		IgnoreSubnetFlag:   freeRangeInterface["ignore_subnet_flag"].(bool),
-		TemporaryClaimTime: freeRangeInterface["temporary_claim_time"].(int),
+		IgnoreSubnetFlag:   freeRange["ignore_subnet_flag"].(bool),
+		TemporaryClaimTime: freeRange["temporary_claim_time"].(int),
 	}
 
 	return availableAddressBlocksRequest
@@ -424,10 +503,6 @@ func readRangeSchema(d *schema.ResourceData) Range {
 		From: from,
 		To:   to,
 
-		// you should not set this yourself
-		// Created:      d.Get("created").(string),
-		// LastModified: tryGetString(d, "lastmodified"),
-
 		InheritAccess: d.Get("inherit_access").(bool),
 		RangeProperties: RangeProperties{
 
@@ -443,23 +518,49 @@ func readRangeSchema(d *schema.ResourceData) Range {
 
 func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Mmclient)
+	var err error
+	var AvailableAddressBlocks []AddressBlock
 
-	if freeRangeMap, ok := d.GetOk("free_range"); ok {
-		availableAddressBlocksRequest := readAvailableAddressBlocksRequest(freeRangeMap)
-
-		tflog.Debug(c, "Request a available AddressBlock")
-		AvailableAddressBlocks, err := client.AvailableAddressBlocks(availableAddressBlocksRequest)
-
-		if err != nil {
-			return diag.FromErr(err)
+	if freeRange, ok := d.GetOk("free_range"); ok {
+		freeRangeInterface := freeRange.([]interface{})[0]
+		freeRangeMap := freeRangeInterface.(map[string]interface{})
+		var ranges []interface{}
+		// convert to list if range, otherwise pick from ranges
+		if rangeName, ok := freeRangeMap["range"]; ok && rangeName != "" {
+			ranges = []interface{}{rangeName}
+		} else {
+			ranges = freeRangeMap["ranges"].([]interface{})
+			if len(ranges) == 0 {
+				return diag.Errorf("No valide parent range provided. ranges is empty list.")
+			}
 		}
+		// For readAvailableAddressBlocksRequest "range" has to be set.
+		// Which is not the case if ranges was used
+		freeRangeMap["range"] = ranges[0]
+		availableAddressBlocksRequest := readAvailableAddressBlocksRequest(freeRangeMap)
+		for _, iprange := range ranges {
+			rangeName := iprange.(string)
+			// TODO validate rangeName
+			tflog.Debug(c, "Request a available AddressBlock")
+			availableAddressBlocksRequest.RangeRef = rangeName
+			AvailableAddressBlocks, err = client.AvailableAddressBlocks(availableAddressBlocksRequest)
+			if err != nil {
+				return diag.FromErr(err)
+				// TODO do we want to make errors allowed as long there is one succesfull AvailableAddressBlocksRequest
+			}
+
+			if len(AvailableAddressBlocks) >= 1 {
+				break
+			}
+			tflog.Info(c, fmt.Sprintf("No suitable unclaimed range found in %v", rangeName))
+		}
+
 		if len(AvailableAddressBlocks) <= 0 {
-			// TODO better messages
 			return diag.Errorf("No available address blocks found")
 		}
+
 		d.Set("from", AvailableAddressBlocks[0].From)
 		d.Set("to", AvailableAddressBlocks[0].To)
-
 	}
 
 	// TODO discovery
@@ -498,7 +599,7 @@ func resourceRangeRead(c context.Context, d *schema.ResourceData, m interface{})
 		return diags
 	}
 
-	writeRangeSchema(d, *iprange)
+	diags = writeRangeSchema(d, *iprange, client.serverLocation)
 
 	return diags
 }

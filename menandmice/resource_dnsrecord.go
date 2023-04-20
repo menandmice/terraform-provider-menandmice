@@ -31,9 +31,10 @@ func resourceDNSRec() *schema.Resource {
 				Computed:    true,
 			},
 			"name": {
-				Type:        schema.TypeString,
-				Description: "The DNS record name.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The DNS record name.",
+				Required:     true,
+				ValidateFunc: validation.StringDoesNotMatch(regexp.MustCompile(`\.$`), "Hostname should not end with '.'"),
 			},
 			"data": {
 				Type:         schema.TypeString,
@@ -83,33 +84,48 @@ func resourceDNSRec() *schema.Resource {
 			},
 
 			"server": {
-				Type:         schema.TypeString,
-				Description:  "The DNS server where the DNS record is stored. Requires FQDN with the trialing dot '.'.",
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "Server name should end with '.'"),
+				Type:        schema.TypeString,
+				Description: "The DNS server where the DNS record is stored. Requires FQDN with the trialing dot '.'.",
+
+				ConflictsWith: []string{"dns_zone_ref"},
+				RequiredWith:  []string{"zone"},
+				Optional:      true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringMatch(regexp.MustCompile(`\.$`), "Server name should end with '.'"),
 			},
 			"view": {
-				Type:        schema.TypeString,
-				Description: "The view of the DNS record. Example: internal.",
-				Optional:    true,
-				Default:     "",
-				ForceNew:    true,
+				Type:          schema.TypeString,
+				Description:   "The view of the DNS record. Example: internal.",
+				Optional:      true,
+				Default:       "",
+				ConflictsWith: []string{"dns_zone_ref"},
+				ForceNew:      true,
 			},
 
 			"zone": {
 				Type:         schema.TypeString,
-				Description:  "The DNS zone where the record is stored. Requires FQDN with the trailing dot '.'.",
-				Required:     true,
+				Description:  "The DNS zone where the record is stored. Requires a trailing dot '.'.",
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`\.$`), "server should end with '.'"),
+
+				ExactlyOneOf: []string{"dns_zone_ref", "zone"},
 			},
 
 			"dns_zone_ref": {
+				Type:         schema.TypeString,
+				Description:  "Internal reference to the zone where this DNS record is stored.",
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"dns_zone_ref", "zone"},
+			},
+			"fqdn": {
 				Type:        schema.TypeString,
-				Description: "Internal reference to the zone where this DNS record is stored.",
+				Description: "Fully qualified domain name of this DNS record.",
 				Computed:    true,
 			},
+
 			// TODO add force overwrite
 		},
 	}
@@ -137,6 +153,11 @@ func writeDNSRecSchema(d *schema.ResourceData, dnsrec DNSRecord) {
 	}
 	d.Set("enabled", dnsrec.Enabled)
 	d.Set("comment", dnsrec.Comment) // comment is always given, but sometimes ""
+
+	// set fqdn for user convience. this not information from the api
+	if zone, ok := d.Get("zone").(string); ok && zone != "" {
+		d.Set("fqdn", dnsrec.Name+"."+zone)
+	}
 }
 
 func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
@@ -146,9 +167,15 @@ func readDNSRecSchema(d *schema.ResourceData) DNSRecord {
 		ttlString = strconv.Itoa(ttl)
 	}
 
+	var dnsZoneRefString string
+	if dnsZoneRef, ok := d.GetOk("dns_zone_ref"); ok {
+		dnsZoneRefString = dnsZoneRef.(string)
+	} else {
+		dnsZoneRefString = tryGetString(d, "server") + ":" + tryGetString(d, "view") + ":" + tryGetString(d, "zone")
+	}
 	dnsrec := DNSRecord{
 		Ref:        tryGetString(d, "ref"),
-		DNSZoneRef: tryGetString(d, "server") + ":" + tryGetString(d, "view") + ":" + tryGetString(d, "zone"),
+		DNSZoneRef: dnsZoneRefString,
 
 		Rectype: d.Get("type").(string),
 		DNSProperties: DNSProperties{

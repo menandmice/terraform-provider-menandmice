@@ -47,6 +47,7 @@ data "menandmice_dns_record" "rec1" {
 - `data` (String) The data stored in the record
 - `dns_zone_ref` (String) Internal reference to the zone where this DNS record is stored.
 - `enabled` (Boolean) If the DNS record is enabled.
+- `fqdn` (String) Fully qualified domain name of this DNS record.
 - `id` (String) The ID of this resource.
 - `ref` (String) Internal reference to this DNS record.
 - `ttl` (Number) The DNS record's Time To Live value in seconds, setting how long the record is allowed to be cached.

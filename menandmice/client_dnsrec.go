@@ -20,28 +20,31 @@ type DNSProperties struct {
 	Enabled bool   `json:"enabled,omitempty"`
 }
 
-type FindDNSRecResponse struct {
+type findDNSRecResponse struct {
 	Result struct {
 		DNSRecords   []DNSRecord `json:"dnsRecords"`
 		TotalResults int         `json:"totalResults"`
 	} `json:"result"`
 }
 
-func (c Mmclient) FindDNSRec(zone string, filter map[string]string) ([]DNSRecord, error) {
-	var re FindDNSRecResponse
-	err := c.Get(&re, "DNSZones/"+zone+"/DNSRecords", nil, filter)
+func (c Mmclient) FindDNSRec(zone string, filter map[string]interface{}) ([]DNSRecord, error) {
+	var re findDNSRecResponse
+
+	query := map[string]interface{}{"filter": map2filter(filter)}
+
+	err := c.Get(&re, "DNSZones/"+zone+"/DNSRecords", query)
 	return re.Result.DNSRecords, err
 }
 
-type ReadDNSRecResponse struct {
+type readDNSRecResponse struct {
 	Result struct {
 		DNSRecord `json:"dnsRecord"`
 	} `json:"result"`
 }
 
 func (c *Mmclient) ReadDNSRec(ref string) (*DNSRecord, error) {
-	var re ReadDNSRecResponse
-	err := c.Get(&re, "dnsrecords/"+ref, nil, nil)
+	var re readDNSRecResponse
+	err := c.Get(&re, "dnsrecords/"+ref, nil)
 
 	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		return nil, nil
@@ -49,14 +52,14 @@ func (c *Mmclient) ReadDNSRec(ref string) (*DNSRecord, error) {
 	return &re.Result.DNSRecord, err
 }
 
-type CreateDNSRecResponse struct {
+type createDNSRecResponse struct {
 	Result struct {
 		ObjRef []string `json:"objRefs"`
 		Error  []string `json:"errors"`
 	} `json:"result"`
 }
 
-type CreateDNSRecRequest struct {
+type createDNSRecRequest struct {
 	DNSRecords  []DNSRecord `json:"dnsRecords"`
 	SaveComment string      `json:"saveComment"`
 	// autoAssignRangeRef string
@@ -66,12 +69,12 @@ type CreateDNSRecRequest struct {
 
 func (c *Mmclient) CreateDNSRec(dnsrec DNSRecord) (string, error) {
 	var objRef string
-	postcreate := CreateDNSRecRequest{
+	postcreate := createDNSRecRequest{
 		DNSRecords:                         []DNSRecord{dnsrec},
 		SaveComment:                        "created by terraform",
 		ForceOverrideOfNamingConflictCheck: false,
 	}
-	var re CreateDNSRecResponse
+	var re createDNSRecResponse
 	err := c.Post(postcreate, &re, "DNSRecords")
 
 	if err != nil {
@@ -98,7 +101,7 @@ func (c *Mmclient) DeleteDNSRec(ref string) error {
 	return err
 }
 
-type UpdateDNSRecRequest struct {
+type updateDNSRecRequest struct {
 	Ref string `json:"ref"`
 	// objType Unknown
 	SaveComment       string        `json:"saveComment"`
@@ -108,7 +111,7 @@ type UpdateDNSRecRequest struct {
 
 func (c *Mmclient) UpdateDNSRec(dnsProperties DNSProperties, ref string) error {
 
-	update := UpdateDNSRecRequest{
+	update := updateDNSRecRequest{
 		Ref:               ref,
 		SaveComment:       "updated by terraform",
 		DeleteUnspecified: true,

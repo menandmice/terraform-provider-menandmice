@@ -16,9 +16,10 @@ func DataSourceDNSRec() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"name": {
-				Type:        schema.TypeString,
-				Description: "The DNS record name.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The DNS record name.",
+				Required:     true,
+				ValidateFunc: validation.StringDoesNotMatch(regexp.MustCompile(`\.$`), "Hostname should not end with '.'"),
 			},
 			"view": {
 				Type:        schema.TypeString,
@@ -74,10 +75,14 @@ func DataSourceDNSRec() *schema.Resource {
 				Description: "If the DNS record is enabled.",
 				Computed:    true,
 			},
-
 			"dns_zone_ref": {
 				Type:        schema.TypeString,
 				Description: "Internal reference to the zone where this DNS record is stored.",
+				Computed:    true,
+			},
+			"fqdn": {
+				Type:        schema.TypeString,
+				Description: "Fully qualified domain name of this DNS record.",
 				Computed:    true,
 			},
 		},
@@ -91,7 +96,7 @@ func dataSourceDNSRectRead(c context.Context, d *schema.ResourceData, m interfac
 
 	dnsZoneRef := tryGetString(d, "server") + ":" + tryGetString(d, "view") + ":" + tryGetString(d, "zone")
 
-	dnsrecs, err := client.FindDNSRec(dnsZoneRef, map[string]string{
+	dnsrecs, err := client.FindDNSRec(dnsZoneRef, map[string]interface{}{
 		"name": tryGetString(d, "name"),
 		"type": tryGetString(d, "type"),
 	})

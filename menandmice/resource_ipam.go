@@ -2,6 +2,7 @@ package menandmice
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -78,11 +79,9 @@ func resourceIPAMRec() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The IP address to claim.",
 				ExactlyOneOf: []string{"free_ip", "address"},
+				Computed:     true,
 				Optional:     true,
-				// TODO validation.IsIPAddress does this to
-				ValidateFunc: validation.Any(
-					validation.IsIPv4Address,
-					validation.IsIPv6Address),
+				ValidateFunc: validation.IsIPAddress,
 				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
 					if ipv6AddressDiffSuppress(key, old, new, d) {
 						return true
@@ -94,10 +93,10 @@ func resourceIPAMRec() *schema.Resource {
 				},
 				ForceNew: true,
 			},
-			// TODO Think this can be removed/deprecated
 			"current_address": {
 				Type:        schema.TypeString,
 				Description: "Address currently used.",
+				Deprecated:  "user address instead",
 				Computed:    true,
 			},
 			// TODO might not be a good idea to make this configerable.
@@ -127,13 +126,13 @@ func resourceIPAMRec() *schema.Resource {
 			},
 			"last_seen_date": {
 				Type:        schema.TypeString,
-				Description: "The date when the address was last seen during IP address discovery.",
+				Description: "The date when the address was last seen during IP address discovery in rfc3339 time format.",
 				Computed:    true,
 			},
 
 			"last_discovery_date": {
 				Type:        schema.TypeString,
-				Description: "The date when the system last performed IP address discovery for this IP address.",
+				Description: "The date when the system last performed IP address discovery for this IP address rfc3339 time format.",
 				Computed:    true,
 			},
 			"last_known_client_identifier": {
@@ -213,8 +212,8 @@ func resourceIPAMRec() *schema.Resource {
 	}
 }
 
-func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
-
+func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord, tz *time.Location) diag.Diagnostics {
+	var diags diag.Diagnostics
 	d.Set("ref", ipamrec.Ref)
 	d.Set("address", ipamrec.Address)
 	d.Set("current_address", ipamrec.Address)
@@ -226,8 +225,18 @@ func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 
 	d.Set("discovery_type", ipamrec.DiscoveryType)
 
-	d.Set("last_seen_date", ipamrec.LastSeenDate)           // TODO convert to timeformat RFC 3339
-	d.Set("last_discovery_date", ipamrec.LastDiscoveryDate) // TODO convert to timeformat RFC 3339
+	lastSeenDate, err := MmTimeString2rfc(ipamrec.LastSeenDate, tz)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("last_seen_date", lastSeenDate)
+
+	lastDiscoveryDate, err := MmTimeString2rfc(ipamrec.LastDiscoveryDate, tz)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("last_discovery_date", lastDiscoveryDate)
+
 	d.Set("last_known_client_identifier", ipamrec.LastKnownClientIdentifier)
 	d.Set("device", ipamrec.Device)
 	d.Set("interface", ipamrec.Interface)
@@ -247,6 +256,7 @@ func writeIPAMRecSchema(d *schema.ResourceData, ipamrec IPAMRecord) {
 	// }
 	d.Set("usage", ipamrec.Usage)
 	// d.Set("cloud_device_info", ipamrec.CloudDeviceInfo)
+	return diags
 }
 
 func readIPAMRecSchema(d *schema.ResourceData) IPAMRecord {
@@ -305,7 +315,7 @@ func resourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interface{
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	writeIPAMRecSchema(d, ipamrec)
+	diags = writeIPAMRecSchema(d, ipamrec, client.serverLocation)
 
 	return diags
 }

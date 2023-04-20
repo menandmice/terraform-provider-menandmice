@@ -11,13 +11,13 @@ import (
 func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
 
 	address1 := "192.168.2.15"
-	// address2 := "::192.168.2.15" //TODO test ipv6
+	address2 := "::192:168:2:15"
 	location := "here"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMenandmiceIPAMRecDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckMenandmiceIPAMRecDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckMenandmiceIPAMRecConfigBasic(address1, location, true),
@@ -31,13 +31,13 @@ func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
 					testAccCheckResourceExists("menandmice_ipam_record.testipam"),
 				),
 			},
-			// TODO
-			// {
-			// 	Config: testAccCheckMenandmiceIPAMRecConfigBasic(address2, location, true),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckResourceExists("menandmice_ipam_record.testipam"),
-			// 	),
-			// },
+			// for testing ipv6
+			{
+				Config: testAccCheckMenandmiceIPAMRecConfigBasic(address2, location, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckResourceExists("menandmice_ipam_record.testipam"),
+				),
+			},
 
 			// TODO add test for find free ip
 			{
@@ -57,8 +57,8 @@ func TestAccMenandmiceIPAMRcBasic(t *testing.T) {
 }
 
 func testAccCheckMenandmiceIPAMRecDestroy(s *terraform.State) error {
-	c := testAccProvider.Meta().(*Mmclient)
 
+	c := testAccProvider.Meta().(*Mmclient)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "menandmice_ipam_record" {
 			continue

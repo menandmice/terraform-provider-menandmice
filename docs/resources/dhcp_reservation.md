@@ -27,7 +27,7 @@ resource "menandmice_dhcp_reservation" "reservation1" {
 
 data "menandmice_dhcp_scope" "scope2" {
   dhcp_server = "micetro.example.net."
-  cidr        = "192.168.2.0/24"
+  range       = "192.168.2.0/24"
 }
 
 resource "menandmice_dhcp_reservation" "reservation2" {

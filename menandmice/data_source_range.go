@@ -12,6 +12,7 @@ func DataSourceRange() *schema.Resource {
 		ReadContext: dataSourceRangeRead,
 		Schema: map[string]*schema.Schema{
 
+			// TODO add atributes: cloudAllocationPools, dhcpScopes authority ,discoveredProperties
 			"ref": {
 				Type:        schema.TypeString,
 				Description: "Internal references to this range.",
@@ -23,12 +24,12 @@ func DataSourceRange() *schema.Resource {
 				Description: "The CIDR of the range, or from-to address range.",
 				Required:    true,
 			},
-			// "cidr": {
-			// 	Type:         schema.TypeString,
-			// 	Description:  "The CIDR of the range",
-			// 	ExactlyOneOf: []string{"cidr", "from"},
-			// 	Optional:     true,
-			// },
+			"cidr": {
+				Type:         schema.TypeString,
+				Description:  "The CIDR of the range",
+				ExactlyOneOf: []string{"cidr", "from"},
+				Optional:     true,
+			},
 			"from": {
 				Type:        schema.TypeString,
 				Description: "The starting IP address of the range.",
@@ -56,17 +57,27 @@ func DataSourceRange() *schema.Resource {
 				Description: "The display name of the AD site to which the range belongs.",
 				Computed:    true,
 			},
-			// TODO childRanges
-			// "childRanges": {
-			// 	Type:        schema.TypeList,
-			// 	Description: "An list of child ranges of the range.",
-			// 	Computed:    true,
 
-			// redundant
-			// IsLeaf            bool       `json:"isLeaf"`
-			// NumChildren int        `json:"numchildren"`
+			"child_ranges": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "An list of child ranges of the range.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ref": {
+							Type:        schema.TypeString,
+							Description: "Internal references to this child range.",
+							Computed:    true,
+						},
 
-			// TODO dhcpScopes
+						"name": {
+							Type:        schema.TypeString,
+							Description: "Name to this child range.",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			// "dhcpScopes": {
 			// 	Type:        schema.TypeList,
 			// 	Description:
@@ -87,7 +98,7 @@ func DataSourceRange() *schema.Resource {
 
 			"locked": {
 				Type:        schema.TypeBool,
-				Description: "Determines if the range is defined as a subnet.",
+				Description: "Determines if the range is locked.",
 				Computed:    true,
 			},
 			"auto_assign": {
@@ -157,7 +168,6 @@ func DataSourceRange() *schema.Resource {
 				Computed:    true,
 			},
 
-			// TODO cloudAllocationPools
 			// "cloudAllocationPools": {
 			// Type:        schema.TypeList,
 			// Optional:    true,
@@ -165,7 +175,6 @@ func DataSourceRange() *schema.Resource {
 			// 	Schema: map[string]*schema.Schema{
 			// },
 
-			// TODO discoveredProperties
 			// "discoveredProperties": {
 			// Type:        schema.TypeList,
 			// Optional:    true,
@@ -175,12 +184,12 @@ func DataSourceRange() *schema.Resource {
 
 			"created": {
 				Type:        schema.TypeString,
-				Description: "DDate when zone was created in Micetro.",
+				Description: "Date when range was created in Micetro in rfc3339 time format",
 				Computed:    true,
 			},
 			"lastmodified": {
 				Type:        schema.TypeString,
-				Description: "Date when zone was last modified in Micetro.",
+				Description: "Date when range was last modified in Micetro rfc3339 time format",
 				Computed:    true,
 			},
 		},
@@ -202,7 +211,7 @@ func dataSourceRangeRead(c context.Context, d *schema.ResourceData, m interface{
 		return diag.Errorf("range_%v does not exist", name)
 	}
 
-	writeRangeSchema(d, *iprange)
+	writeRangeSchema(d, *iprange, client.serverLocation)
 	d.SetId(iprange.Ref)
 
 	return diags

@@ -29,22 +29,27 @@ data "menandmice_dns_zone" "zone1" {
 
 ### Optional
 
+- `dnssec_signed` (Boolean) If DNS signing is enabled.
 - `view` (String) Name of the view this DNS zone is in.
 
 ### Read-Only
 
-- `adintegrated` (Boolean) If the DNS zone is AD integrated.
+- `ad_integrated` (Boolean) If the DNS zone is AD integrated.
+- `adintegrated` (Boolean, Deprecated) If the DNS zone is AD integrated.
 - `authority` (String) The authoritative DNS server for this zone.
-- `created` (String) Date when zone was created in Micetro.
+- `created` (String) Date when zone was created in Micetro in rfc3339 time format
 - `customp_properties` (Map of String) Map of custom properties associated with this DNS zone.
-- `displayname` (String) A display name to distinguish the zone from other, identically named zone instances.
-- `dnssecsigned` (Boolean) If DNS signing is enabled.
-- `dnsviewref` (String) Interal references to views.
-- `dnsviewrefs` (Set of String) Interal references to views. Only used with Active Directory.
+- `display_name` (String) A display name to distinguish the zone from other, identically named zone instances.
+- `displayname` (String, Deprecated) A display name to distinguish the zone from other, identically named zone instances.
+- `dns_view_ref` (String, Deprecated) Interal references to views.
+- `dns_view_refs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
+- `dnssecsigned` (Boolean, Deprecated) If DNS signing is enabled.
+- `dnsviewref` (String, Deprecated) Interal references to views.
+- `dnsviewrefs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
 - `dynamic` (Boolean) If the DNS zone is dynamic.
 - `id` (String) The ID of this resource.
 - `kskids` (String) A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.
-- `lastmodified` (String) Date when zone was last modified in Micetro.
+- `lastmodified` (String) Date when zone was last modified in Micetro rfc3339 time format
 - `ref` (String) Internal references to this DNS zone.
 - `type` (String) The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward.
 - `zskids` (String) A comma-separated string of IDs of ZSKs. Starting with active keys, then inactive keys in parenthesis.

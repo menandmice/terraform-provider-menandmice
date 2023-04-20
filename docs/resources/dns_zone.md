@@ -16,12 +16,11 @@ description: |-
 resource "menandmice_dns_zone" "zone2" {
   name              = "zone2.net."
   authority         = "micetro.example.net."
-  adintegrated      = false
   custom_properties = { "place" = "city", "owner" = "me" }
 
-  view         = ""       # default ""
-  type         = "Master" # default "Master"
-  dnssecsigned = false    # default false
+  view          = ""       # default ""
+  type          = "Master" # default "Master"
+  dnssec_signed = false    # default false
 }
 ```
 
@@ -35,13 +34,15 @@ resource "menandmice_dns_zone" "zone2" {
 
 ### Optional
 
-- `adintegrated` (Boolean) If the DNS zone is AD integrated. (Default: False)
-- `adpartition` (String) The AD partition if the zone is AD integrated.
-- `adreplicationtype` (String) Replication type if the zone is AD integrated.
+- `ad_integrated` (Boolean) If the DNS zone is AD integrated. (Default: False)
+- `ad_partition` (String) The AD partition if the zone is AD integrated.
+- `ad_replication_type` (String) Replication type if the zone is AD integrated.
+- `adintegrated` (Boolean, Deprecated) If the DNS zone is AD integrated. (Default: False)
+- `adpartition` (String, Deprecated) The AD partition if the zone is AD integrated.
+- `adreplicationtype` (String, Deprecated) Replication type if the zone is AD integrated.
 - `custom_properties` (Map of String) Map of custom properties associated with this DNS zone.
-- `displayname` (String) A display name to distinguish the zone from other, identically named zone instances.
-- `dnssecsigned` (Boolean)
-- `dynamic` (Boolean) If the DNS zone is dynamic. (Default: False)
+- `dnssec_signed` (Boolean)
+- `dnssecsigned` (Boolean, Deprecated)
 - `kskids` (String) A comma-separated string of IDs of KSKs. Starting with active keys, then inactive keys in parenthesis.
 - `masters` (List of String) List of IP addresses of all master zones, for slave zones.
 - `type` (String) The type of the DNS zone. Example: Master, Slave, Hint, Stub, Forward. (Default: Master)
@@ -50,11 +51,16 @@ resource "menandmice_dns_zone" "zone2" {
 
 ### Read-Only
 
-- `created` (String) DDate when zone was created in Micetro.
-- `dnsviewref` (String) Interal references to views.
-- `dnsviewrefs` (Set of String) Interal references to views. Only used with Active Directory.
+- `created` (String) Date when zone was created in Micetro in rfc3339 time format
+- `display_name` (String) A display name to distinguish the zone from other, identically named zone instances.
+- `displayname` (String, Deprecated) A display name to distinguish the zone from other, identically named zone instances.
+- `dns_view_ref` (String) Interal references to views.
+- `dns_view_refs` (Set of String) Interal references to views. Only used with Active Directory.
+- `dnsviewref` (String, Deprecated) Interal references to views.
+- `dnsviewrefs` (Set of String, Deprecated) Interal references to views. Only used with Active Directory.
+- `dynamic` (Boolean) If the DNS zone is dynamic. (Default: False)
 - `id` (String) The ID of this resource.
-- `lastmodified` (String) Date when zone was last modified in Micetro.
+- `lastmodified` (String) Date when zone was last modified in Micetro rfc3339 time format
 - `ref` (String) Internal references to this DNS zone.
 
 

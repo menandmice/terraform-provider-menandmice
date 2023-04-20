@@ -19,15 +19,15 @@ type DHCPReservationPropertie struct {
 	NextServer       string `json:"nextServer,omitempty"`
 }
 
-type ReadDHCPReservationResponse struct {
+type readDHCPReservationResponse struct {
 	Result struct {
 		DHCPReservation `json:"dhcpReservation"`
 	} `json:"result"`
 }
 
 func (c *Mmclient) ReadDHCPReservation(ref string) (*DHCPReservation, error) {
-	var re ReadDHCPReservationResponse
-	err := c.Get(&re, "DHCPReservations/"+ref, nil, nil)
+	var re readDHCPReservationResponse
+	err := c.Get(&re, "DHCPReservations/"+ref, nil)
 	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
 		//DHCPReservationNotFound not found
 		return nil, nil
@@ -35,7 +35,7 @@ func (c *Mmclient) ReadDHCPReservation(ref string) (*DHCPReservation, error) {
 	return &re.Result.DHCPReservation, err
 }
 
-type CreateDHCPReservationRequest struct {
+type createDHCPReservationRequest struct {
 	DHCPReservation DHCPReservation `json:"dhcpReservation"`
 	SaveComment     string          `json:"saveComment"`
 }
@@ -44,7 +44,7 @@ func (c *Mmclient) CreateDHCPReservation(dhcpReservation DHCPReservation, owner 
 
 	var objRef string
 
-	postcreate := CreateDHCPReservationRequest{
+	postcreate := createDHCPReservationRequest{
 		DHCPReservation: dhcpReservation,
 		SaveComment:     "created by terraform",
 	}
@@ -69,7 +69,7 @@ func (c *Mmclient) DeleteDHCPReservation(ref string) error {
 	return err
 }
 
-type UpdateDHCPReservationRequest struct {
+type updateDHCPReservationRequest struct {
 	Ref               string `json:"ref"`
 	ObjType           string `json:"objType"`
 	SaveComment       string `json:"saveComment"`
@@ -80,7 +80,7 @@ type UpdateDHCPReservationRequest struct {
 
 func (c *Mmclient) UpdateDHCPReservation(properties DHCPReservationPropertie, ref string) error {
 
-	update := UpdateDHCPReservationRequest{
+	update := updateDHCPReservationRequest{
 		Ref:               ref,
 		ObjType:           "DHCPReservation",
 		SaveComment:       "updated by terraform",
@@ -102,16 +102,20 @@ type DHCPScope struct {
 	Enabled       bool   `json:"enabled"`
 }
 
-type FindDHCPScopeResponse struct {
+type findDHCPScopeResponse struct {
 	Result struct {
 		DHCPScopes   []DHCPScope `json:"dhcpScopes"`
 		TotalResults int         `json:"totalResults"`
 	} `json:"result"`
 }
 
-// TODO add find by ref
-func (c Mmclient) FindDHCPScope(filter map[string]string) ([]DHCPScope, error) {
-	var re FindDHCPScopeResponse
-	err := c.Get(&re, "DHCPScopes/", nil, filter)
+// function ReadDHCPScope is never needed
+
+func (c Mmclient) FindDHCPScope(filter map[string]interface{}) ([]DHCPScope, error) {
+	var re findDHCPScopeResponse
+
+	query := map[string]interface{}{"filter": map2filter(filter)}
+
+	err := c.Get(&re, "DHCPScopes/", query)
 	return re.Result.DHCPScopes, err
 }
