@@ -43,8 +43,9 @@ func resourceRange() *schema.Resource {
 				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
 					return new == ""
 				},
-				ForceNew: true,
-				Optional: true,
+				ValidateFunc: validation.IsCIDR,
+				ForceNew:     true,
+				Optional:     true,
 			},
 			"free_range": {
 				Type:         schema.TypeList,
