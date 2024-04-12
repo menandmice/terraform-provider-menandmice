@@ -24,7 +24,6 @@ type Range struct {
 	CloudNetworkRef       string                `json:"cloudNetworkRef,omitempty"`
 	CloudAllocationPools  []CloudAllocationPool `json:"cloudAllocationPools,omitempty"`
 
-	InheritAccess        bool                  `json:"inheritAccess"`
 	DiscoveredProperties []DiscoveryProperties `json:"discoveredProperties,omitempty"`
 	Created              string                `json:"created,omitempty"`
 	LastModified         string                `json:"lastModified,omitempty"`
@@ -37,6 +36,7 @@ type RangeProperties struct {
 	Locked      bool `json:"locked"`
 	AutoAssign  bool `json:"autoAssign"`
 	Subnet      bool `json:"subnet"`
+	InheritAccess	bool	`json:"inheritAccess"`
 	// TODO should be CustomProperties map[string]interface{} `json:"customProperties"`
 	CustomProperties map[string]string `json:"customProperties,omitempty"`
 }
