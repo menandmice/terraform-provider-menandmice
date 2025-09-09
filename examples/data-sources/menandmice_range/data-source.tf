@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    menandmice = {
+      source = "menandmice/menandmice",
+    }
+  }
+}
+
 data "menandmice_range" "rang" {
   name = "0.0.0.0/0"
 }

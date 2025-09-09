@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    menandmice = {
+      source = "menandmice/menandmice",
+    }
+  }
+}
+
 data "menandmice_dns_zones" "zones1" {
   limit  = 10
   folder = "AWS"

@@ -1,3 +1,10 @@
+terraform {
+  required_providers {
+    menandmice = {
+      source = "menandmice/menandmice",
+    }
+  }
+}
 resource "menandmice_dhcp_reservation" "reservation1" {
   owner              = "micetro.example.net."
   name               = "test1"
