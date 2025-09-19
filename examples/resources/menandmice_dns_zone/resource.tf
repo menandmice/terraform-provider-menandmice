@@ -1,3 +1,10 @@
+terraform {
+  required_providers {
+    menandmice = {
+      source = "menandmice/menandmice",
+    }
+  }
+}
 resource "menandmice_dns_zone" "zone2" {
   name              = "zone2.net."
   authority         = "micetro.example.net."

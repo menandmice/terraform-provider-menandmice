@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     menandmice = {
-      source = "menandmice/menandmice",
+      source = "menandmice/menandmice"
     }
   }
 }

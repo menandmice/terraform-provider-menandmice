@@ -343,7 +343,7 @@ func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interfac
 
 		nextFreeIPRequest := readNextFreeIPRequest(freeIPMap)
 
-		tflog.Debug(c, "Request next fee address")
+		tflog.Debug(c, "Request next free address")
 		address, err := client.NextFreeAddress(nextFreeIPRequest)
 
 		if err != nil {
