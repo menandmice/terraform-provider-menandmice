@@ -193,7 +193,7 @@ func resourceRange() *schema.Resource {
 			"subnet": {
 				Type:          schema.TypeBool,
 				Description:   "Determines if the range is defined as a subnet.",
-				Default:       false,
+				Default:       true,
 				Optional:      true,
 				ConflictsWith: []string{"from", "to"},
 			},
@@ -282,7 +282,8 @@ func resourceRange() *schema.Resource {
 			"inherit_access": {
 				Type:        schema.TypeBool,
 				Description: "If this range should inherit its access bits from its parent range.",
-				Computed:    true,
+				Optional:    true,
+				Default:     true,
 			},
 			"is_container": {
 				Type:        schema.TypeBool,
@@ -503,9 +504,8 @@ func readRangeSchema(d *schema.ResourceData) Range {
 		From: from,
 		To:   to,
 
-		InheritAccess: d.Get("inherit_access").(bool),
 		RangeProperties: RangeProperties{
-
+			InheritAccess: 	  d.Get("inherit_access").(bool),
 			Locked:           d.Get("locked").(bool),
 			AutoAssign:       d.Get("auto_assign").(bool),
 			Subnet:           d.Get("subnet").(bool),

@@ -3,6 +3,17 @@
 
 ## 0.5.0 (Unreleased)
 
+## 0.4.1
+
+BUG FIXES:
+
+* resource/range attribute `inherit_access` changed from computed to optional
+
+BREAKING CHANGES:
+
+* resource/range default value for attribute `subnet` changed to true
+
+
 ## 0.4.0
 
 BREAKING CHANGES:
