@@ -1,7 +1,12 @@
 
 # bet practice from https://www.terraform.io/plugin/sdkv2/best-practices/versioning
 
-## 0.5.0 (Unreleased)
+## 0.5.0
+
+BREAKING CHANGES:
+
+* This provider has been updated so it can now be used with Terraform version 1.13.x.
+* It can also be built with go version 1.23.0 and all the packages where updated to be compatible with that version
 
 ## 0.4.1
 
