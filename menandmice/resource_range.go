@@ -31,10 +31,25 @@ func resourceRange() *schema.Resource {
 				Computed:    true,
 			},
 
+			"register_only": {
+				Type:        schema.TypeBool,
+				Description: "Register an existing range in Micetro without attempting to create it. Use when the range already exists in the cloud provider and you only want to track it in Micetro for IPAM purposes.",
+				Optional:    true,
+				Default:     false,
+				ForceNew:    true,
+			},
+
+			"range_identifier": {
+				Type:        schema.TypeString,
+				Description: "The range identifier in CIDR notation (e.g., 192.168.1.0/24) or from-to format (e.g., 192.168.1.0-192.168.1.255).",
+				Computed:    true,
+			},
+
 			"name": {
 				Type:        schema.TypeString,
-				Description: "The CIDR of the range, or from-to address range.",
+				Description: "The CIDR of the range, or from-to address range. Deprecated: use range_identifier instead for clarity.",
 				Computed:    true,
+				Deprecated:  "Use 'range_identifier' instead. This attribute contains the CIDR or from-to format, not a human-readable name.",
 			},
 			"cidr": {
 				Type:         schema.TypeString,
@@ -387,6 +402,7 @@ func flattenRange(iprange Range, tz *time.Location) (map[string]interface{}, dia
 	var m = map[string]interface{}{}
 	m["ref"] = iprange.Ref
 	m["name"] = iprange.Name
+	m["range_identifier"] = iprange.Name // New attribute for clarity
 
 	if _, _, err := net.ParseCIDR(iprange.Name); err == nil {
 		m["cidr"] = iprange.Name
@@ -574,7 +590,16 @@ func resourceRangeCreate(c context.Context, d *schema.ResourceData, m interface{
 	// }
 
 	iprange := readRangeSchema(d)
-	objRef, err := client.CreateRange(iprange, discovery)
+
+	var objRef string
+	registerOnly := d.Get("register_only").(bool)
+
+	if registerOnly {
+		tflog.Info(c, "Register-only mode: registering existing range in Micetro without creating it")
+		objRef, err = client.RegisterRange(iprange)
+	} else {
+		objRef, err = client.CreateRange(iprange, discovery)
+	}
 
 	if err != nil {
 		return diag.FromErr(err)

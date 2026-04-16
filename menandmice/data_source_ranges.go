@@ -69,6 +69,12 @@ func DataSourceRanges() *schema.Resource {
 							Computed:    true,
 						},
 
+						"range_identifier": {
+							Type:        schema.TypeString,
+							Description: "The range identifier in CIDR notation or from-to format.",
+							Computed:    true,
+						},
+
 						"name": {
 							Type:        schema.TypeString,
 							Description: "The CIDR of the range, or from-to address range.",

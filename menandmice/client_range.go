@@ -1,6 +1,9 @@
 package menandmice
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Range struct {
 	Ref               string     `json:"ref,omitempty"`
@@ -151,6 +154,36 @@ func (c *Mmclient) CreateRange(iprange Range, discovery Discovery) (string, erro
 	}
 
 	return re.Result.Ref, err
+}
+
+// RegisterRange registers an existing range in Micetro without creating it.
+// It first checks if the range exists, and if so, updates its properties.
+// If the range doesn't exist in Micetro, it returns an error.
+func (c *Mmclient) RegisterRange(iprange Range) (string, error) {
+	// Try to read the range by its name (CIDR or from-to format)
+	existingRange, err := c.ReadRange(iprange.Name)
+	if err != nil {
+		return "", fmt.Errorf("failed to check if range exists: %w", err)
+	}
+
+	if existingRange != nil {
+		// Range exists in Micetro, update its properties and return its ref
+		err = c.UpdateRange(iprange.RangeProperties, existingRange.Ref)
+		if err != nil {
+			return "", fmt.Errorf("range exists but failed to update properties: %w", err)
+		}
+		return existingRange.Ref, nil
+	}
+
+	// Range doesn't exist in Micetro - try to create it as "register only"
+	// This creates the range entry in Micetro for tracking purposes
+	discovery := Discovery{Enabled: false}
+	ref, err := c.CreateRange(iprange, discovery)
+	if err != nil {
+		return "", fmt.Errorf("failed to register range in Micetro: %w. Note: register_only mode creates a tracking entry in Micetro; ensure the range CIDR is correct", err)
+	}
+
+	return ref, nil
 }
 
 func (c *Mmclient) DeleteRange(ref string) error {
