@@ -133,12 +133,16 @@ func dataSourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interfac
 	var diags diag.Diagnostics
 	client := m.(*Mmclient)
 
-	ipam, err := client.ReadIPAMRec(d.Get("address").(string))
+	address := d.Get("address").(string)
+	ipam, err := client.ReadIPAMRec(address)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	diags = writeIPAMRecSchema(d, ipam, client.serverLocation)
+	if ipam == nil {
+		return diag.Errorf("ipam record for address %v does not exist", address)
+	}
+	diags = writeIPAMRecSchema(d, *ipam, client.serverLocation)
 	d.SetId(ipam.Ref)
 
 	return diags
