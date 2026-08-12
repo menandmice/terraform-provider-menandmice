@@ -315,7 +315,11 @@ func resourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interface{
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	diags = writeIPAMRecSchema(d, ipamrec, client.serverLocation)
+	if ipamrec == nil {
+		d.SetId("")
+		return diags
+	}
+	diags = writeIPAMRecSchema(d, *ipamrec, client.serverLocation)
 
 	return diags
 }
@@ -343,7 +347,7 @@ func resourceIPAMRecCreate(c context.Context, d *schema.ResourceData, m interfac
 
 		nextFreeIPRequest := readNextFreeIPRequest(freeIPMap)
 
-		tflog.Debug(c, "Request next fee address")
+		tflog.Debug(c, "Request next free address")
 		address, err := client.NextFreeAddress(nextFreeIPRequest)
 
 		if err != nil {

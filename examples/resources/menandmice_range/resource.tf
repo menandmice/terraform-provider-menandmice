@@ -1,3 +1,10 @@
+terraform {
+  required_providers {
+    menandmice = {
+      source = "menandmice/menandmice",
+    }
+  }
+}
 resource "menandmice_range" "example1" {
   cidr   = "192.168.5.0/24"
   title  = "Test Terraform example1"
