@@ -1,6 +1,9 @@
 package menandmice
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type IPAMRecord struct {
 	Ref     string `json:"addrRef,omitempty"`
@@ -45,10 +48,14 @@ type readIPAMRECResponse struct {
 	} `json:"result"`
 }
 
-func (c *Mmclient) ReadIPAMRec(ref string) (IPAMRecord, error) {
+func (c *Mmclient) ReadIPAMRec(ref string) (*IPAMRecord, error) {
 	var re readIPAMRECResponse
-	err := c.Get(&re, "IPAMRecords/"+ref, nil)
-	return re.Result.IPAMRecord, err
+	ref = strings.TrimPrefix(ref, "ipamRecords/")
+	err := c.Get(&re, "ipamRecords/"+ref, nil)
+	if reqError, ok := err.(*RequestError); ok && reqError.StatusCode == ResourceNotFound {
+		return nil, nil
+	}
+	return &re.Result.IPAMRecord, err
 }
 
 // TODO because this will only set IPAMProperties and ignore others. Maybe change to:
@@ -64,7 +71,7 @@ func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
 	if err != nil {
 		return err
 	}
-	if existingIPAMRecord.Claimed {
+	if existingIPAMRecord != nil && existingIPAMRecord.Claimed {
 		return fmt.Errorf("DHCPReservations already exists for: %v", existingIPAMRecord.Address)
 	}
 	return c.UpdateIPAMRec(ipamRecord.IPAMProperties, ipamRecord.Address)
@@ -72,7 +79,7 @@ func (c *Mmclient) CreateIPAMRec(ipamRecord IPAMRecord) error {
 
 func (c *Mmclient) DeleteIPAMRec(ref string) error {
 
-	return c.Delete(deleteRequest("IPAddress"), "IPAMRecords/"+ref)
+	return c.Delete(deleteRequest("IPAddress"), "ipamRecords/"+ref)
 }
 
 type updateIPAMRecRequest struct {
@@ -113,5 +120,5 @@ func (c *Mmclient) UpdateIPAMRec(ipamProperties IPAMProperties, ref string) erro
 		Properties:        properties,
 	}
 
-	return c.Put(update, "IPAMRecords/"+ref)
+	return c.Put(update, "ipamRecords/"+ref)
 }

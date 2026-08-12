@@ -315,7 +315,11 @@ func resourceIPAMRecRead(c context.Context, d *schema.ResourceData, m interface{
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	diags = writeIPAMRecSchema(d, ipamrec, client.serverLocation)
+	if ipamrec == nil {
+		d.SetId("")
+		return diags
+	}
+	diags = writeIPAMRecSchema(d, *ipamrec, client.serverLocation)
 
 	return diags
 }
