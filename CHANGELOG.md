@@ -12,6 +12,7 @@ BUG FIXES:
 
 * Fixed a bug in `ipam_record` where terraform plan/refresh always failed with "IP address not found" when the resource ID was set to its full ref (e.g. after create or import). This was because the ref was incorrectly prefixed a second time when reading the record
 * `ipam_record` now removes the resource from state instead of failing plan/refresh when the underlying IP address no longer exists in Micetro and it will be recreated on the next terraform apply. This is consistent with how `range`, `dns_record`, `dhcp_reservation` and `dns_zone` resources behave
+* It can also be built with go version 1.23.0 and all the packages where updated to be compatible with that version
 
 ## 0.4.1
 
