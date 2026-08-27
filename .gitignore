@@ -40,3 +40,6 @@ vendor
 terraform-provider-menandmice
 
 */.terraform.lock.hcl
+
+# Generated artifacts (e.g. scripts/generate_resource_schema_docs.py output)
+/generated/
