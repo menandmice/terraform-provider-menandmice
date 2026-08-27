@@ -47,150 +47,58 @@ def load_go_sources():
     return sources
 
 
-def find_brace_matches(text):
+# Anything that can contain a stray `{`/`}`/`Default:`-looking substring
+# without it being real Go structure: line/block comments, and the three
+# Go literal-with-delimiters kinds (double-quoted, backtick raw, rune).
+_SKIPPABLE_RE = re.compile(
+    r"//[^\n]*"              # line comment
+    r"|/\*.*?\*/"            # block comment
+    r'|"(?:[^"\\]|\\.)*"'    # double-quoted string
+    r"|`[^`]*`"              # backtick raw string
+    r"|'(?:[^'\\]|\\.)*'",   # rune literal
+    re.DOTALL,
+)
+
+
+def scan_go_source(text):
     """
-    Scan Go source and return {index_of_'{': index_of_matching_'}'} for every
-    *structural* brace, i.e. one that isn't inside a string, rune literal, or
-    comment. Braces that appear inside comments/strings are ignored entirely,
-    which is what lets us skip over commented-out schema attributes below.
+    One pass over Go source that returns (masked, matches):
+
+    - masked: same-length copy of `text` with every comment/string/rune
+      literal blanked out (spaces, newlines kept), so a keyword regex like
+      `Default:` can't be fooled by look-alike text sitting inside a
+      Description string, e.g. `Description: "... (Default: True)"`.
+    - matches: {index_of_'{': index_of_matching_'}'} for every *structural*
+      brace - one that isn't inside a comment/string. This is what lets us
+      skip over commented-out schema attributes.
+
+    Everything outside a comment/string is plain Go code, so `_SKIPPABLE_RE`
+    finds those spans and whatever sits between them is scanned directly for
+    braces with a simple stack.
     """
+    masked_parts = []
     matches = {}
     stack = []
-    state = "code"
-    i, n = 0, len(text)
-    while i < n:
-        c = text[i]
-        if state == "code":
-            if c == "/" and i + 1 < n and text[i + 1] == "/":
-                state = "line_comment"
-                i += 2
-                continue
-            if c == "/" and i + 1 < n and text[i + 1] == "*":
-                state = "block_comment"
-                i += 2
-                continue
-            if c == '"':
-                state = "dstring"
-            elif c == "`":
-                state = "backtick"
-            elif c == "'":
-                state = "rune"
-            elif c == "{":
-                stack.append(i)
-            elif c == "}":
-                if stack:
-                    matches[stack.pop()] = i
-            i += 1
-        elif state == "line_comment":
-            if c == "\n":
-                state = "code"
-            i += 1
-        elif state == "block_comment":
-            if c == "*" and i + 1 < n and text[i + 1] == "/":
-                state = "code"
-                i += 2
-                continue
-            i += 1
-        elif state == "dstring":
-            if c == "\\":
-                i += 2
-                continue
-            if c == '"':
-                state = "code"
-            i += 1
-        elif state == "backtick":
-            if c == "`":
-                state = "code"
-            i += 1
-        elif state == "rune":
-            if c == "\\":
-                i += 2
-                continue
-            if c == "'":
-                state = "code"
-            i += 1
-    return matches
+    pos = 0
 
+    def scan_braces(code, offset):
+        for i, c in enumerate(code):
+            if c == "{":
+                stack.append(offset + i)
+            elif c == "}" and stack:
+                matches[stack.pop()] = offset + i
 
-def build_masked(text):
-    """Return a same-length copy of text with the contents of every string,
-    rune literal, and comment blanked out (kept as spaces/newlines). Used to
-    locate schema field keywords (Default:, Required:, ...) while ignoring
-    look-alike text that happens to sit inside a Description string, e.g.
-    `Description: "... (Default: True)"`."""
-    out = []
-    state = "code"
-    i, n = 0, len(text)
-    while i < n:
-        c = text[i]
-        if state == "code":
-            if c == "/" and i + 1 < n and text[i + 1] == "/":
-                state = "line_comment"
-                out.append("  ")
-                i += 2
-                continue
-            if c == "/" and i + 1 < n and text[i + 1] == "*":
-                state = "block_comment"
-                out.append("  ")
-                i += 2
-                continue
-            if c == '"':
-                state = "dstring"
-                out.append(" ")
-            elif c == "`":
-                state = "backtick"
-                out.append(" ")
-            elif c == "'":
-                state = "rune"
-                out.append(" ")
-            else:
-                out.append(c)
-            i += 1
-        elif state == "line_comment":
-            if c == "\n":
-                state = "code"
-                out.append(c)
-            else:
-                out.append(" ")
-            i += 1
-        elif state == "block_comment":
-            if c == "*" and i + 1 < n and text[i + 1] == "/":
-                state = "code"
-                out.append("  ")
-                i += 2
-                continue
-            out.append(" " if c != "\n" else c)
-            i += 1
-        elif state == "dstring":
-            if c == "\\":
-                out.append("  ")
-                i += 2
-                continue
-            if c == '"':
-                state = "code"
-                out.append(" ")
-            else:
-                out.append(" " if c != "\n" else c)
-            i += 1
-        elif state == "backtick":
-            if c == "`":
-                state = "code"
-                out.append(" ")
-            else:
-                out.append(" " if c != "\n" else c)
-            i += 1
-        elif state == "rune":
-            if c == "\\":
-                out.append("  ")
-                i += 2
-                continue
-            if c == "'":
-                state = "code"
-                out.append(" ")
-            else:
-                out.append(" " if c != "\n" else c)
-            i += 1
-    return "".join(out)
+    for m in _SKIPPABLE_RE.finditer(text):
+        code = text[pos:m.start()]
+        scan_braces(code, pos)
+        masked_parts.append(code)
+        masked_parts.append("".join(c if c == "\n" else " " for c in m.group()))
+        pos = m.end()
+
+    scan_braces(text[pos:], pos)
+    masked_parts.append(text[pos:])
+
+    return "".join(masked_parts), matches
 
 
 ENTRY_KEY_RE = re.compile(r'"([A-Za-z0-9_]+)"\s*:\s*(?:&schema\.Schema)?\s*\{')
@@ -354,8 +262,7 @@ def parse_resource_func(sources, func_name):
         m = func_re.search(text)
         if not m:
             continue
-        matches = find_brace_matches(text)
-        masked_text = build_masked(text)
+        masked_text, matches = scan_go_source(text)
         func_brace_pos = m.end() - 1
         if func_brace_pos not in matches:
             continue
@@ -468,7 +375,7 @@ def get_resources_map(provider_text):
     m = re.search(r"ResourcesMap:\s*map\[string\]\*schema\.Resource\s*\{", provider_text)
     if not m:
         raise RuntimeError("Could not find ResourcesMap in provider.go")
-    matches = find_brace_matches(provider_text)
+    _, matches = scan_go_source(provider_text)
     brace_pos = m.end() - 1
     close = matches[brace_pos]
     body = provider_text[brace_pos + 1: close]
