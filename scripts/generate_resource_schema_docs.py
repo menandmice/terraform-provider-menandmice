@@ -2,8 +2,8 @@
 """
 Extracts the Terraform schema (attributes, types, required/optional/computed,
 defaults, descriptions) directly from the Go source of this provider's
-resources, and writes one Markdown file per resource describing exactly what
-a customer needs to know to write/import that resource.
+resources and data sources, and writes one Markdown file per type describing
+exactly what a customer needs to know to write/import it.
 
 This does not use the Terraform example .tf files or the tfplugindocs output
 in docs/ - it parses the schema.Schema map literals in menandmice/*.go so the
@@ -13,7 +13,8 @@ Usage:
     python scripts/generate_resource_schema_docs.py
 
 Output:
-    generated/resource-schemas/<resource_type>.md   (gitignored)
+    generated/resources/<resource_type>.md         (gitignored)
+    generated/data-sources/<data_source_type>.md   (gitignored)
 """
 
 import argparse
@@ -23,7 +24,13 @@ import sys
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_DIR = os.path.join(REPO_ROOT, "menandmice")
-OUT_DIR = os.path.join(REPO_ROOT, "generated", "resource-schemas")
+GENERATED_DIR = os.path.join(REPO_ROOT, "generated")
+
+# (provider.go map name, output subfolder, label used in the generated docs)
+MAPS = [
+    ("ResourcesMap", "resources", "Resource"),
+    ("DataSourcesMap", "data-sources", "Data Source"),
+]
 
 TYPE_NAMES = {
     "TypeString": "String",
@@ -343,9 +350,9 @@ def render_attr_lines(attrs, lines, depth=0):
             render_attr_lines(attr["children"], lines, depth + 1)
 
 
-def render_markdown(resource_type, func_name, source_file, attrs):
+def render_markdown(type_name, func_name, source_file, attrs, kind):
     lines = []
-    lines.append(f"# `{resource_type}`")
+    lines.append(f"# `{type_name}` ({kind})")
     lines.append("")
     lines.append(
         f"Auto-generated from `menandmice/{source_file}` (`{func_name}`) by "
@@ -370,12 +377,12 @@ def render_markdown(resource_type, func_name, source_file, attrs):
     return "\n".join(lines).rstrip() + "\n"
 
 
-def get_resources_map(provider_text):
-    """Extract {resource_type: func_name} from provider.go's ResourcesMap."""
-    m = re.search(r"ResourcesMap:\s*map\[string\]\*schema\.Resource\s*\{", provider_text)
+def get_provider_map(provider_text, matches, map_name):
+    """Extract {terraform_type: func_name} from a provider.go map literal,
+    e.g. map_name="ResourcesMap" or "DataSourcesMap"."""
+    m = re.search(re.escape(map_name) + r":\s*map\[string\]\*schema\.Resource\s*\{", provider_text)
     if not m:
-        raise RuntimeError("Could not find ResourcesMap in provider.go")
-    _, matches = scan_go_source(provider_text)
+        raise RuntimeError(f"Could not find {map_name} in provider.go")
     brace_pos = m.end() - 1
     close = matches[brace_pos]
     body = provider_text[brace_pos + 1: close]
@@ -383,24 +390,25 @@ def get_resources_map(provider_text):
 
 
 def parse_args(argv=None):
+    subfolder_list = ", ".join(f"{sub}/" for _, sub, _ in MAPS)
     parser = argparse.ArgumentParser(
         prog="generate_resource_schema_docs.py",
         description=(
             "Extracts the Terraform schema (attributes, types, "
             "required/optional/computed, defaults, descriptions) directly "
-            "from the Go source of this provider's resources, and writes "
-            "one Markdown file per resource describing exactly what a "
-            "customer needs to know to write/import that resource.\n\n"
+            "from the Go source of this provider's resources and data "
+            "sources, and writes one Markdown file per type describing "
+            "exactly what a customer needs to know to write/import it.\n\n"
             "This parses the schema.Schema map literals in menandmice/*.go "
-            "(driven by the ResourcesMap in menandmice/provider.go) rather "
-            "than the example .tf files or the tfplugindocs output in "
-            "docs/, so the generated reference always matches the actual "
-            "provider code."
+            "(driven by the ResourcesMap/DataSourcesMap in "
+            "menandmice/provider.go) rather than the example .tf files or "
+            "the tfplugindocs output in docs/, so the generated reference "
+            "always matches the actual provider code."
         ),
         epilog=(
             "Output:\n"
-            f"  One <resource_type>.md file per resource is written to\n"
-            f"  {os.path.relpath(OUT_DIR, REPO_ROOT)}{os.sep} (gitignored) by default.\n\n"
+            f"  One <type_name>.md file per resource/data source is written under\n"
+            f"  {os.path.relpath(GENERATED_DIR, REPO_ROOT)}{os.sep} ({subfolder_list}), gitignored, by default.\n\n"
             "Example:\n"
             "  python scripts/generate_resource_schema_docs.py\n"
             "  python scripts/generate_resource_schema_docs.py --out-dir /tmp/docs"
@@ -409,10 +417,11 @@ def parse_args(argv=None):
     )
     parser.add_argument(
         "--out-dir",
-        default=OUT_DIR,
+        default=GENERATED_DIR,
         help=(
-            "Directory to write the generated <resource_type>.md files into "
-            f"(default: {os.path.relpath(OUT_DIR, REPO_ROOT)}{os.sep}, relative to the repo root)"
+            "Base directory to write the generated docs into - resources go "
+            f"in <out-dir>/resources/ and data sources in <out-dir>/data-sources/ "
+            f"(default: {os.path.relpath(GENERATED_DIR, REPO_ROOT)}{os.sep}, relative to the repo root)"
         ),
     )
     return parser.parse_args(argv)
@@ -427,25 +436,31 @@ def main(argv=None):
         print("provider.go not found in menandmice/", file=sys.stderr)
         return 1
 
-    resources = get_resources_map(provider_text)
-    if not resources:
-        print("No resources found in provider.go ResourcesMap", file=sys.stderr)
-        return 1
+    _, provider_matches = scan_go_source(provider_text)
 
-    os.makedirs(args.out_dir, exist_ok=True)
-
-    for resource_type, func_name in sorted(resources.items()):
-        source_file, attrs = parse_resource_func(sources, func_name)
-        if attrs is None:
-            print(f"warning: could not parse schema for {resource_type} ({func_name})", file=sys.stderr)
+    wrote_any = False
+    for map_name, subfolder, kind in MAPS:
+        entries = get_provider_map(provider_text, provider_matches, map_name)
+        if not entries:
+            print(f"warning: no entries found in provider.go {map_name}", file=sys.stderr)
             continue
-        markdown = render_markdown(resource_type, func_name, source_file, attrs)
-        out_path = os.path.join(args.out_dir, f"{resource_type}.md")
-        with open(out_path, "w", encoding="utf-8") as f:
-            f.write(markdown)
-        print(f"wrote {out_path}")
 
-    return 0
+        out_dir = os.path.join(args.out_dir, subfolder)
+        os.makedirs(out_dir, exist_ok=True)
+
+        for type_name, func_name in sorted(entries.items()):
+            source_file, attrs = parse_resource_func(sources, func_name)
+            if attrs is None:
+                print(f"warning: could not parse schema for {type_name} ({func_name})", file=sys.stderr)
+                continue
+            markdown = render_markdown(type_name, func_name, source_file, attrs, kind)
+            out_path = os.path.join(out_dir, f"{type_name}.md")
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(markdown)
+            print(f"wrote {out_path}")
+            wrote_any = True
+
+    return 0 if wrote_any else 1
 
 
 if __name__ == "__main__":
