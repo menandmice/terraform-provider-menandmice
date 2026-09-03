@@ -41,3 +41,12 @@ resource "menandmice_range" "example4" {
   title       = "Test Terraform example3"
   description = "Test"
 }
+
+# Register an existing range without creating it (useful when the subnet
+# already exists in the cloud provider and you only want to track it in Micetro)
+resource "menandmice_range" "existing_subnet" {
+  cidr          = "10.0.100.0/24"
+  title         = "Existing Azure Subnet"
+  description   = "Subnet created by Azure, registered in Micetro for IPAM tracking"
+  register_only = true
+}
