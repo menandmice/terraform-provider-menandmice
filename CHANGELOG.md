@@ -3,6 +3,20 @@
 
 ## 0.5.1 (Unreleased)
 
+FEATURES:
+
+* Provider gains an `organization` setting (also configurable via the `MENANDMICE_ORGANIZATION` environment variable) to operate within a specific Micetro organization. When set, the provider authenticates with a session (Bearer token) and switches to that organization, so resources such as `dns_record`, `dns_zone`, `dhcp_*` or `range` are created within it.
+
+DOCS:
+
+* Updated `docs/index.md` with documentation for the new `organization` provider setting and example usage.
+* Updated `examples/provider/provider.tf` to show the `organization` setting in example configuration.
+
+BUG FIXES:
+
+* Fixed `provider_test.go` `TestProvider` which erroneously failed when the provider initialised successfully
+* Fixed `go vet` failure caused by a non-constant format string in `utis.go`
+
 BREAKING CHANGES:
 
 * This provider can now be built with go version 1.26.0

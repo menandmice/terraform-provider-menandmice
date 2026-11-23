@@ -26,14 +26,15 @@ type Mmclient struct {
 
 // Cfg config to construct client
 type Cfg struct {
-	MMEndpoint string
-	MMUsername string
-	MMPassword string
-	MMTimezone string
-	TLSVerify  bool
-	Timeout    int
-	Version    string
-	Debug      bool
+	MMEndpoint   string
+	MMUsername   string
+	MMPassword   string
+	MMTimezone   string
+	TLSVerify    bool
+	Timeout      int
+	Version      string
+	Debug        bool
+	Organization string
 }
 
 func init() {
@@ -81,7 +82,25 @@ func ClientInit(c *Cfg) (*Mmclient, error) {
 		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: false})
 	}
 
-	client.SetBasicAuth(c.MMUsername, c.MMPassword)
+	if c.Organization != "" {
+		// Organization-scoped mode: authenticate with a session (Bearer token)
+		// and switch the session to the requested organization, so that all
+		// subsequent operations (e.g. creating DNS records or DHCP scopes)
+		// are performed within that organization.
+		if err := client.login(c.MMUsername, c.MMPassword); err != nil {
+			return nil, err
+		}
+		orgRef, err := client.resolveOrganization(c.Organization)
+		if err != nil {
+			return nil, err
+		}
+		if err := client.SetCurrentOrganization(orgRef); err != nil {
+			return nil, err
+		}
+	} else {
+		// Legacy stateless mode: use HTTP Basic authentication.
+		client.SetBasicAuth(c.MMUsername, c.MMPassword)
+	}
 	client.SetHeader("Content-Type", "application/json")
 	client.SetHeader("User-Agen", "terraform-provider-menandmice "+c.Version)
 	client.SetTimeout(time.Duration(c.Timeout) * time.Second)

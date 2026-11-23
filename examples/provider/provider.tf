@@ -11,4 +11,5 @@ provider "menandmice" {
   password        = "secret"                      # can also be set with MENANDMICE_PASSWORD environment variable
   server_timezone = "America/Chicago"             # can also be set with MENANDMICE_SERVER_TIMEZONE environment variable
   tls_verify      = false                         # can also be set with MENANDMICE_TLS_VERIFY environment variable
+  organization    = "MyOrganization"              # Can also be set with the MENANDMICE_ORGANIZATION environment variable
 }
