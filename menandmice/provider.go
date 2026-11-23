@@ -60,6 +60,15 @@ func Provider(version string) func() *schema.Provider {
 						Default to local time zone.
 						If not set correcly terraform will print wrong times for things like creation and modiviaction dates`,
 				},
+				"organization": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MENANDMICE_ORGANIZATION", nil),
+					Description: "Name or reference of the Micetro organization to operate in. " +
+						"When set, the provider authenticates with a session and switches to this organization, " +
+						"so resources (e.g. DNS records, DHCP scopes) are created within it. " +
+						"If not set, resources are managed without organization scoping.",
+				},
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"menandmice_dns_record":       resourceDNSRec(),
@@ -103,14 +112,15 @@ func configure(version string, p *schema.Provider) func(context.Context, *schema
 		var diags diag.Diagnostics
 
 		params := Cfg{
-			MMEndpoint: d.Get("endpoint").(string),
-			MMUsername: d.Get("username").(string),
-			MMPassword: d.Get("password").(string),
-			MMTimezone: d.Get("server_timezone").(string),
-			TLSVerify:  d.Get("tls_verify").(bool),
-			Timeout:    d.Get("timeout").(int),
-			Version:    version,
-			Debug:      false,
+			MMEndpoint:   d.Get("endpoint").(string),
+			MMUsername:   d.Get("username").(string),
+			MMPassword:   d.Get("password").(string),
+			MMTimezone:   d.Get("server_timezone").(string),
+			TLSVerify:    d.Get("tls_verify").(bool),
+			Timeout:      d.Get("timeout").(int),
+			Version:      version,
+			Debug:        false,
+			Organization: d.Get("organization").(string),
 		}
 		if params.MMEndpoint == "" {
 			diags = append(diags, diag.Errorf("No REST API endpoint set for provider menandmice.")...)

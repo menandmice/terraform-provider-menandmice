@@ -22,8 +22,12 @@ var testAccProviders = map[string]func() (*schema.Provider, error){
 var testAccProvider *schema.Provider = Provider("test")()
 
 func TestProvider(t *testing.T) {
-	if provider := Provider("test"); provider != nil {
-		t.Fatalf("could not initialise provier")
+	p := Provider("test")()
+	if p == nil {
+		t.Fatalf("could not initialise provider")
+	}
+	if err := p.InternalValidate(); err != nil {
+		t.Fatalf("provider validation failed: %s", err)
 	}
 }
 func testAccPreCheck(t *testing.T) {

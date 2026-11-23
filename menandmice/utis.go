@@ -70,7 +70,7 @@ func toError(diags diag.Diagnostics) error {
 			message += diag.Summary + "\n"
 
 		}
-		return fmt.Errorf(message)
+		return fmt.Errorf("%s", message)
 
 	}
 	return nil
