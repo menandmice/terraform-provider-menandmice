@@ -26,6 +26,7 @@ provider "menandmice" {
   password        = "secret"                      # can also be set with MENANDMICE_PASSWORD environment variable
   server_timezone = "America/Chicago"             # can also be set with MENANDMICE_SERVER_TIMEZONE environment variable
   tls_verify      = false                         # can also be set with MENANDMICE_TLS_VERIFY environment variable
+  # organization  = "MyOrganization"              # Can also be set with the MENANDMICE_ORGANIZATION environment variable.
 }
 ```
 
@@ -35,6 +36,7 @@ provider "menandmice" {
 ### Optional
 
 - `endpoint` (String) Micetro API endpoint
+- `organization` (String) Name or reference of the Micetro organization to operate in. If not set, resources are managed without organization scoping.
 - `password` (String, Sensitive) Micetro password
 - `server_timezone` (String) Timezone of Mictro server.
 						in IANA Time Zone format. example: America/Chicago.
